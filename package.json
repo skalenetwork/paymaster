@@ -1,6 +1,9 @@
 {
   "name": "paymaster",
   "packageManager": "yarn@3.6.4",
+  "scripts": {
+    "cspell": "yarn exec cspell \"**/*\""
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.0",
@@ -13,6 +16,7 @@
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=16.0.0",
     "chai": "^4.2.0",
+    "cspell": "^7.3.8",
     "ethers": "^6.4.0",
     "hardhat": "^2.18.1",
     "hardhat-gas-reporter": "^1.0.8",

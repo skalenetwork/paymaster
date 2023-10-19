@@ -140,3 +140,5 @@ typechain-types
 cache
 artifacts
 
+# python
+venv

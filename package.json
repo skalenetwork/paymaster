@@ -10,6 +10,7 @@
     "hooks": "git config core.hooksPath .githooks || true",
     "lint": "yarn exec solhint 'contracts/**/*.sol'",
     "no-hooks": "git config core.hooksPath .git/hooks",
+    "slither": "PATH=\"$(pwd)/scripts:$PATH\" slither .",
     "tsc": "tsc --noEmit"
   },
   "devDependencies": {

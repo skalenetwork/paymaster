@@ -2,7 +2,12 @@
   "name": "paymaster",
   "packageManager": "yarn@3.6.4",
   "scripts": {
-    "cspell": "yarn exec cspell \"**/*\""
+    "cleanCompile": "yarn exec hardhat clean && yarn compile",
+    "compile": "yarn exec hardhat compile && yarn hooks",
+    "cspell": "yarn exec cspell \"**/*\"",
+    "fullCheck": "yarn compile",
+    "hooks": "git config core.hooksPath .githooks || true",
+    "no-hooks": "git config core.hooksPath .git/hooks"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",

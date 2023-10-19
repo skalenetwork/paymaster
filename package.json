@@ -6,7 +6,7 @@
     "compile": "yarn exec hardhat compile && yarn hooks",
     "cspell": "yarn exec cspell \"**/*\"",
     "eslint": "yarn exec eslint .",
-    "fullCheck": "yarn compile && yarn lint && yarn tsc && yarn eslint",
+    "fullCheck": "yarn compile && yarn lint && yarn tsc && yarn eslint && yarn slither",
     "hooks": "git config core.hooksPath .githooks || true",
     "lint": "yarn exec solhint 'contracts/**/*.sol'",
     "no-hooks": "git config core.hooksPath .git/hooks",

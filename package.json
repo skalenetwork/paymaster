@@ -5,10 +5,12 @@
     "cleanCompile": "yarn exec hardhat clean && yarn compile",
     "compile": "yarn exec hardhat compile && yarn hooks",
     "cspell": "yarn exec cspell \"**/*\"",
-    "fullCheck": "yarn compile && yarn lint",
+    "eslint": "yarn exec eslint .",
+    "fullCheck": "yarn compile && yarn lint && yarn tsc && yarn eslint",
     "hooks": "git config core.hooksPath .githooks || true",
     "lint": "yarn exec solhint 'contracts/**/*.sol'",
-    "no-hooks": "git config core.hooksPath .git/hooks"
+    "no-hooks": "git config core.hooksPath .git/hooks",
+    "tsc": "tsc --noEmit"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
@@ -21,8 +23,11 @@
     "@types/chai": "^4.2.0",
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=16.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
     "chai": "^4.2.0",
     "cspell": "^7.3.8",
+    "eslint": "^8.51.0",
     "ethers": "^6.4.0",
     "hardhat": "^2.18.1",
     "hardhat-gas-reporter": "^1.0.8",
@@ -30,6 +35,6 @@
     "solidity-coverage": "^0.8.0",
     "ts-node": ">=8.0.0",
     "typechain": "^8.1.0",
-    "typescript": ">=4.5.0"
+    "typescript": "^5.2.2"
   }
 }

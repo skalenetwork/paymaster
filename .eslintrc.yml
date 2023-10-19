@@ -1,0 +1,13 @@
+extends:
+  - eslint:all
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+parser: "@typescript-eslint/parser"
+plugins:
+  - "@typescript-eslint"
+root: true
+ignorePatterns:
+  - typechain-types/**
+rules:
+  no-console: off
+  one-var: ["error", "never"]

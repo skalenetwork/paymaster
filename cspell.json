@@ -5,7 +5,8 @@
         ".gitignore",
         "artifacts/**",
         "cache/**",
-        "typechain-types/**"
+        "typechain-types/**",
+        "**/venv/**"
     ],
     "dictionaries": ["domain-terms", "libraries", "names", "skale-terms", "solidity"],
     "dictionaryDefinitions": [

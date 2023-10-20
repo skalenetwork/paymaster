@@ -44,14 +44,14 @@ jobs:
     - name: Install project
       run: yarn install
 
-    # - name: Install slither
-    #   run: pip3 install -r scripts/requirements.txt
+    - name: Install slither
+      run: pip3 install -r scripts/requirements.txt
 
-    # - name: Show slither version
-    #   run: slither --version
+    - name: Check spelling
+      run: yarn cspell
 
-    # - name: lint
-    #   run: yarn fullCheck
+    - name: lint
+      run: yarn fullCheck
 
     # - name: Test deployment
     #   run: ./scripts/test_deploy.sh

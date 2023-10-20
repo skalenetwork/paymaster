@@ -11,6 +11,7 @@
     "lint": "yarn exec solhint 'contracts/**/*.sol'",
     "no-hooks": "git config core.hooksPath .git/hooks",
     "slither": "PATH=\"$(pwd)/scripts:$PATH\" slither .",
+    "test": "yarn tsc && yarn exec hardhat test",
     "tsc": "tsc --noEmit"
   },
   "devDependencies": {

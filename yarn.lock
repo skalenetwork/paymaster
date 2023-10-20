@@ -1847,7 +1847,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:>=16.0.0":
+"@types/node@npm:*":
   version: 20.8.6
   resolution: "@types/node@npm:20.8.6"
   dependencies:
@@ -1860,6 +1860,15 @@ __metadata:
   version: 18.15.13
   resolution: "@types/node@npm:18.15.13"
   checksum: 79cc5a2b5f98e8973061a4260a781425efd39161a0e117a69cd089603964816c1a14025e1387b4590c8e82d05133b7b4154fa53a7dffb3877890a66145e76515
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:>=20.8.7":
+  version: 20.8.7
+  resolution: "@types/node@npm:20.8.7"
+  dependencies:
+    undici-types: ~5.25.1
+  checksum: 2173c0c03daefcb60c03a61b1371b28c8fe412e7a40dc6646458b809d14a85fbc7aeb369d957d57f0aaaafd99964e77436f29b3b579232d8f2b20c58abbd1d25
   languageName: node
   linkType: hard
 
@@ -6079,7 +6088,7 @@ __metadata:
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.9
     "@types/mocha": ">=9.1.0"
-    "@types/node": ">=16.0.0"
+    "@types/node": ">=20.8.7"
     "@typescript-eslint/eslint-plugin": ^6.8.0
     "@typescript-eslint/parser": ^6.8.0
     chai: ^4.2.0

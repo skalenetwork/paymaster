@@ -21,7 +21,7 @@
     "@nomicfoundation/hardhat-verify": "^1.0.0",
     "@typechain/ethers-v6": "^0.4.0",
     "@typechain/hardhat": "^8.0.0",
-    "@types/chai": "^4.2.0",
+    "@types/chai": "^4.3.9",
     "@types/mocha": ">=9.1.0",
     "@types/node": ">=16.0.0",
     "@typescript-eslint/eslint-plugin": "^6.8.0",

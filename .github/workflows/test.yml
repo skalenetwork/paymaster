@@ -24,6 +24,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
 
     - name: Get yarn cache directory path
       id: yarn-cache-dir-path
@@ -50,7 +52,7 @@ jobs:
     - name: Check spelling
       run: yarn cspell
 
-    - name: lint
+    - name: Lint
       run: yarn fullCheck
 
     # - name: Test deployment

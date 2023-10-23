@@ -21,7 +21,66 @@
 
 pragma solidity ^0.8.18;
 
+// cspell:words structs
 
-contract Paymaster {
-    uint hello;
+import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {AccessManagedUpgradeable}
+from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol";
+
+import {IPaymaster, SchainHash} from "./interfaces/IPaymaster.sol";
+
+
+type ValidatorId is uint256;
+
+struct Schain {
+    SchainHash hash;
+    string name;
+}
+
+struct Validator {
+    ValidatorId id;
+}
+
+error SchainNotFound(
+    SchainHash hash
+);
+
+contract Paymaster is AccessManagedUpgradeable, IPaymaster {
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    mapping(SchainHash => Schain) public schains;
+    EnumerableSet.Bytes32Set private _schainHashes;
+
+    function addSchain(string calldata name) external override restricted {
+        SchainHash schainHash = SchainHash.wrap(keccak256(abi.encodePacked(name)));
+        Schain memory schain = Schain({
+            hash: schainHash,
+            name: name
+        });
+        _addSchain(schain);
+    }
+
+    function removeSchain(SchainHash schainHash) external override restricted {
+        _removeSchain(_getSchain(schainHash));
+    }
+
+    // Private
+
+    function _addSchain(Schain memory schain) private {
+        schains[schain.hash] = schain;
+        _schainHashes.add(SchainHash.unwrap(schain.hash));
+    }
+
+    function _removeSchain(Schain memory schain) private {
+        delete schains[schain.hash];
+        _schainHashes.remove(SchainHash.unwrap(schain.hash));
+    }
+
+    function _getSchain(SchainHash hash) private view returns (Schain storage schain) {
+        if (_schainHashes.contains(SchainHash.unwrap(hash))) {
+            return schains[hash];
+        } else {
+            revert SchainNotFound(hash);
+        }
+    }
 }

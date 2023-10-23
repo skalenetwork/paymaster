@@ -1,5 +1,9 @@
 {
   "extends": "solhint:all",
   "rules": {
+    "comprehensive-interface": "error",
+    "no-global-import": "error",
+    "private-vars-leading-underscore": "error",
+    "state-visibility": "error"
   }
 }

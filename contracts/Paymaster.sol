@@ -45,6 +45,14 @@ error SchainNotFound(
     SchainHash hash
 );
 
+error SchainAddingError(
+    SchainHash hash
+);
+
+error SchainDeletionError(
+    SchainHash hash
+);
+
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -68,12 +76,16 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function _addSchain(Schain memory schain) private {
         schains[schain.hash] = schain;
-        _schainHashes.add(SchainHash.unwrap(schain.hash));
+        if (!_schainHashes.add(SchainHash.unwrap(schain.hash))) {
+            revert SchainAddingError(schain.hash);
+        }
     }
 
     function _removeSchain(Schain memory schain) private {
         delete schains[schain.hash];
-        _schainHashes.remove(SchainHash.unwrap(schain.hash));
+        if(!_schainHashes.remove(SchainHash.unwrap(schain.hash))) {
+            revert SchainDeletionError(schain.hash);
+        }
     }
 
     function _getSchain(SchainHash hash) private view returns (Schain storage schain) {

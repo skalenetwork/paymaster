@@ -3,6 +3,7 @@
   "rules": {
     "comprehensive-interface": "error",
     "no-global-import": "error",
+    "ordering": "error",
     "private-vars-leading-underscore": "error",
     "state-visibility": "error"
   }

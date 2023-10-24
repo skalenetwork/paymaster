@@ -23,8 +23,11 @@ pragma solidity ^0.8.18;
 
 
 type SchainHash is bytes32;
+type ValidatorId is uint256;
 
 interface IPaymaster {
     function addSchain(string calldata name) external;
     function removeSchain(SchainHash schainHash) external;
+    function addValidator(ValidatorId id) external;
+    function removeValidator(ValidatorId id) external;
 }

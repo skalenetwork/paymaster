@@ -24,6 +24,7 @@ pragma solidity ^0.8.18;
 // cspell:words structs
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {AccessManagedUpgradeable}
 from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol";
 
@@ -37,6 +38,8 @@ struct Schain {
 
 struct Validator {
     ValidatorId id;
+    uint nodesAmount;
+    uint activeNodesAmount;
 }
 
 error SchainNotFound(
@@ -88,13 +91,26 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function addValidator(ValidatorId id) external override restricted {
         Validator memory validator = Validator({
-            id: id
+            id: id,
+            nodesAmount: 0,
+            activeNodesAmount: 0
         });
         _addValidator(validator);
     }
 
     function removeValidator(ValidatorId id) external override restricted {
         _removeValidator(_getValidator(id));
+    }
+
+    function setNodesAmount(ValidatorId id, uint amount) external override restricted {
+        Validator storage validator = _getValidator(id);
+        validator.nodesAmount = amount;
+        validator.activeNodesAmount = amount;
+    }
+
+    function setActiveNodes(ValidatorId id, uint amount) external override restricted {
+        Validator storage validator = _getValidator(id);
+        validator.activeNodesAmount = Math.min(amount, validator.nodesAmount);
     }
 
     // Private

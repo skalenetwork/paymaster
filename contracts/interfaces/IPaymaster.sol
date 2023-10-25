@@ -30,4 +30,6 @@ interface IPaymaster {
     function removeSchain(SchainHash schainHash) external;
     function addValidator(ValidatorId id) external;
     function removeValidator(ValidatorId id) external;
+    function setNodesAmount(ValidatorId id, uint amount) external;
+    function setActiveNodes(ValidatorId id, uint amount) external;
 }

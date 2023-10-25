@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /*
-    IPaymaster.sol - Paymaster
+    Schain.sol - Paymaster
     Copyright (C) 2023-Present SKALE Labs
     @author Dmytro Stebaiev
 
@@ -21,15 +21,17 @@
 
 pragma solidity ^0.8.18;
 
+import {SchainHash} from "../interfaces/IPaymaster.sol";
 
-type SchainHash is bytes32;
-type ValidatorId is uint256;
 
-interface IPaymaster {
-    function addSchain(string calldata name) external;
-    function removeSchain(SchainHash schainHash) external;
-    function addValidator(ValidatorId id) external;
-    function removeValidator(ValidatorId id) external;
-    function setNodesAmount(ValidatorId id, uint256 amount) external;
-    function setActiveNodes(ValidatorId id, uint256 amount) external;
-}
+error SchainNotFound(
+    SchainHash hash
+);
+
+error SchainAddingError(
+    SchainHash hash
+);
+
+error SchainDeletionError(
+    SchainHash hash
+);

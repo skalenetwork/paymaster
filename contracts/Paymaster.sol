@@ -28,43 +28,26 @@ import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {AccessManagedUpgradeable}
 from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol";
 
+import {SchainNotFound, SchainAddingError, SchainDeletionError} from "./errors/Schain.sol";
+import {ValidatorNotFound, ValidatorAddingError, ValidatorDeletionError} from "./errors/Validator.sol";
 import {IPaymaster, SchainHash, ValidatorId} from "./interfaces/IPaymaster.sol";
+import {
+    DateTimeUtils,
+    Timestamp
+} from "./DateTimeUtils.sol";
 
 
 struct Schain {
     SchainHash hash;
     string name;
+    Timestamp paidUntil;
 }
 
 struct Validator {
     ValidatorId id;
-    uint nodesAmount;
-    uint activeNodesAmount;
+    uint256 nodesAmount;
+    uint256 activeNodesAmount;
 }
-
-error SchainNotFound(
-    SchainHash hash
-);
-
-error SchainAddingError(
-    SchainHash hash
-);
-
-error SchainDeletionError(
-    SchainHash hash
-);
-
-error ValidatorNotFound(
-    ValidatorId id
-);
-
-error ValidatorAddingError(
-    ValidatorId id
-);
-
-error ValidatorDeletionError(
-    ValidatorId id
-);
 
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -80,7 +63,8 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         SchainHash schainHash = SchainHash.wrap(keccak256(abi.encodePacked(name)));
         Schain memory schain = Schain({
             hash: schainHash,
-            name: name
+            name: name,
+            paidUntil: DateTimeUtils.timestamp().nextMonth()
         });
         _addSchain(schain);
     }
@@ -102,16 +86,20 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         _removeValidator(_getValidator(id));
     }
 
-    function setNodesAmount(ValidatorId id, uint amount) external override restricted {
+    function setNodesAmount(ValidatorId id, uint256 amount) external override restricted {
         Validator storage validator = _getValidator(id);
         validator.nodesAmount = amount;
         validator.activeNodesAmount = amount;
     }
 
-    function setActiveNodes(ValidatorId id, uint amount) external override restricted {
+    function setActiveNodes(ValidatorId id, uint256 amount) external override restricted {
         Validator storage validator = _getValidator(id);
         validator.activeNodesAmount = Math.min(amount, validator.nodesAmount);
     }
+
+    // function pay(SchainHash schainHash, Months duration) external {
+
+    // }
 
     // Private
 
@@ -122,7 +110,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function _removeSchain(Schain memory schain) private {
+    function _removeSchain(Schain storage schain) private {
         delete schains[schain.hash];
         if(!_schainHashes.remove(SchainHash.unwrap(schain.hash))) {
             revert SchainDeletionError(schain.hash);
@@ -136,7 +124,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function _removeValidator(Validator memory validator) private {
+    function _removeValidator(Validator storage validator) private {
         delete validators[validator.id];
         if(!_validatorIds.remove(ValidatorId.unwrap(validator.id))) {
             revert ValidatorDeletionError(validator.id);

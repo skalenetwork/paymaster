@@ -1,4 +1,4 @@
 {
     "detectors_to_exclude": "solc-version",
-    "filter_paths": "@openzeppelin/contracts/|@openzeppelin/contracts-upgradeable/"
+    "filter_paths": "@openzeppelin/contracts/|@openzeppelin/contracts-upgradeable/|@quant-finance/solidity-datetime"
 }

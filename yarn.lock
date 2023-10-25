@@ -1554,6 +1554,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@quant-finance/solidity-datetime@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "@quant-finance/solidity-datetime@npm:2.2.0"
+  checksum: e6578ec85d1d5141995a656380a541b74e364e5754fa9e3cd7a7c283418690e6917b2eb019fe23fbceecf7d3e1b53bdf9cf1dc3a2f3fc4a651f641546b1f1390
+  languageName: node
+  linkType: hard
+
 "@scure/base@npm:~1.1.0":
   version: 1.1.3
   resolution: "@scure/base@npm:1.1.3"
@@ -6093,6 +6100,7 @@ __metadata:
     "@nomicfoundation/hardhat-verify": ^1.0.0
     "@openzeppelin/contracts": ^5.0.0
     "@openzeppelin/contracts-upgradeable": ^5.0.0
+    "@quant-finance/solidity-datetime": ^2.2.0
     "@typechain/ethers-v6": ^0.4.0
     "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.9

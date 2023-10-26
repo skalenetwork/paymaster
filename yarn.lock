@@ -1759,17 +1759,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typechain/hardhat@npm:^8.0.0":
-  version: 8.0.3
-  resolution: "@typechain/hardhat@npm:8.0.3"
+"@typechain/hardhat@npm:^9.1.0":
+  version: 9.1.0
+  resolution: "@typechain/hardhat@npm:9.1.0"
   dependencies:
     fs-extra: ^9.1.0
   peerDependencies:
-    "@typechain/ethers-v6": ^0.4.3
+    "@typechain/ethers-v6": ^0.5.1
     ethers: ^6.1.0
     hardhat: ^2.9.9
-    typechain: ^8.3.1
-  checksum: ba1678e76efad08f3ef6347b125da1840f6c04f4f754538caea048e8fe522ac34672f81a3c31a7c0e6bd78d5d38a9280838319b19a8aae69f9580c1ad3e097b7
+    typechain: ^8.3.2
+  checksum: a05998ce89bb4a297f233f4489e4af2a3ad0abcedd75392096745a378d7c5bab9650fcd5dd778c9deaf790bf16e3a849b3ed91a6ae916173df6dfc9e574efcbc
   languageName: node
   linkType: hard
 
@@ -6102,7 +6102,7 @@ __metadata:
     "@openzeppelin/contracts-upgradeable": ^5.0.0
     "@quant-finance/solidity-datetime": ^2.2.0
     "@typechain/ethers-v6": ^0.4.0
-    "@typechain/hardhat": ^8.0.0
+    "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.9
     "@types/mocha": ">=9.1.0"
     "@types/node": ">=16.0.0"

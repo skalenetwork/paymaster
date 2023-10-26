@@ -33,6 +33,23 @@ type Year is uint256;
 type Timestamp is uint256;
 
 using DateTimeUtils for Timestamp global;
+using {
+    monthsLess as <,
+    monthsEqual as ==,
+    monthsGreater as >
+} for Months global;
+
+function monthsLess(Months left, Months right) pure returns (bool result) {
+    return Months.unwrap(left) < Months.unwrap(right);
+}
+
+function monthsEqual(Months a, Months b) pure returns (bool result) {
+    return !(a < b) && !(b < a);
+}
+
+function monthsGreater(Months left, Months right) pure returns (bool result) {
+    return !(left < right) && !(left == right);
+}
 
 library DateTimeUtils {
     function timestamp() internal view returns (Timestamp timestampValue) {

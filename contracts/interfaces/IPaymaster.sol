@@ -21,6 +21,13 @@
 
 pragma solidity ^0.8.18;
 
+// cspell:words IERC20
+
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
+
+import {Months} from "../DateTimeUtils.sol";
+import {USD} from "../types/Usd.sol";
+
 
 type SchainHash is bytes32;
 type ValidatorId is uint256;
@@ -32,4 +39,9 @@ interface IPaymaster {
     function removeValidator(ValidatorId id) external;
     function setNodesAmount(ValidatorId id, uint256 amount) external;
     function setActiveNodes(ValidatorId id, uint256 amount) external;
+    function setMaxReplenishmentPeriod(Months months) external;
+    function setSchainPrice(USD price) external;
+    function setSklPrice(USD price) external;
+    function setSkaleToken(IERC20 token) external;
+    function pay(SchainHash schainHash, Months duration) external;
 }

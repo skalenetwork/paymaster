@@ -19,21 +19,39 @@
     along with Paymaster.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
-// cspell:words structs
+// cspell:words structs IERC20
 
+import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {AccessManagedUpgradeable}
 from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol";
 
+import {
+    SchainPriceIsNotSet,
+    SkaleTokenIsNotSet,
+    SklPriceIsNotSet
+} from "./errors/Parameters.sol";
+import {
+    ReplenishmentPeriodIsTooBig,
+    TooSmallAllowance,
+    TransferFailure
+} from "./errors/Replenishment.sol";
 import {SchainNotFound, SchainAddingError, SchainDeletionError} from "./errors/Schain.sol";
 import {ValidatorNotFound, ValidatorAddingError, ValidatorDeletionError} from "./errors/Validator.sol";
-import {IPaymaster, SchainHash, ValidatorId} from "./interfaces/IPaymaster.sol";
+import {
+    IPaymaster,
+    SchainHash,
+    USD,
+    ValidatorId
+} from "./interfaces/IPaymaster.sol";
+import {SKL} from "./types/Skl.sol";
 import {
     DateTimeUtils,
-    Timestamp
+    Timestamp,
+    Months
 } from "./DateTimeUtils.sol";
 
 
@@ -58,6 +76,11 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     mapping(ValidatorId => Validator) public validators;
     EnumerableSet.UintSet private _validatorIds;
+
+    Months public maxReplenishmentPeriod;
+    USD public schainPricePerMonth;
+    USD public oneSklPrice;
+    IERC20 public skaleToken;
 
     function addSchain(string calldata name) external override restricted {
         SchainHash schainHash = SchainHash.wrap(keccak256(abi.encodePacked(name)));
@@ -97,9 +120,50 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         validator.activeNodesAmount = Math.min(amount, validator.nodesAmount);
     }
 
-    // function pay(SchainHash schainHash, Months duration) external {
+    function setMaxReplenishmentPeriod(Months months) external override restricted {
+        maxReplenishmentPeriod = months;
+    }
 
-    // }
+    function setSchainPrice(USD price) external override restricted {
+        schainPricePerMonth = price;
+    }
+
+    function setSklPrice(USD price) external override restricted {
+        oneSklPrice = price;
+    }
+
+    function setSkaleToken(IERC20 token) external override restricted {
+        skaleToken = token;
+    }
+
+    function pay(SchainHash schainHash, Months duration) external override {
+        if (duration > maxReplenishmentPeriod) {
+            revert ReplenishmentPeriodIsTooBig();
+        }
+
+        Schain storage schain = _getSchain(schainHash);
+        SKL cost = _toSKL(_getCost(duration));
+
+        if (address(skaleToken) == address(0)) {
+            revert SkaleTokenIsNotSet();
+        }
+        SKL allowance = SKL.wrap(
+            skaleToken.allowance(_msgSender(), address(this))
+        );
+        if (allowance < cost) {
+            revert TooSmallAllowance({
+                spender: address(this),
+                required: SKL.unwrap(cost),
+                allowed: SKL.unwrap(allowance)
+            });
+        }
+
+        if (!skaleToken.transferFrom(_msgSender(), address(this), SKL.unwrap(cost))) {
+            revert TransferFailure();
+        }
+
+        schain.paidUntil = schain.paidUntil.add(duration);
+    }
 
     // Private
 
@@ -145,5 +209,21 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         } else {
             revert ValidatorNotFound(id);
         }
+    }
+
+    function _toSKL(USD amount) private view returns (SKL result) {
+        if (oneSklPrice == USD.wrap(0)) {
+            revert SklPriceIsNotSet();
+        }
+        result = SKL.wrap(
+            USD.unwrap(amount) * 1e18 / USD.unwrap(oneSklPrice)
+        );
+    }
+
+    function _getCost(Months period) private view returns (USD cost) {
+        if (schainPricePerMonth == USD.wrap(0)) {
+            revert SchainPriceIsNotSet();
+        }
+        cost = USD.wrap(Months.unwrap(period) * USD.unwrap(schainPricePerMonth));
     }
 }

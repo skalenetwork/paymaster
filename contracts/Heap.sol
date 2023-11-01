@@ -52,12 +52,15 @@ library HeapLibrary {
         }
     }
 
-    function pop(Heap storage heap) internal returns (uint256 minimum) {
-        minimum = get(heap);
-        uint256 lastValue = _getValue(heap, _getLastNode(heap));
-        --heap.size;
+    function pop(Heap storage heap) internal {
         if (heap.size > 0) {
-            _fixDown(heap, _ROOT, _getLastNode(heap), lastValue);
+            uint256 lastValue = _getValue(heap, _getLastNode(heap));
+            --heap.size;
+            if (heap.size > 0) {
+                _fixDown(heap, _ROOT, _getLastNode(heap), lastValue);
+            }
+        } else {
+            revert AccessToEmptyHeap();
         }
     }
 

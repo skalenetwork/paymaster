@@ -38,6 +38,11 @@ using {
     monthsEqual as ==,
     monthsGreater as >
 } for Months global;
+using {
+    timestampLess as <,
+    timestampLessOrEqual as <=,
+    timestampEqual as ==
+} for Timestamp global;
 
 function monthsLess(Months left, Months right) pure returns (bool result) {
     return Months.unwrap(left) < Months.unwrap(right);
@@ -49,6 +54,18 @@ function monthsEqual(Months a, Months b) pure returns (bool result) {
 
 function monthsGreater(Months left, Months right) pure returns (bool result) {
     return !(left < right) && !(left == right);
+}
+
+function timestampLessOrEqual(Timestamp left, Timestamp right) pure returns (bool result) {
+    return Timestamp.unwrap(left) <= Timestamp.unwrap(right);
+}
+
+function timestampLess(Timestamp left, Timestamp right) pure returns (bool result) {
+    return Timestamp.unwrap(left) < Timestamp.unwrap(right);
+}
+
+function timestampEqual(Timestamp left, Timestamp right) pure returns (bool result) {
+    return Timestamp.unwrap(left) == Timestamp.unwrap(right);
 }
 
 library DateTimeUtils {

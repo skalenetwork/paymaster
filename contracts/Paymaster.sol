@@ -53,6 +53,7 @@ import {
     Timestamp,
     Months
 } from "./DateTimeUtils.sol";
+import {TimelineLibrary} from "./Timeline.sol";
 
 
 struct Schain {
@@ -81,6 +82,8 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     USD public schainPricePerMonth;
     USD public oneSklPrice;
     IERC20 public skaleToken;
+
+    TimelineLibrary.Timeline private _totalRewards;
 
     function addSchain(string calldata name) external override restricted {
         SchainHash schainHash = SchainHash.wrap(keccak256(abi.encodePacked(name)));

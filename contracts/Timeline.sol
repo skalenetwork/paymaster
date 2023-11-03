@@ -122,7 +122,7 @@ library TimelineLibrary {
 
     function _getNextChange(Timeline storage timeline) private view returns (Change storage change) {
         ChangeId changeId = ChangeId.wrap(
-            PriorityQueueLibrary.Value.unwrap(
+            PriorityQueueLibrary.unwrapValue(
                 timeline.changesQueue.front()
             )
         );
@@ -131,7 +131,7 @@ library TimelineLibrary {
 
     function _popNextChange(Timeline storage timeline) private {
         ChangeId changeId = ChangeId.wrap(
-            PriorityQueueLibrary.Value.unwrap(
+            PriorityQueueLibrary.unwrapValue(
                 timeline.changesQueue.front()
             )
         );

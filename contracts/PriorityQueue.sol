@@ -55,16 +55,23 @@ library PriorityQueueLibrary {
         return queue.values[priority][queue.values[priority].length - 1];
     }
 
-    function pop(PriorityQueue storage queue) internal returns (Value value) {
+    function pop(PriorityQueue storage queue) internal {
         if (empty(queue)) {
             revert AccessToEmptyPriorityQueue();
         }
         uint256 priority = queue.priorities.get();
         uint256 length = queue.values[priority].length;
-        value = queue.values[priority][length - 1];
         queue.values[priority].pop();
         if (length == 1) {
             queue.priorities.pop();
         }
+    }
+
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // PriorityQueueLibrary.Value.unwrap(value)
+    // TODO: remove the function after slither fix the issue
+    function unwrapValue(Value value) internal pure returns (uint256 unwrappedValue) {
+        return Value.unwrap(value);
     }
 }

@@ -26,7 +26,7 @@ pragma solidity ^0.8.19;
 import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 
 import {PriorityQueueLibrary} from "./PriorityQueue.sol";
-import {Timestamp} from "./DateTimeUtils.sol";
+import {DateTimeUtils, Seconds, Timestamp} from "./DateTimeUtils.sol";
 
 
 library TimelineLibrary {
@@ -37,6 +37,9 @@ library TimelineLibrary {
     using PriorityQueueLibrary for PriorityQueueLibrary.PriorityQueue;
 
     error CannotSetValueInThePast();
+    error TimeIntervalIsNotProcessed();
+    error IncorrectTimeInterval();
+    error TimestampIsOutOfValues();
 
     struct Timeline {
         Timestamp processedUntil;
@@ -84,6 +87,33 @@ library TimelineLibrary {
         timeline.processedUntil = until;
     }
 
+    function getSum(Timeline storage timeline, Timestamp from, Timestamp to) internal view returns (uint256 sum) {
+        _validateTimeInterval(timeline, from , to);
+        if (timeline.valuesQueue.empty()) {
+            return 0;
+        }
+        if (from < _getValueByIndex(timeline, 0).timestamp) {
+            return getSum(timeline, _getValueByIndex(timeline, 0).timestamp, to);
+        }
+
+        sum = 0;
+        uint256 queueLength = timeline.valuesQueue.length();
+        Timestamp current = from;
+        for (uint256 i = _getLowerBoundIndex(timeline, from); i < queueLength && current < to; ++i) {
+            Timestamp next = to;
+            if (i + 1 < queueLength) {
+                Timestamp nextInterval = _getValueByIndex(timeline, i+1).timestamp;
+                if (nextInterval < to) {
+                    next = nextInterval;
+                }
+            }
+
+            sum += _getValueByIndex(timeline, i+1).value * Seconds.unwrap(DateTimeUtils.diff(current, next));
+
+            current = next;
+        }
+    }
+
     // Private
 
     function _hasFutureChanges(Timeline storage timeline) private view returns (bool hasChanges) {
@@ -113,6 +143,30 @@ library TimelineLibrary {
         return timeline.values[ValueId.wrap(timeline.valuesQueue.back())];
     }
 
+    function _getValueByIndex(Timeline storage timeline, uint256 index) private view returns (Value storage value) {
+        return timeline.values[ValueId.wrap(timeline.valuesQueue.at(index))];
+    }
+
+    function _getLowerBoundIndex(Timeline storage timeline, Timestamp timestamp) private view returns (uint256 index) {
+        if (timestamp < _getValueByIndex(timeline, 0).timestamp) {
+            revert TimestampIsOutOfValues();
+        }
+        if (_getCurrentValue(timeline).timestamp <= timestamp) {
+            return timeline.valuesQueue.length() - 1;
+        }
+        uint256 left = 0;
+        uint256 right = timeline.valuesQueue.length() - 1;
+        while (left + 1 < right) {
+            uint256 middle = (left + right) / 2;
+            if (_getValueByIndex(timeline, middle).timestamp <= timestamp) {
+                left = middle;
+            } else {
+                right = middle;
+            }
+        }
+        return left;
+    }
+
     function _createValue(Timeline storage timeline, Value memory value) private {
         if(!timeline.valuesQueue.empty() && value.timestamp <= _getCurrentValue(timeline).timestamp) {
             revert CannotSetValueInThePast();
@@ -129,5 +183,14 @@ library TimelineLibrary {
                 uint256(ValueId.unwrap(valueId)) + 1
             )
         );
+    }
+
+    function _validateTimeInterval(Timeline storage timeline, Timestamp from, Timestamp to) private view {
+        if (to < from) {
+            revert IncorrectTimeInterval();
+        }
+        if (timeline.processedUntil < to) {
+            revert TimeIntervalIsNotProcessed();
+        }
     }
 }

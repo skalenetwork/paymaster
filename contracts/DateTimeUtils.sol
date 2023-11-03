@@ -114,6 +114,10 @@ library DateTimeUtils {
         newTimestamp = timestampValue.addMonths(monthsValue);
     }
 
+    function diff(Timestamp from, Timestamp to) internal pure returns (Seconds difference) {
+        difference = Seconds.wrap(Timestamp.unwrap(to) - Timestamp.unwrap(from));
+    }
+
     // Auxiliary functions
 
     function firstDayOfMonth(Timestamp timestampValue) internal pure returns (Timestamp newTimestamp) {

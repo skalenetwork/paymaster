@@ -74,4 +74,12 @@ library PriorityQueueLibrary {
     function unwrapValue(Value value) internal pure returns (uint256 unwrappedValue) {
         return Value.unwrap(value);
     }
+
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // PriorityQueueLibrary.Value.wrap(value)
+    // TODO: remove the function after slither fix the issue
+    function wrapValue(uint256 unwrappedValue) internal pure returns (Value wrappedValue) {
+        return Value.wrap(unwrappedValue);
+    }
 }

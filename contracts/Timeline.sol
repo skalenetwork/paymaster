@@ -38,12 +38,14 @@ library TimelineLibrary {
 
     error CannotSetValueInThePast();
     error TimeIntervalIsNotProcessed();
+    error TimeIntervalIsAlreadyProcessed();
     error IncorrectTimeInterval();
     error TimestampIsOutOfValues();
 
     struct Timeline {
         Timestamp processedUntil;
 
+        ChangeId changesEnd;
         mapping (ChangeId => Change) futureChanges;
         PriorityQueueLibrary.PriorityQueue changesQueue;
 
@@ -88,7 +90,7 @@ library TimelineLibrary {
     }
 
     function getSum(Timeline storage timeline, Timestamp from, Timestamp to) internal view returns (uint256 sum) {
-        _validateTimeInterval(timeline, from , to);
+        _validateTimeInterval(timeline, from , to, true);
         if (timeline.valuesQueue.empty()) {
             return 0;
         }
@@ -108,10 +110,22 @@ library TimelineLibrary {
                 }
             }
 
-            sum += _getValueByIndex(timeline, i+1).value * Seconds.unwrap(DateTimeUtils.diff(current, next));
+            sum += _getValueByIndex(timeline, i+1).value * Seconds.unwrap(DateTimeUtils.duration(current, next));
 
             current = next;
         }
+    }
+
+    function add(Timeline storage timeline, Timestamp from, Timestamp to, uint256 value) internal {
+        _validateTimeInterval(timeline, from , to, false);
+        Seconds duration = DateTimeUtils.duration(from, to);
+        uint256 rate = value / Seconds.unwrap(duration);
+        _addChange(timeline, from, rate, 0);
+        uint256 reminder = value % Seconds.unwrap(duration);
+        if (reminder > 0) {
+            _addChange(timeline, to.sub(Seconds.wrap(1)), reminder, 0);
+        }
+        _addChange(timeline, to, 0, rate + reminder);
     }
 
     // Private
@@ -127,6 +141,27 @@ library TimelineLibrary {
             )
         );
         return timeline.futureChanges[changeId];
+    }
+
+    function _addChange(
+        Timeline storage timeline,
+        Timestamp timestamp,
+        uint256 addValue,
+        uint256 subtractValue
+    )
+        private
+    {
+        ChangeId changeId = timeline.changesEnd;
+        timeline.changesEnd = _getNextChangeId(changeId);
+        timeline.futureChanges[changeId] = Change({
+            timestamp: timestamp,
+            add: addValue,
+            subtract: subtractValue
+        });
+        timeline.changesQueue.push(
+            Timestamp.unwrap(timestamp),
+            PriorityQueueLibrary.wrapValue(ChangeId.unwrap(changeId))
+        );
     }
 
     function _popNextChange(Timeline storage timeline) private {
@@ -185,12 +220,26 @@ library TimelineLibrary {
         );
     }
 
-    function _validateTimeInterval(Timeline storage timeline, Timestamp from, Timestamp to) private view {
+    function _getNextChangeId(ChangeId changeId) private pure returns (ChangeId nextChangeId) {
+        nextChangeId = ChangeId.wrap(ChangeId.unwrap(changeId) + 1);
+    }
+
+    function _validateTimeInterval(
+        Timeline storage timeline,
+        Timestamp from,
+        Timestamp to,
+        bool processed) private view {
         if (to < from) {
             revert IncorrectTimeInterval();
         }
-        if (timeline.processedUntil < to) {
-            revert TimeIntervalIsNotProcessed();
+        if (processed) {
+            if (timeline.processedUntil < to) {
+                revert TimeIntervalIsNotProcessed();
+            }
+        } else {
+            if (from < timeline.processedUntil) {
+                revert TimeIntervalIsAlreadyProcessed();
+            }
         }
     }
 }

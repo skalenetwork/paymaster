@@ -71,6 +71,7 @@ struct Validator {
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.UintSet;
+    using TimelineLibrary for TimelineLibrary.Timeline;
 
     mapping(SchainHash => Schain) public schains;
     EnumerableSet.Bytes32Set private _schainHashes;
@@ -161,11 +162,17 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             });
         }
 
+        SKL costPerMonth = SKL.wrap(SKL.unwrap(cost) / Months.unwrap(duration));
+        Timestamp start = schain.paidUntil;
+        Months oneMonth = Months.wrap(1);
+        for (Months i = Months.wrap(0); i < duration; i = i + oneMonth) {
+            _totalRewards.add(start.add(i), start.add(i + oneMonth), SKL.unwrap(costPerMonth));
+        }
+        schain.paidUntil = start.add(duration);
+
         if (!skaleToken.transferFrom(_msgSender(), address(this), SKL.unwrap(cost))) {
             revert TransferFailure();
         }
-
-        schain.paidUntil = schain.paidUntil.add(duration);
     }
 
     // Private

@@ -36,7 +36,8 @@ using DateTimeUtils for Timestamp global;
 using {
     monthsLess as <,
     monthsEqual as ==,
-    monthsGreater as >
+    monthsGreater as >,
+    monthsAdd as +
 } for Months global;
 using {
     timestampLess as <,
@@ -54,6 +55,10 @@ function monthsEqual(Months a, Months b) pure returns (bool result) {
 
 function monthsGreater(Months left, Months right) pure returns (bool result) {
     return !(left < right) && !(left == right);
+}
+
+function monthsAdd(Months a, Months b) pure returns (Months sum) {
+    sum = Months.wrap(Months.unwrap(a) + Months.unwrap(b));
 }
 
 function timestampLessOrEqual(Timestamp left, Timestamp right) pure returns (bool result) {
@@ -108,13 +113,26 @@ library DateTimeUtils {
         );
     }
 
+    function subSeconds(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
+        newTimestamp = Timestamp.wrap(
+            UntypedDateTime.subSeconds(
+                Timestamp.unwrap(timestampValue),
+                Seconds.unwrap(secondsValue)
+            )
+        );
+    }
+
     // Operations
 
     function add(Timestamp timestampValue, Months monthsValue) internal pure returns (Timestamp newTimestamp) {
         newTimestamp = timestampValue.addMonths(monthsValue);
     }
 
-    function diff(Timestamp from, Timestamp to) internal pure returns (Seconds difference) {
+    function sub(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
+        newTimestamp = timestampValue.subSeconds(secondsValue);
+    }
+
+    function duration(Timestamp from, Timestamp to) internal pure returns (Seconds difference) {
         difference = Seconds.wrap(Timestamp.unwrap(to) - Timestamp.unwrap(from));
     }
 

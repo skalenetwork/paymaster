@@ -86,6 +86,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     TimelineLibrary.Timeline private _totalRewards;
 
+    constructor(address initialAuthority) initializer {
+        __AccessManaged_init(initialAuthority);
+    }
+
     function addSchain(string calldata name) external override restricted {
         SchainHash schainHash = SchainHash.wrap(keccak256(abi.encodePacked(name)));
         Schain memory schain = Schain({

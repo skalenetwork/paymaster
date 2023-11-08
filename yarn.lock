@@ -1255,6 +1255,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nomicfoundation/ethereumjs-rlp@npm:5.0.3":
+  version: 5.0.3
+  resolution: "@nomicfoundation/ethereumjs-rlp@npm:5.0.3"
+  bin:
+    rlp: bin/rlp
+  checksum: 1cf45b1eeec11d82950b9867efbf07c60a4aac533149b0567b8e1e20d88b8b62d0521eac8ee1a3982c8baca6e179d33e3c5bfb1b670e60b409135300dcfae2f8
+  languageName: node
+  linkType: hard
+
 "@nomicfoundation/ethereumjs-statemanager@npm:2.0.2":
   version: 2.0.2
   resolution: "@nomicfoundation/ethereumjs-statemanager@npm:2.0.2"
@@ -1282,6 +1291,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@nomicfoundation/ethereumjs-trie@npm:^6.0.3":
+  version: 6.0.3
+  resolution: "@nomicfoundation/ethereumjs-trie@npm:6.0.3"
+  dependencies:
+    "@nomicfoundation/ethereumjs-rlp": 5.0.3
+    "@nomicfoundation/ethereumjs-util": 9.0.3
+    "@types/readable-stream": ^2.3.13
+    ethereum-cryptography: 0.1.3
+    readable-stream: ^3.6.0
+  checksum: 70aeec8655c803b06a771081b60fb7e263d810d7ae104e40607ccd27870bde83e0bf65a7b44f19f8067bc3673514d60cbc02981721e3ee50bf48d7516cd551e8
+  languageName: node
+  linkType: hard
+
 "@nomicfoundation/ethereumjs-tx@npm:5.0.2":
   version: 5.0.2
   resolution: "@nomicfoundation/ethereumjs-tx@npm:5.0.2"
@@ -1304,6 +1326,17 @@ __metadata:
     "@nomicfoundation/ethereumjs-rlp": 5.0.2
     ethereum-cryptography: 0.1.3
   checksum: 3a08f7b88079ef9f53b43da9bdcb8195498fd3d3911c2feee2571f4d1204656053f058b2f650471c86f7d2d0ba2f814768c7cfb0f266eede41c848356afc4900
+  languageName: node
+  linkType: hard
+
+"@nomicfoundation/ethereumjs-util@npm:9.0.3, @nomicfoundation/ethereumjs-util@npm:^9.0.3":
+  version: 9.0.3
+  resolution: "@nomicfoundation/ethereumjs-util@npm:9.0.3"
+  dependencies:
+    "@chainsafe/ssz": ^0.10.0
+    "@nomicfoundation/ethereumjs-rlp": 5.0.3
+    ethereum-cryptography: 0.1.3
+  checksum: 26948a4c7747455b5f07891ab1b1d932d7d19215de47159fdba5bb3e2e17d4c43d39c78810fe634c74bfa681feeb88cfcd1ea621f6cdbc1b2333dc30a2342b8e
   languageName: node
   linkType: hard
 
@@ -1745,31 +1778,31 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typechain/ethers-v6@npm:^0.5.1":
-  version: 0.5.1
-  resolution: "@typechain/ethers-v6@npm:0.5.1"
+"@typechain/ethers-v6@npm:^0.4.0":
+  version: 0.4.3
+  resolution: "@typechain/ethers-v6@npm:0.4.3"
   dependencies:
     lodash: ^4.17.15
     ts-essentials: ^7.0.1
   peerDependencies:
     ethers: 6.x
-    typechain: ^8.3.2
+    typechain: ^8.3.1
     typescript: ">=4.7.0"
-  checksum: 44e7970ce95eeb1a02019f8a53bbe30dcb87664e1df15fe436ae48eea1bf91ca72b5b230eac1bdf9cbe9b55bc488b54c6273e6f77155eaeff885fb34cfcd1108
+  checksum: 8c2b0cb65712d410892d4b2a78afb2f586d0081e580d1b147bea7b3a1b1f5403328cf648fd2386cb01cd34d03411c13e4cddd22404a980f2efbd087ac2ad8dea
   languageName: node
   linkType: hard
 
-"@typechain/hardhat@npm:^9.1.0":
-  version: 9.1.0
-  resolution: "@typechain/hardhat@npm:9.1.0"
+"@typechain/hardhat@npm:^8.0.0":
+  version: 8.0.3
+  resolution: "@typechain/hardhat@npm:8.0.3"
   dependencies:
     fs-extra: ^9.1.0
   peerDependencies:
-    "@typechain/ethers-v6": ^0.5.1
+    "@typechain/ethers-v6": ^0.4.3
     ethers: ^6.1.0
     hardhat: ^2.9.9
-    typechain: ^8.3.2
-  checksum: a05998ce89bb4a297f233f4489e4af2a3ad0abcedd75392096745a378d7c5bab9650fcd5dd778c9deaf790bf16e3a849b3ed91a6ae916173df6dfc9e574efcbc
+    typechain: ^8.3.1
+  checksum: ba1678e76efad08f3ef6347b125da1840f6c04f4f754538caea048e8fe522ac34672f81a3c31a7c0e6bd78d5d38a9280838319b19a8aae69f9580c1ad3e097b7
   languageName: node
   linkType: hard
 
@@ -3476,6 +3509,13 @@ __metadata:
   dependencies:
     is-obj: ^2.0.0
   checksum: 0f47600a4b93e1dc37261da4e6909652c008832a5d3684b5bf9a9a0d3f4c67ea949a86dceed9b72f5733ed8e8e6383cc5958df3bbd0799ee317fd181f2ece700
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^16.3.1":
+  version: 16.3.1
+  resolution: "dotenv@npm:16.3.1"
+  checksum: 15d75e7279018f4bafd0ee9706593dd14455ddb71b3bcba9c52574460b7ccaf67d5cf8b2c08a5af1a9da6db36c956a04a1192b101ee102a3e0cf8817bbcf3dfd
   languageName: node
   linkType: hard
 
@@ -6155,6 +6195,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "paymaster@workspace:."
   dependencies:
+    "@nomicfoundation/ethereumjs-trie": ^6.0.3
+    "@nomicfoundation/ethereumjs-util": ^9.0.3
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.0
     "@nomicfoundation/hardhat-ethers": ^3.0.0
     "@nomicfoundation/hardhat-network-helpers": ^1.0.0
@@ -6163,8 +6205,8 @@ __metadata:
     "@openzeppelin/contracts": ^5.0.0
     "@openzeppelin/contracts-upgradeable": ^5.0.0
     "@quant-finance/solidity-datetime": ^2.2.0
-    "@typechain/ethers-v6": ^0.5.1
-    "@typechain/hardhat": ^9.1.0
+    "@typechain/ethers-v6": ^0.4.0
+    "@typechain/hardhat": ^8.0.0
     "@types/chai": ^4.3.9
     "@types/mocha": ">=10.0.3"
     "@types/node": ">=20.8.9"
@@ -6172,6 +6214,7 @@ __metadata:
     "@typescript-eslint/parser": ^6.9.1
     chai: ^4.2.0
     cspell: ^7.3.8
+    dotenv: ^16.3.1
     eslint: ^8.52.0
     ethers: ^6.4.0
     hardhat: ^2.18.1

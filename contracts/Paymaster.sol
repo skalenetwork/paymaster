@@ -82,6 +82,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     Months public maxReplenishmentPeriod;
     USD public schainPricePerMonth;
     USD public oneSklPrice;
+    Timestamp public sklPriceTimestamp;
     IERC20 public skaleToken;
 
     TimelineLibrary.Timeline private _totalRewards;
@@ -138,6 +139,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function setSklPrice(USD price) external override restricted {
         oneSklPrice = price;
+        sklPriceTimestamp = DateTimeUtils.timestamp();
     }
 
     function setSkaleToken(IERC20 token) external override restricted {

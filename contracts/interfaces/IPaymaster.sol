@@ -35,7 +35,7 @@ type ValidatorId is uint256;
 interface IPaymaster {
     function addSchain(string calldata name) external;
     function removeSchain(SchainHash schainHash) external;
-    function addValidator(ValidatorId id) external;
+    function addValidator(ValidatorId id, address validatorAddress) external;
     function removeValidator(ValidatorId id) external;
     function setNodesAmount(ValidatorId id, uint256 amount) external;
     function setActiveNodes(ValidatorId id, uint256 amount) external;
@@ -44,4 +44,6 @@ interface IPaymaster {
     function setSklPrice(USD price) external;
     function setSkaleToken(IERC20 token) external;
     function pay(SchainHash schainHash, Months duration) external;
+    function claim(address to) external;
+    function claimFor(ValidatorId validatorId, address to) external;
 }

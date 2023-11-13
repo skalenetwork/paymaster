@@ -28,10 +28,18 @@ error ValidatorNotFound(
     ValidatorId id
 );
 
+error ValidatorAddressNotFound(
+    address validatorAddress
+);
+
 error ValidatorAddingError(
     ValidatorId id
 );
 
 error ValidatorDeletionError(
     ValidatorId id
+);
+
+error ValidatorAddressAlreadyExists(
+    address validatorAddress
 );

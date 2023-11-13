@@ -40,13 +40,20 @@ import {
     TransferFailure
 } from "./errors/Replenishment.sol";
 import {SchainNotFound, SchainAddingError, SchainDeletionError} from "./errors/Schain.sol";
-import {ValidatorNotFound, ValidatorAddingError, ValidatorDeletionError} from "./errors/Validator.sol";
+import {
+    ValidatorNotFound,
+    ValidatorAddingError,
+    ValidatorAddressAlreadyExists,
+    ValidatorAddressNotFound,
+    ValidatorDeletionError
+} from "./errors/Validator.sol";
 import {
     IPaymaster,
     SchainHash,
     USD,
     ValidatorId
 } from "./interfaces/IPaymaster.sol";
+import {TypedMap} from "./structs/TypedMap.sol";
 import {SKL} from "./types/Skl.sol";
 import {
     DateTimeUtils,
@@ -66,18 +73,22 @@ struct Validator {
     ValidatorId id;
     uint256 nodesAmount;
     uint256 activeNodesAmount;
+    Timestamp claimedUntil;
+    address validatorAddress;
 }
 
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.UintSet;
     using TimelineLibrary for TimelineLibrary.Timeline;
+    using TypedMap for TypedMap.AddressToValidatorIdMap;
 
     mapping(SchainHash => Schain) public schains;
     EnumerableSet.Bytes32Set private _schainHashes;
 
     mapping(ValidatorId => Validator) public validators;
     EnumerableSet.UintSet private _validatorIds;
+    TypedMap.AddressToValidatorIdMap private _addressToValidatorId;
 
     Months public maxReplenishmentPeriod;
     USD public schainPricePerMonth;
@@ -105,11 +116,13 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         _removeSchain(_getSchain(schainHash));
     }
 
-    function addValidator(ValidatorId id) external override restricted {
+    function addValidator(ValidatorId id, address validatorAddress) external override restricted {
         Validator memory validator = Validator({
+            activeNodesAmount: 0,
+            claimedUntil: DateTimeUtils.timestamp(),
             id: id,
             nodesAmount: 0,
-            activeNodesAmount: 0
+            validatorAddress: validatorAddress
         });
         _addValidator(validator);
     }
@@ -181,6 +194,23 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
+    function claim(address to) external restricted override {
+        Validator storage validator = _getValidatorByAddress(_msgSender());
+        claimFor(validator.id, to);
+    }
+
+    function claimFor(ValidatorId validatorId, address to) public restricted override {
+        Validator storage validator = _getValidator(validatorId);
+        Timestamp currentTime = DateTimeUtils.timestamp();
+        _totalRewards.process(currentTime);
+        SKL rewards = SKL.wrap(_totalRewards.getSum(validator.claimedUntil, currentTime));
+        validator.claimedUntil = currentTime;
+
+        if (!skaleToken.transfer(to, SKL.unwrap(rewards))) {
+            revert TransferFailure();
+        }
+    }
+
     // Private
 
     function _addSchain(Schain memory schain) private {
@@ -202,11 +232,17 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         if (!_validatorIds.add(ValidatorId.unwrap(validator.id))) {
             revert ValidatorAddingError(validator.id);
         }
+        if(!_addressToValidatorId.set(validator.validatorAddress, validator.id)) {
+            revert ValidatorAddressAlreadyExists(validator.validatorAddress);
+        }
     }
 
     function _removeValidator(Validator storage validator) private {
         delete validators[validator.id];
         if(!_validatorIds.remove(ValidatorId.unwrap(validator.id))) {
+            revert ValidatorDeletionError(validator.id);
+        }
+        if(!_addressToValidatorId.remove(validator.validatorAddress)) {
             revert ValidatorDeletionError(validator.id);
         }
     }
@@ -224,6 +260,15 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             return validators[id];
         } else {
             revert ValidatorNotFound(id);
+        }
+    }
+
+    function _getValidatorByAddress(address validatorAddress) private view returns (Validator storage validator) {
+        (bool success, ValidatorId id) = _addressToValidatorId.tryGet(validatorAddress);
+        if (success) {
+            return _getValidator(id);
+        } else {
+            revert ValidatorAddressNotFound(validatorAddress);
         }
     }
 

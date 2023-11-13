@@ -25,7 +25,7 @@ pragma solidity ^0.8.19;
 
 import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 
-import {PriorityQueueLibrary} from "./PriorityQueue.sol";
+import {PriorityQueueLibrary} from "./structs/PriorityQueue.sol";
 import {DateTimeUtils, Seconds, Timestamp} from "./DateTimeUtils.sol";
 
 

@@ -62,6 +62,9 @@ task(
 
         const zeroDelay = 0;
         await accessManager.grantRole(
+            // Can't rename ADMIN_ROLE because
+            // it's imported from openzeppelin library
+            // eslint-disable-next-line new-cap
             await accessManager.ADMIN_ROLE(),
             taskArgs.accountAddress,
             zeroDelay

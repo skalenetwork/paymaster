@@ -9,5 +9,8 @@ root: true
 ignorePatterns:
   - typechain-types/**
 rules:
+  capitalized-comments: ["error", "always", { "ignoreConsecutiveComments": true }]
+  multiline-comment-style: ["error", "separate-lines"]
   no-console: off
   one-var: ["error", "never"]
+

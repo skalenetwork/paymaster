@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /*
-    AccessManager.sol - Paymaster
+    PaymasterAccessManager.sol - Paymaster
     Copyright (C) 2023-Present SKALE Labs
     @author Dmytro Stebaiev
 
@@ -21,4 +21,10 @@
 
 pragma solidity ^0.8.20;
 
-import {AccessManager} from "@openzeppelin/contracts/access/manager/AccessManager.sol";
+import {AccessManagerUpgradeable}
+from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagerUpgradeable.sol";
+
+
+contract PaymasterAccessManager is AccessManagerUpgradeable {
+    uint64 public constant PRICE_SETTER_ROLE = 1;
+}

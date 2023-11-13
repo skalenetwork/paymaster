@@ -6,6 +6,12 @@
     "code-complexity": "error",
     "comprehensive-interface": "error",
     "explicit-types": "error",
+    "func-visibility": [
+      "error",
+      {
+        "ignoreConstructors": true
+      }
+    ],
     "named-return-values": "error",
     "no-empty-blocks": "error",
     "no-global-import": "error",

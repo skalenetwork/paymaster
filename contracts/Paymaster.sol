@@ -60,6 +60,7 @@ import {
     Timestamp,
     Months
 } from "./DateTimeUtils.sol";
+import {SequenceLibrary} from "./Sequence.sol";
 import {TimelineLibrary} from "./Timeline.sol";
 
 
@@ -75,18 +76,21 @@ struct Validator {
     uint256 activeNodesAmount;
     Timestamp claimedUntil;
     address validatorAddress;
+    SequenceLibrary.Sequence nodesHistory;
 }
 
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.UintSet;
+    using SequenceLibrary for SequenceLibrary.Iterator;
+    using SequenceLibrary for SequenceLibrary.Sequence;
     using TimelineLibrary for TimelineLibrary.Timeline;
     using TypedMap for TypedMap.AddressToValidatorIdMap;
 
     mapping(SchainHash => Schain) public schains;
     EnumerableSet.Bytes32Set private _schainHashes;
 
-    mapping(ValidatorId => Validator) public validators;
+    mapping(ValidatorId => Validator) private _validators;
     EnumerableSet.UintSet private _validatorIds;
     TypedMap.AddressToValidatorIdMap private _addressToValidatorId;
 
@@ -97,6 +101,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     IERC20 public skaleToken;
 
     TimelineLibrary.Timeline private _totalRewards;
+    SequenceLibrary.Sequence private _totalNodesHistory;
 
     constructor(address initialAuthority) initializer {
         __AccessManaged_init(initialAuthority);
@@ -117,14 +122,19 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function addValidator(ValidatorId id, address validatorAddress) external override restricted {
-        Validator memory validator = Validator({
-            activeNodesAmount: 0,
-            claimedUntil: DateTimeUtils.timestamp(),
-            id: id,
-            nodesAmount: 0,
-            validatorAddress: validatorAddress
-        });
-        _addValidator(validator);
+        if (!_validatorIds.add(ValidatorId.unwrap(id))) {
+            revert ValidatorAddingError(id);
+        }
+        if(!_addressToValidatorId.set(validatorAddress, id)) {
+            revert ValidatorAddressAlreadyExists(validatorAddress);
+        }
+
+        _validators[id].id = id;
+        delete _validators[id].nodesAmount;
+        delete _validators[id].activeNodesAmount;
+        _validators[id].claimedUntil = DateTimeUtils.timestamp();
+        _validators[id].validatorAddress = validatorAddress;
+        _validators[id].nodesHistory.clear();
     }
 
     function removeValidator(ValidatorId id) external override restricted {
@@ -202,8 +212,36 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function claimFor(ValidatorId validatorId, address to) public restricted override {
         Validator storage validator = _getValidator(validatorId);
         Timestamp currentTime = DateTimeUtils.timestamp();
+        Timestamp cursor = validator.claimedUntil;
         _totalRewards.process(currentTime);
-        SKL rewards = SKL.wrap(_totalRewards.getSum(validator.claimedUntil, currentTime));
+
+        SequenceLibrary.Iterator memory totalNodesHistoryIterator = _totalNodesHistory.getIterator(cursor);
+        SequenceLibrary.Iterator memory nodesHistoryIterator = validator.nodesHistory.getIterator(cursor);
+
+        SKL rewards = SKL.wrap(0);
+        uint256 activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
+        uint256 totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
+        while (cursor < currentTime) {
+
+            Timestamp nextCursor = _getNextCursor(currentTime, totalNodesHistoryIterator, nodesHistoryIterator);
+
+            rewards = rewards + SKL.wrap(
+                _totalRewards.getSum(cursor, nextCursor) * activeNodes / totalNodes
+            );
+
+            cursor = nextCursor;
+            while (totalNodesHistoryIterator.nextTimestamp < cursor) {
+                if (totalNodesHistoryIterator.step()) {
+                    totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
+                }
+            }
+            while (nodesHistoryIterator.nextTimestamp < cursor) {
+                if (nodesHistoryIterator.step()) {
+                    activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
+                }
+            }
+        }
+
         validator.claimedUntil = currentTime;
 
         if (!skaleToken.transfer(to, SKL.unwrap(rewards))) {
@@ -227,18 +265,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function _addValidator(Validator memory validator) private {
-        validators[validator.id] = validator;
-        if (!_validatorIds.add(ValidatorId.unwrap(validator.id))) {
-            revert ValidatorAddingError(validator.id);
-        }
-        if(!_addressToValidatorId.set(validator.validatorAddress, validator.id)) {
-            revert ValidatorAddressAlreadyExists(validator.validatorAddress);
-        }
-    }
-
     function _removeValidator(Validator storage validator) private {
-        delete validators[validator.id];
+        validator.id = ValidatorId.wrap(0);
+        delete validator.nodesAmount;
+        delete validator.activeNodesAmount;
+        validator.claimedUntil = Timestamp.wrap(0);
+        delete validator.validatorAddress;
+        validator.nodesHistory.clear();
+
         if(!_validatorIds.remove(ValidatorId.unwrap(validator.id))) {
             revert ValidatorDeletionError(validator.id);
         }
@@ -257,7 +291,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function _getValidator(ValidatorId id) private view returns (Validator storage validator) {
         if (_validatorIds.contains(ValidatorId.unwrap(id))) {
-            return validators[id];
+            return _validators[id];
         } else {
             revert ValidatorNotFound(id);
         }
@@ -286,5 +320,19 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             revert SchainPriceIsNotSet();
         }
         cost = USD.wrap(Months.unwrap(period) * USD.unwrap(schainPricePerMonth));
+    }
+
+    function _getNextCursor(
+        Timestamp currentTime,
+        SequenceLibrary.Iterator memory totalNodesHistoryIterator,
+        SequenceLibrary.Iterator memory nodesHistoryIterator
+    ) private pure returns (Timestamp nextCursor) {
+        nextCursor = currentTime;
+        if (totalNodesHistoryIterator.hasNext()) {
+            nextCursor = DateTimeUtils.min(nextCursor, totalNodesHistoryIterator.nextTimestamp);
+        }
+        if (nodesHistoryIterator.hasNext()) {
+            nextCursor = DateTimeUtils.min(nextCursor, nodesHistoryIterator.nextTimestamp);
+        }
     }
 }

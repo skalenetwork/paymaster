@@ -21,6 +21,7 @@
 
 pragma solidity ^0.8.18;
 
+import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {DateTime as UntypedDateTime} from "@quant-finance/solidity-datetime/contracts/DateTime.sol";
 
 
@@ -145,5 +146,9 @@ library DateTimeUtils {
 
     function nextMonth(Timestamp timestampValue) internal pure returns (Timestamp newTimestamp) {
         return timestampValue.firstDayOfMonth().add(months(1));
+    }
+
+    function min(Timestamp a, Timestamp b) internal pure returns (Timestamp minimum) {
+        minimum = Timestamp.wrap(Math.min(Timestamp.unwrap(a), Timestamp.unwrap(b)));
     }
 }

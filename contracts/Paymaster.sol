@@ -143,13 +143,18 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function setNodesAmount(ValidatorId id, uint256 amount) external override restricted {
         Validator storage validator = _getValidator(id);
+        uint256 oldActiveNodesAmount = validator.activeNodesAmount;
         validator.nodesAmount = amount;
         validator.activeNodesAmount = amount;
+        _activeNodesAmountChanged(validator, oldActiveNodesAmount, amount);
     }
 
     function setActiveNodes(ValidatorId id, uint256 amount) external override restricted {
         Validator storage validator = _getValidator(id);
-        validator.activeNodesAmount = Math.min(amount, validator.nodesAmount);
+        uint256 oldActiveNodesAmount = validator.activeNodesAmount;
+        uint256 activeNodesAmount = Math.min(amount, validator.nodesAmount);
+        validator.activeNodesAmount = activeNodesAmount;
+        _activeNodesAmountChanged(validator, oldActiveNodesAmount, activeNodesAmount);
     }
 
     function setMaxReplenishmentPeriod(Months months) external override restricted {
@@ -279,6 +284,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         if(!_addressToValidatorId.remove(validator.validatorAddress)) {
             revert ValidatorDeletionError(validator.id);
         }
+    }
+
+    function _activeNodesAmountChanged(Validator storage validator, uint256 oldAmount, uint256 newAmount) private {
+        Timestamp currentTime = DateTimeUtils.timestamp();
+        validator.nodesHistory.add(currentTime, newAmount);
+
+        uint256 totalNodes = _totalNodesHistory.getLastValue();
+        _totalNodesHistory.add(currentTime, totalNodes + newAmount - oldAmount);
     }
 
     function _getSchain(SchainHash hash) private view returns (Schain storage schain) {

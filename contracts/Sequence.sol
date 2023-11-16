@@ -23,15 +23,16 @@ pragma solidity ^0.8.19;
 
 // cspell:words deque structs
 
-import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
-
 import {Timestamp} from "./DateTimeUtils.sol";
+import {TypedDoubleEndedQueue} from "./structs/TypedDoubleEndedQueue.sol";
 
 
 library SequenceLibrary {
     type NodeId is uint256;
 
-    using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
+    using TypedDoubleEndedQueue for TypedDoubleEndedQueue.NodeIdDeque;
+
+    error CannotAddToThePast();
 
     uint256 private constant _EMPTY_ITERATOR_INDEX = type(uint256).max;
 
@@ -42,13 +43,29 @@ library SequenceLibrary {
 
     struct Sequence {
         mapping (NodeId => Node) nodes;
-        DoubleEndedQueue.Bytes32Deque ids;
+        TypedDoubleEndedQueue.NodeIdDeque ids;
+        NodeId freeNodeId;
     }
 
     struct Iterator {
         uint256 idIndex;
         uint256 sequenceSize;
         Timestamp nextTimestamp;
+    }
+
+    function add(Sequence storage sequence, Timestamp timestamp, uint256 value) internal {
+        uint256 length = sequence.ids.length();
+        if (length > 0) {
+            if (timestamp <= _getNodeByIndex(sequence, length - 1).timestamp) {
+                revert CannotAddToThePast();
+            }
+        }
+        NodeId nodeId = _assignId(sequence);
+        sequence.nodes[nodeId] = Node({
+            timestamp: timestamp,
+            value: value
+        });
+        sequence.ids.pushBack(nodeId);
     }
 
     function getIterator(
@@ -108,6 +125,15 @@ library SequenceLibrary {
         return _getNodeByIndex(sequence, iterator.idIndex).value;
     }
 
+    function getLastValue(Sequence storage sequence) internal view returns (uint256 lastValue) {
+        uint256 length = sequence.ids.length();
+        if (length > 0) {
+            return _getNodeByIndex(sequence, length - 1).value;
+        } else {
+            return 0;
+        }
+    }
+
     function step(Iterator memory iterator) internal pure returns (bool success) {
         success = hasNext(iterator);
         iterator.idIndex += 1;
@@ -125,19 +151,37 @@ library SequenceLibrary {
             delete node.value;
         }
         sequence.ids.clear();
+        sequence.freeNodeId = NodeId.wrap(0);
+    }
+
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // SequenceLibrary.NodeId.unwrap(value)
+    // TODO: remove the function after slither fix the issue
+    function unwrapNodeId(NodeId value) internal pure returns (uint256 unwrappedValue) {
+        return NodeId.unwrap(value);
+    }
+
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // SequenceLibrary.NodeId.wrap(value)
+    // TODO: remove the function after slither fix the issue
+    function wrapNodeId(uint256 unwrappedValue) internal pure returns (NodeId wrappedValue) {
+        return NodeId.wrap(unwrappedValue);
     }
 
     // Private
+
+    function _assignId(Sequence storage sequence) private returns (NodeId newNodeId) {
+        newNodeId = sequence.freeNodeId;
+        sequence.freeNodeId = NodeId.wrap(NodeId.unwrap(newNodeId) + 1);
+    }
 
     function _getNode(Sequence storage sequence, NodeId nodeId) private view returns (Node storage node) {
         return sequence.nodes[nodeId];
     }
 
     function _getNodeByIndex(Sequence storage sequence, uint256 index) private view returns (Node storage node) {
-        return _getNode(sequence, _getNodeId(sequence, index));
-    }
-
-    function _getNodeId(Sequence storage sequence, uint256 index) private view returns (NodeId nodeId) {
-        nodeId = NodeId.wrap(uint256(sequence.ids.at(index)));
+        return _getNode(sequence, sequence.ids.at(index));
     }
 }

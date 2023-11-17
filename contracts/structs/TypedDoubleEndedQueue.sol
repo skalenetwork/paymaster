@@ -26,6 +26,7 @@ pragma solidity ^0.8.20;
 import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 
 import {SequenceLibrary} from "../Sequence.sol";
+import {TimelineLibrary} from "../Timeline.sol";
 
 
 library TypedDoubleEndedQueue {
@@ -33,6 +34,12 @@ library TypedDoubleEndedQueue {
     struct NodeIdDeque {
         DoubleEndedQueue.Bytes32Deque inner;
     }
+
+    struct ValueIdDeque {
+        DoubleEndedQueue.Bytes32Deque inner;
+    }
+
+    // NodeIdDeque - internal
 
     /**
      * @dev Inserts an item at the end of the queue.
@@ -44,6 +51,15 @@ library TypedDoubleEndedQueue {
     }
 
     /**
+     * @dev Removes the item at the beginning of the queue and returns it.
+     *
+     * Reverts with `QueueEmpty` if the queue is empty.
+     */
+    function popFront(NodeIdDeque storage deque) internal returns (SequenceLibrary.NodeId value) {
+        return SequenceLibrary.wrapNodeId(uint256(DoubleEndedQueue.popFront(deque.inner)));
+    }
+
+    /**
      * @dev Resets the queue back to being empty.
      *
      * NOTE: The current items are left behind in storage. This does not affect the functioning of the queue, but misses
@@ -52,6 +68,28 @@ library TypedDoubleEndedQueue {
     function clear(NodeIdDeque storage deque) internal {
         DoubleEndedQueue.clear(deque.inner);
     }
+
+    // ValueIdDeque - internal
+
+    /**
+     * @dev Inserts an item at the end of the queue.
+     *
+     * Reverts with {QueueFull} if the queue is full.
+     */
+    function pushBack(ValueIdDeque storage deque, TimelineLibrary.ValueId valueId) internal {
+        DoubleEndedQueue.pushBack(deque.inner, TimelineLibrary.unwrapValueId(valueId));
+    }
+
+    /**
+     * @dev Removes the item at the beginning of the queue and returns it.
+     *
+     * Reverts with `QueueEmpty` if the queue is empty.
+     */
+    function popFront(ValueIdDeque storage deque) internal returns (TimelineLibrary.ValueId valueId) {
+        return TimelineLibrary.wrapValueId(DoubleEndedQueue.popFront(deque.inner));
+    }
+
+    // NodeIdDeque - internal view
 
     /**
      * @dev Return the item at a position in the queue given by `index`, with the first item at 0 and last item at
@@ -79,5 +117,42 @@ library TypedDoubleEndedQueue {
      */
     function empty(NodeIdDeque storage deque) internal view returns (bool isEmpty) {
         return DoubleEndedQueue.empty(deque.inner);
+    }
+
+    // ValueIdDeque - internal view
+
+    /**
+     * @dev Returns true if the queue is empty.
+     */
+    function empty(ValueIdDeque storage deque) internal view returns (bool isEmpty) {
+        return DoubleEndedQueue.empty(deque.inner);
+    }
+
+    /**
+     * @dev Returns the number of items in the queue.
+     */
+    function length(ValueIdDeque storage deque) internal view returns (uint256 lengthValue) {
+        return DoubleEndedQueue.length(deque.inner);
+    }
+
+    /**
+     * @dev Returns the item at the end of the queue.
+     *
+     * Reverts with `QueueEmpty` if the queue is empty.
+     */
+    function back(ValueIdDeque storage deque) internal view returns (TimelineLibrary.ValueId valueId) {
+        return TimelineLibrary.wrapValueId(DoubleEndedQueue.back(deque.inner));
+    }
+
+    /**
+     * @dev Return the item at a position in the queue given by `index`, with the first item at 0 and last item at
+     * `length(deque) - 1`.
+     *
+     * Reverts with `QueueOutOfBounds` if the index is out of bounds.
+     */
+    function at(ValueIdDeque storage deque, uint256 index) internal view returns (TimelineLibrary.ValueId valueId) {
+        return TimelineLibrary.wrapValueId(
+                DoubleEndedQueue.at(deque.inner, index)
+        );
     }
 }

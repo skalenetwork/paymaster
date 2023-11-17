@@ -147,11 +147,21 @@ library SequenceLibrary {
         uint256 length = sequence.ids.length();
         for (uint256 i = 0; i < length; ++i) {
             Node storage node = _getNodeByIndex(sequence, i);
-            node.timestamp = Timestamp.wrap(0); // similar to operator delete
-            delete node.value;
+            _deleteNode(node);
         }
         sequence.ids.clear();
         sequence.freeNodeId = NodeId.wrap(0);
+    }
+
+    function clear(Sequence storage sequence, Timestamp before) internal {
+        // It's important to store the most right value
+        for (uint256 nodesAmount = sequence.ids.length(); nodesAmount > 1; --nodesAmount) {
+            if (before <= _getNodeByIndex(sequence, 0).timestamp) {
+                break;
+            }
+            NodeId nodeId = sequence.ids.popFront();
+            _deleteNode(sequence.nodes[nodeId]);
+        }
     }
 
     // This function is a workaround to allow slither to analyze the code
@@ -175,6 +185,11 @@ library SequenceLibrary {
     function _assignId(Sequence storage sequence) private returns (NodeId newNodeId) {
         newNodeId = sequence.freeNodeId;
         sequence.freeNodeId = NodeId.wrap(NodeId.unwrap(newNodeId) + 1);
+    }
+
+    function _deleteNode(Node storage node) private {
+        node.timestamp = Timestamp.wrap(0); // similar to operator delete
+        delete node.value;
     }
 
     function _getNode(Sequence storage sequence, NodeId nodeId) private view returns (Node storage node) {

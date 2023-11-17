@@ -103,6 +103,8 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     TimelineLibrary.Timeline private _totalRewards;
     SequenceLibrary.Sequence private _totalNodesHistory;
 
+    error ImportantDataRemoving();
+
     constructor(address initialAuthority) initializer {
         __AccessManaged_init(initialAuthority);
     }
@@ -174,6 +176,31 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         skaleToken = token;
     }
 
+    function clearHistory(Timestamp before) external override restricted {
+        uint256 schainsAmount = _schainHashes.length();
+        for (uint256 i = 0; i < schainsAmount; ++i) {
+            SchainHash schainHash = SchainHash.wrap(_schainHashes.at(i));
+            Schain storage schain = _getSchain(schainHash);
+            if (schain.paidUntil < before) {
+                revert ImportantDataRemoving();
+            }
+        }
+
+        uint256 validatorsAmount = _validatorIds.length();
+        for (uint256 i = 0; i < validatorsAmount; ++i) {
+            ValidatorId validatorId = ValidatorId.wrap(_validatorIds.at(i));
+            Validator storage validator = _getValidator(validatorId);
+            if (validator.claimedUntil < before) {
+                revert ImportantDataRemoving();
+            }
+            validator.nodesHistory.clear(before);
+        }
+
+        _totalRewards.process(before);
+        _totalRewards.clear(before);
+        _totalNodesHistory.clear(before);
+    }
+
     function pay(SchainHash schainHash, Months duration) external override {
         if (duration > maxReplenishmentPeriod) {
             revert ReplenishmentPeriodIsTooBig();
@@ -209,7 +236,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function claim(address to) external restricted override {
+    function claim(address to) external override {
         Validator storage validator = _getValidatorByAddress(_msgSender());
         claimFor(validator.id, to);
     }

@@ -23,9 +23,8 @@ pragma solidity ^0.8.19;
 
 // cspell:words deque structs
 
-import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
-
 import {PriorityQueueLibrary} from "./structs/PriorityQueue.sol";
+import {TypedDoubleEndedQueue} from "./structs/TypedDoubleEndedQueue.sol";
 import {DateTimeUtils, Seconds, Timestamp} from "./DateTimeUtils.sol";
 
 
@@ -33,7 +32,7 @@ library TimelineLibrary {
     type ChangeId is uint256;
     type ValueId is bytes32;
 
-    using DoubleEndedQueue for DoubleEndedQueue.Bytes32Deque;
+    using TypedDoubleEndedQueue for TypedDoubleEndedQueue.ValueIdDeque;
     using PriorityQueueLibrary for PriorityQueueLibrary.PriorityQueue;
 
     error CannotSetValueInThePast();
@@ -41,6 +40,7 @@ library TimelineLibrary {
     error TimeIntervalIsAlreadyProcessed();
     error IncorrectTimeInterval();
     error TimestampIsOutOfValues();
+    error ClearUnprocessed();
 
     struct Timeline {
         Timestamp processedUntil;
@@ -51,7 +51,7 @@ library TimelineLibrary {
 
         ValueId valuesEnd;
         mapping (ValueId => Value) values;
-        DoubleEndedQueue.Bytes32Deque valuesQueue;
+        TypedDoubleEndedQueue.ValueIdDeque valuesQueue;
     }
     struct Change {
         Timestamp timestamp;
@@ -128,6 +128,36 @@ library TimelineLibrary {
         _addChange(timeline, to, 0, rate + reminder);
     }
 
+    function clear(Timeline storage timeline, Timestamp before) internal {
+        if (timeline.processedUntil < before) {
+            revert ClearUnprocessed();
+        }
+
+        for (uint256 valuesAmount = timeline.valuesQueue.length(); valuesAmount > 0; --valuesAmount) {
+            if (before <= _getValueByIndex(timeline, 0).timestamp) {
+                break;
+            }
+            ValueId valueId = timeline.valuesQueue.popFront();
+            _deleteValue(timeline.values[valueId]);
+        }
+    }
+
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // TimelineLibrary.ValueId.unwrap(value)
+    // TODO: remove the function after slither fix the issue
+    function unwrapValueId(ValueId value) internal pure returns (bytes32 unwrappedValue) {
+        return ValueId.unwrap(value);
+    }
+
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // TimelineLibrary.ValueId.wrap(value)
+    // TODO: remove the function after slither fix the issue
+    function wrapValueId(bytes32 unwrappedValue) internal pure returns (ValueId wrappedValue) {
+        return ValueId.wrap(unwrappedValue);
+    }
+
     // Private
 
     function _hasFutureChanges(Timeline storage timeline) private view returns (bool hasChanges) {
@@ -174,12 +204,17 @@ library TimelineLibrary {
         delete timeline.futureChanges[changeId];
     }
 
+    function _deleteValue(Value storage value) private {
+        value.timestamp = Timestamp.wrap(0);
+        delete value.value;
+    }
+
     function _getCurrentValue(Timeline storage timeline) private view returns (Value storage value) {
-        return timeline.values[ValueId.wrap(timeline.valuesQueue.back())];
+        return timeline.values[timeline.valuesQueue.back()];
     }
 
     function _getValueByIndex(Timeline storage timeline, uint256 index) private view returns (Value storage value) {
-        return timeline.values[ValueId.wrap(timeline.valuesQueue.at(index))];
+        return timeline.values[timeline.valuesQueue.at(index)];
     }
 
     function _getLowerBoundIndex(Timeline storage timeline, Timestamp timestamp) private view returns (uint256 index) {
@@ -208,7 +243,7 @@ library TimelineLibrary {
         }
         ValueId valuesEnd = timeline.valuesEnd;
         timeline.values[valuesEnd] = value;
-        timeline.valuesQueue.pushBack(ValueId.unwrap(valuesEnd));
+        timeline.valuesQueue.pushBack(valuesEnd);
         timeline.valuesEnd = _getNextValueId(valuesEnd);
     }
 

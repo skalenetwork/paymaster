@@ -4596,9 +4596,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hardhat@npm:^2.19.0":
-  version: 2.19.0
-  resolution: "hardhat@npm:2.19.0"
+"hardhat@npm:^2.19.1":
+  version: 2.19.1
+  resolution: "hardhat@npm:2.19.1"
   dependencies:
     "@ethersproject/abi": ^5.1.2
     "@metamask/eth-sig-util": ^4.0.0
@@ -4658,7 +4658,7 @@ __metadata:
       optional: true
   bin:
     hardhat: internal/cli/bootstrap.js
-  checksum: 99b7ee89c5898aa410298f48269360e414c5471c2cab56d382a08fd9d639db540c5d242ab9b1189bcffb4ac7847fbfc5b30c047cbc91fb802f2806e8e8c19e8f
+  checksum: 0c12069e8eae47419d595e38d22716049136cf74390f9e89121ae73fdc716ffcb6cd3283e3ca8676ce00e3ff90804dfa95473830d96340ec01860dfa6237d8d3
   languageName: node
   linkType: hard
 
@@ -6217,7 +6217,7 @@ __metadata:
     dotenv: ^16.3.1
     eslint: ^8.53.0
     ethers: ^6.4.0
-    hardhat: ^2.19.0
+    hardhat: ^2.19.1
     hardhat-gas-reporter: ^1.0.8
     solhint: ^3.6.2
     solidity-coverage: ^0.8.0

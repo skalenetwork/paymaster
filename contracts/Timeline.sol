@@ -63,7 +63,7 @@ library TimelineLibrary {
         uint256 value;
     }
 
-    function process(Timeline storage timeline, Timestamp until) internal {
+    function process(Timeline storage timeline, Timestamp until) public {
         if (until <= timeline.processedUntil) {
             return;
         }
@@ -89,7 +89,7 @@ library TimelineLibrary {
         timeline.processedUntil = until;
     }
 
-    function getSum(Timeline storage timeline, Timestamp from, Timestamp to) internal view returns (uint256 sum) {
+    function getSum(Timeline storage timeline, Timestamp from, Timestamp to) public view returns (uint256 sum) {
         _validateTimeInterval(timeline, from , to, true);
         if (timeline.valuesQueue.empty()) {
             return 0;
@@ -116,7 +116,7 @@ library TimelineLibrary {
         }
     }
 
-    function add(Timeline storage timeline, Timestamp from, Timestamp to, uint256 value) internal {
+    function add(Timeline storage timeline, Timestamp from, Timestamp to, uint256 value) public {
         _validateTimeInterval(timeline, from , to, false);
         Seconds duration = DateTimeUtils.duration(from, to);
         uint256 rate = value / Seconds.unwrap(duration);
@@ -128,7 +128,7 @@ library TimelineLibrary {
         _addChange(timeline, to, 0, rate + reminder);
     }
 
-    function clear(Timeline storage timeline, Timestamp before) internal {
+    function clear(Timeline storage timeline, Timestamp before) public {
         if (timeline.processedUntil < before) {
             revert ClearUnprocessed();
         }
@@ -146,7 +146,7 @@ library TimelineLibrary {
     // because current version fails on
     // TimelineLibrary.ValueId.unwrap(value)
     // TODO: remove the function after slither fix the issue
-    function unwrapValueId(ValueId value) internal pure returns (bytes32 unwrappedValue) {
+    function unwrapValueId(ValueId value) public pure returns (bytes32 unwrappedValue) {
         return ValueId.unwrap(value);
     }
 
@@ -154,7 +154,7 @@ library TimelineLibrary {
     // because current version fails on
     // TimelineLibrary.ValueId.wrap(value)
     // TODO: remove the function after slither fix the issue
-    function wrapValueId(bytes32 unwrappedValue) internal pure returns (ValueId wrappedValue) {
+    function wrapValueId(bytes32 unwrappedValue) public pure returns (ValueId wrappedValue) {
         return ValueId.wrap(unwrappedValue);
     }
 

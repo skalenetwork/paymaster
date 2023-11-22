@@ -53,7 +53,7 @@ library SequenceLibrary {
         Timestamp nextTimestamp;
     }
 
-    function add(Sequence storage sequence, Timestamp timestamp, uint256 value) internal {
+    function add(Sequence storage sequence, Timestamp timestamp, uint256 value) public {
         uint256 length = sequence.ids.length();
         if (length > 0) {
             if (timestamp <= _getNodeByIndex(sequence, length - 1).timestamp) {
@@ -72,7 +72,7 @@ library SequenceLibrary {
         Sequence storage sequence,
         Timestamp timestamp
     )
-        internal
+        public
         view
         returns (Iterator memory iterator)
     {
@@ -115,7 +115,7 @@ library SequenceLibrary {
         });
     }
 
-    function getValue(Sequence storage sequence, Iterator memory iterator) internal view returns (uint256 value) {
+    function getValue(Sequence storage sequence, Iterator memory iterator) public view returns (uint256 value) {
         if(iterator.idIndex == _EMPTY_ITERATOR_INDEX) {
             return 0;
         }
@@ -125,7 +125,7 @@ library SequenceLibrary {
         return _getNodeByIndex(sequence, iterator.idIndex).value;
     }
 
-    function getLastValue(Sequence storage sequence) internal view returns (uint256 lastValue) {
+    function getLastValue(Sequence storage sequence) public view returns (uint256 lastValue) {
         uint256 length = sequence.ids.length();
         if (length > 0) {
             return _getNodeByIndex(sequence, length - 1).value;
@@ -134,16 +134,16 @@ library SequenceLibrary {
         }
     }
 
-    function step(Iterator memory iterator) internal pure returns (bool success) {
+    function step(Iterator memory iterator) public pure returns (bool success) {
         success = hasNext(iterator);
         iterator.idIndex += 1;
     }
 
-    function hasNext(Iterator memory iterator) internal pure returns (bool exist) {
+    function hasNext(Iterator memory iterator) public pure returns (bool exist) {
         return iterator.idIndex + 1 < iterator.sequenceSize;
     }
 
-    function clear(Sequence storage sequence) internal {
+    function clear(Sequence storage sequence) public {
         uint256 length = sequence.ids.length();
         for (uint256 i = 0; i < length; ++i) {
             Node storage node = _getNodeByIndex(sequence, i);
@@ -153,7 +153,7 @@ library SequenceLibrary {
         sequence.freeNodeId = NodeId.wrap(0);
     }
 
-    function clear(Sequence storage sequence, Timestamp before) internal {
+    function clear(Sequence storage sequence, Timestamp before) public {
         // It's important to store the most right value
         for (uint256 nodesAmount = sequence.ids.length(); nodesAmount > 1; --nodesAmount) {
             if (before <= _getNodeByIndex(sequence, 0).timestamp) {
@@ -168,7 +168,7 @@ library SequenceLibrary {
     // because current version fails on
     // SequenceLibrary.NodeId.unwrap(value)
     // TODO: remove the function after slither fix the issue
-    function unwrapNodeId(NodeId value) internal pure returns (uint256 unwrappedValue) {
+    function unwrapNodeId(NodeId value) public pure returns (uint256 unwrappedValue) {
         return NodeId.unwrap(value);
     }
 
@@ -176,7 +176,7 @@ library SequenceLibrary {
     // because current version fails on
     // SequenceLibrary.NodeId.wrap(value)
     // TODO: remove the function after slither fix the issue
-    function wrapNodeId(uint256 unwrappedValue) internal pure returns (NodeId wrappedValue) {
+    function wrapNodeId(uint256 unwrappedValue) public pure returns (NodeId wrappedValue) {
         return NodeId.wrap(unwrappedValue);
     }
 

@@ -25,14 +25,14 @@ pragma solidity ^0.8.18;
 type SKL is uint256;
 
 using {
-    sklLess as <,
-    sklAdd as +
+    _sklLess as <,
+    _sklAdd as +
 } for SKL global;
 
-function sklLess(SKL left, SKL right) pure returns (bool result) {
+function _sklLess(SKL left, SKL right) pure returns (bool result) {
     return SKL.unwrap(left) < SKL.unwrap(right);
 }
 
-function sklAdd(SKL a, SKL b) pure returns (SKL sum) {
+function _sklAdd(SKL a, SKL b) pure returns (SKL sum) {
     sum = SKL.wrap(SKL.unwrap(a) + SKL.unwrap(b));
 }

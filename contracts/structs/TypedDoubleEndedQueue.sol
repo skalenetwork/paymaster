@@ -39,14 +39,14 @@ library TypedDoubleEndedQueue {
         DoubleEndedQueue.Bytes32Deque inner;
     }
 
-    // NodeIdDeque - internal
+    // NodeIdDeque - public
 
     /**
      * @dev Inserts an item at the end of the queue.
      *
      * Reverts with {QueueFull} if the queue is full.
      */
-    function pushBack(NodeIdDeque storage deque, SequenceLibrary.NodeId value) internal {
+    function pushBack(NodeIdDeque storage deque, SequenceLibrary.NodeId value) public {
         DoubleEndedQueue.pushBack(deque.inner, bytes32(SequenceLibrary.unwrapNodeId(value)));
     }
 
@@ -55,7 +55,7 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueEmpty` if the queue is empty.
      */
-    function popFront(NodeIdDeque storage deque) internal returns (SequenceLibrary.NodeId value) {
+    function popFront(NodeIdDeque storage deque) public returns (SequenceLibrary.NodeId value) {
         return SequenceLibrary.wrapNodeId(uint256(DoubleEndedQueue.popFront(deque.inner)));
     }
 
@@ -65,18 +65,18 @@ library TypedDoubleEndedQueue {
      * NOTE: The current items are left behind in storage. This does not affect the functioning of the queue, but misses
      * out on potential gas refunds.
      */
-    function clear(NodeIdDeque storage deque) internal {
+    function clear(NodeIdDeque storage deque) public {
         DoubleEndedQueue.clear(deque.inner);
     }
 
-    // ValueIdDeque - internal
+    // ValueIdDeque - public
 
     /**
      * @dev Inserts an item at the end of the queue.
      *
      * Reverts with {QueueFull} if the queue is full.
      */
-    function pushBack(ValueIdDeque storage deque, TimelineLibrary.ValueId valueId) internal {
+    function pushBack(ValueIdDeque storage deque, TimelineLibrary.ValueId valueId) public {
         DoubleEndedQueue.pushBack(deque.inner, TimelineLibrary.unwrapValueId(valueId));
     }
 
@@ -85,11 +85,11 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueEmpty` if the queue is empty.
      */
-    function popFront(ValueIdDeque storage deque) internal returns (TimelineLibrary.ValueId valueId) {
+    function popFront(ValueIdDeque storage deque) public returns (TimelineLibrary.ValueId valueId) {
         return TimelineLibrary.wrapValueId(DoubleEndedQueue.popFront(deque.inner));
     }
 
-    // NodeIdDeque - internal view
+    // NodeIdDeque - public view
 
     /**
      * @dev Return the item at a position in the queue given by `index`, with the first item at 0 and last item at
@@ -97,7 +97,7 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueOutOfBounds` if the index is out of bounds.
      */
-    function at(NodeIdDeque storage deque, uint256 index) internal view returns (SequenceLibrary.NodeId value) {
+    function at(NodeIdDeque storage deque, uint256 index) public view returns (SequenceLibrary.NodeId value) {
         return SequenceLibrary.wrapNodeId(
             uint256(
                 DoubleEndedQueue.at(deque.inner, index)
@@ -108,30 +108,30 @@ library TypedDoubleEndedQueue {
     /**
      * @dev Returns the number of items in the queue.
      */
-    function length(NodeIdDeque storage deque) internal view returns (uint256 lengthValue) {
+    function length(NodeIdDeque storage deque) public view returns (uint256 lengthValue) {
         return DoubleEndedQueue.length(deque.inner);
     }
 
     /**
      * @dev Returns true if the queue is empty.
      */
-    function empty(NodeIdDeque storage deque) internal view returns (bool isEmpty) {
+    function empty(NodeIdDeque storage deque) public view returns (bool isEmpty) {
         return DoubleEndedQueue.empty(deque.inner);
     }
 
-    // ValueIdDeque - internal view
+    // ValueIdDeque - public view
 
     /**
      * @dev Returns true if the queue is empty.
      */
-    function empty(ValueIdDeque storage deque) internal view returns (bool isEmpty) {
+    function empty(ValueIdDeque storage deque) public view returns (bool isEmpty) {
         return DoubleEndedQueue.empty(deque.inner);
     }
 
     /**
      * @dev Returns the number of items in the queue.
      */
-    function length(ValueIdDeque storage deque) internal view returns (uint256 lengthValue) {
+    function length(ValueIdDeque storage deque) public view returns (uint256 lengthValue) {
         return DoubleEndedQueue.length(deque.inner);
     }
 
@@ -140,7 +140,7 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueEmpty` if the queue is empty.
      */
-    function back(ValueIdDeque storage deque) internal view returns (TimelineLibrary.ValueId valueId) {
+    function back(ValueIdDeque storage deque) public view returns (TimelineLibrary.ValueId valueId) {
         return TimelineLibrary.wrapValueId(DoubleEndedQueue.back(deque.inner));
     }
 
@@ -150,7 +150,7 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueOutOfBounds` if the index is out of bounds.
      */
-    function at(ValueIdDeque storage deque, uint256 index) internal view returns (TimelineLibrary.ValueId valueId) {
+    function at(ValueIdDeque storage deque, uint256 index) public view returns (TimelineLibrary.ValueId valueId) {
         return TimelineLibrary.wrapValueId(
                 DoubleEndedQueue.at(deque.inner, index)
         );

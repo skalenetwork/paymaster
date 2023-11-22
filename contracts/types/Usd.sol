@@ -24,10 +24,10 @@ pragma solidity ^0.8.18;
 
 type USD is uint256;
 
-function usdEquals(USD a, USD b) pure returns (bool result) {
+function _usdEquals(USD a, USD b) pure returns (bool result) {
     return USD.unwrap(a) == USD.unwrap(b);
 }
 
 using {
-    usdEquals as ==
+    _usdEquals as ==
 } for USD global;

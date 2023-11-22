@@ -40,7 +40,7 @@ library TypedMap {
      * Returns true if the key was added to the map, that is if it was not
      * already present.
      */
-    function set(AddressToValidatorIdMap storage map, address key, ValidatorId value) internal returns (bool added) {
+    function set(AddressToValidatorIdMap storage map, address key, ValidatorId value) public returns (bool added) {
         return EnumerableMap.set(map.inner, key, ValidatorId.unwrap(value));
     }
 
@@ -49,7 +49,7 @@ library TypedMap {
      *
      * Returns true if the key was removed from the map, that is if it was present.
      */
-    function remove(AddressToValidatorIdMap storage map, address key) internal returns (bool removed) {
+    function remove(AddressToValidatorIdMap storage map, address key) public returns (bool removed) {
         return EnumerableMap.remove(map.inner, key);
     }
 
@@ -61,7 +61,7 @@ library TypedMap {
         AddressToValidatorIdMap storage map,
         address key
     )
-        internal
+        public
         view
         returns (bool exist, ValidatorId validatorId)
     {

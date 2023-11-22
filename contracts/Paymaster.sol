@@ -57,27 +57,13 @@ import {TypedMap} from "./structs/TypedMap.sol";
 import {SKL} from "./types/Skl.sol";
 import {
     DateTimeUtils,
+    Seconds,
     Timestamp,
     Months
 } from "./DateTimeUtils.sol";
 import {SequenceLibrary} from "./Sequence.sol";
 import {TimelineLibrary} from "./Timeline.sol";
 
-
-struct Schain {
-    SchainHash hash;
-    string name;
-    Timestamp paidUntil;
-}
-
-struct Validator {
-    ValidatorId id;
-    uint256 nodesAmount;
-    uint256 activeNodesAmount;
-    Timestamp claimedUntil;
-    address validatorAddress;
-    SequenceLibrary.Sequence nodesHistory;
-}
 
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -86,6 +72,30 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     using SequenceLibrary for SequenceLibrary.Sequence;
     using TimelineLibrary for TimelineLibrary.Timeline;
     using TypedMap for TypedMap.AddressToValidatorIdMap;
+
+    type DebtId is uint256;
+
+    struct Payment {
+        Timestamp from;
+        Timestamp to;
+        SKL amount;
+    }
+
+    struct Schain {
+        SchainHash hash;
+        string name;
+        Timestamp paidUntil;
+    }
+
+    struct Validator {
+        ValidatorId id;
+        uint256 nodesAmount;
+        uint256 activeNodesAmount;
+        Timestamp claimedUntil;
+        address validatorAddress;
+        SequenceLibrary.Sequence nodesHistory;
+        DebtId firstUnpaidDebt;
+    }
 
     mapping(SchainHash => Schain) public schains;
     EnumerableSet.Bytes32Set private _schainHashes;
@@ -102,6 +112,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     TimelineLibrary.Timeline private _totalRewards;
     SequenceLibrary.Sequence private _totalNodesHistory;
+
+    mapping (DebtId => Payment) public debts;
+    DebtId public debtsBegin;
+    DebtId public debtsEnd;
 
     error ImportantDataRemoving();
 
@@ -209,31 +223,32 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         Schain storage schain = _getSchain(schainHash);
         SKL cost = _toSKL(_getCost(duration));
 
-        if (address(skaleToken) == address(0)) {
-            revert SkaleTokenIsNotSet();
-        }
-        SKL allowance = SKL.wrap(
-            skaleToken.allowance(_msgSender(), address(this))
-        );
-        if (allowance < cost) {
-            revert TooSmallAllowance({
-                spender: address(this),
-                required: SKL.unwrap(cost),
-                allowed: SKL.unwrap(allowance)
-            });
-        }
-
         SKL costPerMonth = SKL.wrap(SKL.unwrap(cost) / Months.unwrap(duration));
         Timestamp start = schain.paidUntil;
         Months oneMonth = Months.wrap(1);
+        Timestamp current = DateTimeUtils.timestamp();
+        DebtId end = debtsEnd;
         for (Months i = Months.wrap(0); i < duration; i = i + oneMonth) {
-            _totalRewards.add(start.add(i), start.add(i + oneMonth), SKL.unwrap(costPerMonth));
+            Timestamp from = start.add(i);
+            Timestamp to = start.add(i + oneMonth);
+            if(_addPayment(
+                Payment({
+                    from: from,
+                    to: to,
+                    amount: costPerMonth
+                }),
+                current,
+                end
+            )) {
+                end = _next(end);
+            }
+        }
+        if (!_equal(debtsEnd, end)) {
+            debtsEnd = end;
         }
         schain.paidUntil = start.add(duration);
 
-        if (!skaleToken.transferFrom(_msgSender(), address(this), SKL.unwrap(cost))) {
-            revert TransferFailure();
-        }
+        _pullTokens(_msgSender(), cost);
     }
 
     function claim(address to) external override {
@@ -244,37 +259,28 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function claimFor(ValidatorId validatorId, address to) public restricted override {
         Validator storage validator = _getValidator(validatorId);
         Timestamp currentTime = DateTimeUtils.timestamp();
-        Timestamp cursor = validator.claimedUntil;
         _totalRewards.process(currentTime);
 
-        SequenceLibrary.Iterator memory totalNodesHistoryIterator = _totalNodesHistory.getIterator(cursor);
-        SequenceLibrary.Iterator memory nodesHistoryIterator = validator.nodesHistory.getIterator(cursor);
-
-        SKL rewards = SKL.wrap(0);
-        uint256 activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
-        uint256 totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
-        while (cursor < currentTime) {
-
-            Timestamp nextCursor = _getNextCursor(currentTime, totalNodesHistoryIterator, nodesHistoryIterator);
-
-            rewards = rewards + SKL.wrap(
-                _totalRewards.getSum(cursor, nextCursor) * activeNodes / totalNodes
-            );
-
-            cursor = nextCursor;
-            while (totalNodesHistoryIterator.nextTimestamp < cursor) {
-                if (totalNodesHistoryIterator.step()) {
-                    totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
-                }
-            }
-            while (nodesHistoryIterator.nextTimestamp < cursor) {
-                if (nodesHistoryIterator.step()) {
-                    activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
-                }
-            }
-        }
-
+        SKL rewards = _calculateRewards(
+            validator,
+            Payment({
+                from: validator.claimedUntil,
+                to: currentTime,
+                amount: SKL.wrap(0) // ignored by _loadFromTimeline
+            }),
+            _loadFromTimeline
+        );
         validator.claimedUntil = currentTime;
+
+        DebtId end = debtsEnd;
+        for (DebtId debtId = validator.firstUnpaidDebt; _before(debtId, end); debtId = _next(debtId)) {
+            rewards = rewards + _calculateRewards(
+                validator,
+                debts[debtId],
+                _proportionalRewardGetter
+            );
+        }
+        validator.firstUnpaidDebt = end;
 
         if (!skaleToken.transfer(to, SKL.unwrap(rewards))) {
             revert TransferFailure();
@@ -321,6 +327,94 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         _totalNodesHistory.add(currentTime, totalNodes + newAmount - oldAmount);
     }
 
+    function _addDebt(Payment memory debt, DebtId id) private {
+        debts[id] = debt;
+    }
+
+    function _addPayment(Payment memory payment, Timestamp current, DebtId end) private returns (bool debtWasCreated) {
+        debtWasCreated = false;
+        if (current <= payment.from) {
+            // payment for the future
+            _totalRewards.add(payment.from, payment.to, SKL.unwrap(payment.amount));
+        } else {
+            debtWasCreated = true;
+            if (payment.to <= current) {
+                // payment for the past
+                _addDebt(
+                    payment,
+                    end
+                );
+            } else {
+                // payment is partially for the future
+                // and partially for the past
+                _addDebt(
+                    Payment({
+                        from: payment.from,
+                        to: current,
+                        amount: SKL.wrap(
+                            SKL.unwrap(payment.amount)
+                                * Seconds.unwrap(DateTimeUtils.duration(payment.from, current))
+                                / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to))
+                        )
+                    }),
+                    end
+                );
+
+                _totalRewards.add(
+                    current,
+                    payment.to,
+                    SKL.unwrap(payment.amount)
+                        * Seconds.unwrap(DateTimeUtils.duration(current, payment.to))
+                        / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to))
+                );
+            }
+        }
+    }
+
+    function _pullTokens(address from, SKL amount) private {
+        if (address(skaleToken) == address(0)) {
+            revert SkaleTokenIsNotSet();
+        }
+        SKL allowance = SKL.wrap(
+            skaleToken.allowance(from, address(this))
+        );
+        if (allowance < amount) {
+            revert TooSmallAllowance({
+                spender: address(this),
+                required: SKL.unwrap(amount),
+                allowed: SKL.unwrap(allowance)
+            });
+        }
+
+        if (!skaleToken.transferFrom(from, address(this), SKL.unwrap(amount))) {
+            revert TransferFailure();
+        }
+    }
+
+    // False positive detection of the dead code. The function is used in `claim` function
+    //slither-disable-next-line dead-code
+    function _loadFromTimeline(Timestamp from, Timestamp to, Payment memory) private view returns (SKL reward) {
+        return SKL.wrap(_totalRewards.getSum(from, to));
+    }
+
+    // False positive detection of the dead code. The function is used in `claim` function
+    //slither-disable-next-line dead-code
+    function _proportionalRewardGetter(
+        Timestamp from,
+        Timestamp to,
+        Payment memory debt
+    )
+        private
+        pure
+        returns (SKL reward)
+    {
+        return SKL.wrap(
+            SKL.unwrap(debt.amount)
+                * Seconds.unwrap(DateTimeUtils.duration(from, to))
+                / Seconds.unwrap(DateTimeUtils.duration(debt.from, debt.to))
+        );
+    }
+
     function _getSchain(SchainHash hash) private view returns (Schain storage schain) {
         if (_schainHashes.contains(SchainHash.unwrap(hash))) {
             return schains[hash];
@@ -362,6 +456,45 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         cost = USD.wrap(Months.unwrap(period) * USD.unwrap(schainPricePerMonth));
     }
 
+    function _calculateRewards(
+        Validator storage validator,
+        Payment memory debt,
+        function (Timestamp, Timestamp, Payment memory) internal view returns (SKL) getTotalReward
+    )
+        private
+        view
+        returns (SKL rewards)
+    {
+        Timestamp cursor = debt.from;
+
+        SequenceLibrary.Iterator memory totalNodesHistoryIterator = _totalNodesHistory.getIterator(cursor);
+        SequenceLibrary.Iterator memory nodesHistoryIterator = validator.nodesHistory.getIterator(cursor);
+
+        rewards = SKL.wrap(0);
+        uint256 activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
+        uint256 totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
+        while (cursor < debt.to) {
+
+            Timestamp nextCursor = _getNextCursor(debt.to, totalNodesHistoryIterator, nodesHistoryIterator);
+
+            rewards = rewards + SKL.wrap(
+                SKL.unwrap(getTotalReward(cursor, nextCursor, debt)) * activeNodes / totalNodes
+            );
+
+            cursor = nextCursor;
+            while (totalNodesHistoryIterator.nextTimestamp < cursor) {
+                if (totalNodesHistoryIterator.step()) {
+                    totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
+                }
+            }
+            while (nodesHistoryIterator.nextTimestamp < cursor) {
+                if (nodesHistoryIterator.step()) {
+                    activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
+                }
+            }
+        }
+    }
+
     function _getNextCursor(
         Timestamp currentTime,
         SequenceLibrary.Iterator memory totalNodesHistoryIterator,
@@ -374,5 +507,17 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         if (nodesHistoryIterator.hasNext()) {
             nextCursor = DateTimeUtils.min(nextCursor, nodesHistoryIterator.nextTimestamp);
         }
+    }
+
+    function _next(DebtId id) private pure returns (DebtId nextId) {
+        return DebtId.wrap(DebtId.unwrap(id) + 1);
+    }
+
+    function _equal(DebtId a, DebtId b) private pure returns (bool result) {
+        return DebtId.unwrap(a) == DebtId.unwrap(b);
+    }
+
+    function _before(DebtId left, DebtId right) private pure returns (bool result) {
+        return DebtId.unwrap(left) < DebtId.unwrap(right);
     }
 }

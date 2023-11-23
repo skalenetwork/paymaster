@@ -200,6 +200,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             }
         }
 
+        DebtId firstUnpaidDebt = debtsEnd;
         uint256 validatorsAmount = _validatorIds.length();
         for (uint256 i = 0; i < validatorsAmount; ++i) {
             ValidatorId validatorId = ValidatorId.wrap(_validatorIds.at(i));
@@ -207,8 +208,16 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             if (validator.claimedUntil < before) {
                 revert ImportantDataRemoving();
             }
+            if (_before(validator.firstUnpaidDebt, firstUnpaidDebt)) {
+                firstUnpaidDebt = validator.firstUnpaidDebt;
+            }
             validator.nodesHistory.clear(before);
         }
+
+        for (DebtId id = debtsBegin; !_equal(id, firstUnpaidDebt); id = _next(id)) {
+            _clearDebt(id);
+        }
+        debtsBegin = firstUnpaidDebt;
 
         _totalRewards.process(before);
         _totalRewards.clear(before);
@@ -389,6 +398,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         if (!skaleToken.transferFrom(from, address(this), SKL.unwrap(amount))) {
             revert TransferFailure();
         }
+    }
+
+    function _clearDebt(DebtId id) private {
+        debts[id].from = Timestamp.wrap(0);
+        debts[id].to = Timestamp.wrap(0);
+        debts[id].amount = SKL.wrap(0);
     }
 
     // False positive detection of the dead code. The function is used in `claim` function

@@ -40,7 +40,9 @@ library TypedMap {
      * Returns true if the key was added to the map, that is if it was not
      * already present.
      */
-    function set(AddressToValidatorIdMap storage map, address key, ValidatorId value) public returns (bool added) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function set(AddressToValidatorIdMap storage map, address key, ValidatorId value) internal returns (bool added) {
         return EnumerableMap.set(map.inner, key, ValidatorId.unwrap(value));
     }
 
@@ -49,7 +51,9 @@ library TypedMap {
      *
      * Returns true if the key was removed from the map, that is if it was present.
      */
-    function remove(AddressToValidatorIdMap storage map, address key) public returns (bool removed) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function remove(AddressToValidatorIdMap storage map, address key) internal returns (bool removed) {
         return EnumerableMap.remove(map.inner, key);
     }
 
@@ -57,11 +61,13 @@ library TypedMap {
      * @dev Tries to returns the value associated with `key`. O(1).
      * Does not revert if `key` is not in the map.
      */
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
     function tryGet(
         AddressToValidatorIdMap storage map,
         address key
     )
-        public
+        internal
         view
         returns (bool exist, ValidatorId validatorId)
     {

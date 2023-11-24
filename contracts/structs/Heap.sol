@@ -35,7 +35,9 @@ library HeapLibrary {
         uint256[] values;
     }
 
-    function add(Heap storage heap, uint256 value) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function add(Heap storage heap, uint256 value) internal {
         if(heap.values.length == 0) {
             heap.values.push(0);
         }
@@ -44,7 +46,9 @@ library HeapLibrary {
         _fixUp(heap, NodeId.wrap(heap.values.length - 1), value);
     }
 
-    function get(Heap storage heap) public view returns (uint256 minimum) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function get(Heap storage heap) internal view returns (uint256 minimum) {
         if (heap.size > 0) {
             return _getValue(heap, _ROOT);
         } else {
@@ -52,7 +56,9 @@ library HeapLibrary {
         }
     }
 
-    function pop(Heap storage heap) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function pop(Heap storage heap) internal {
         if (heap.size > 0) {
             uint256 lastValue = _getValue(heap, _getLastNode(heap));
             --heap.size;

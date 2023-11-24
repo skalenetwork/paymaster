@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /*
-    PaymasterAccessManager.sol - Paymaster
+    IPaymasterAccessManager.sol - Paymaster
     Copyright (C) 2023-Present SKALE Labs
     @author Dmytro Stebaiev
 
@@ -21,20 +21,9 @@
 
 pragma solidity ^0.8.20;
 
-import {AccessManagerUpgradeable}
-from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagerUpgradeable.sol";
-
-import {IPaymasterAccessManager} from "./interfaces/IPaymasterAccessManager.sol";
+import {IAccessManager} from "@openzeppelin/contracts/access/manager/IAccessManager.sol";
 
 
-contract PaymasterAccessManager is IPaymasterAccessManager, AccessManagerUpgradeable {
-    uint64 public constant PRICE_SETTER_ROLE = 1;
-
-    constructor(address initialAdmin) initializer {
-        initialize(initialAdmin);
-    }
-
-    function initialize(address initialAdmin) public initializer override {
-        __AccessManager_init(initialAdmin);
-    }
+interface IPaymasterAccessManager is IAccessManager {
+    function initialize(address initialAdmin) external;
 }

@@ -39,14 +39,16 @@ library TypedDoubleEndedQueue {
         DoubleEndedQueue.Bytes32Deque inner;
     }
 
-    // NodeIdDeque - public
+    // NodeIdDeque - internal
 
     /**
      * @dev Inserts an item at the end of the queue.
      *
      * Reverts with {QueueFull} if the queue is full.
      */
-    function pushBack(NodeIdDeque storage deque, SequenceLibrary.NodeId value) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function pushBack(NodeIdDeque storage deque, SequenceLibrary.NodeId value) internal {
         DoubleEndedQueue.pushBack(deque.inner, bytes32(SequenceLibrary.unwrapNodeId(value)));
     }
 
@@ -55,7 +57,9 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueEmpty` if the queue is empty.
      */
-    function popFront(NodeIdDeque storage deque) public returns (SequenceLibrary.NodeId value) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function popFront(NodeIdDeque storage deque) internal returns (SequenceLibrary.NodeId value) {
         return SequenceLibrary.wrapNodeId(uint256(DoubleEndedQueue.popFront(deque.inner)));
     }
 
@@ -65,18 +69,22 @@ library TypedDoubleEndedQueue {
      * NOTE: The current items are left behind in storage. This does not affect the functioning of the queue, but misses
      * out on potential gas refunds.
      */
-    function clear(NodeIdDeque storage deque) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function clear(NodeIdDeque storage deque) internal {
         DoubleEndedQueue.clear(deque.inner);
     }
 
-    // ValueIdDeque - public
+    // ValueIdDeque - internal
 
     /**
      * @dev Inserts an item at the end of the queue.
      *
      * Reverts with {QueueFull} if the queue is full.
      */
-    function pushBack(ValueIdDeque storage deque, TimelineLibrary.ValueId valueId) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function pushBack(ValueIdDeque storage deque, TimelineLibrary.ValueId valueId) internal {
         DoubleEndedQueue.pushBack(deque.inner, TimelineLibrary.unwrapValueId(valueId));
     }
 
@@ -85,11 +93,13 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueEmpty` if the queue is empty.
      */
-    function popFront(ValueIdDeque storage deque) public returns (TimelineLibrary.ValueId valueId) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function popFront(ValueIdDeque storage deque) internal returns (TimelineLibrary.ValueId valueId) {
         return TimelineLibrary.wrapValueId(DoubleEndedQueue.popFront(deque.inner));
     }
 
-    // NodeIdDeque - public view
+    // NodeIdDeque - internal view
 
     /**
      * @dev Return the item at a position in the queue given by `index`, with the first item at 0 and last item at
@@ -97,7 +107,9 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueOutOfBounds` if the index is out of bounds.
      */
-    function at(NodeIdDeque storage deque, uint256 index) public view returns (SequenceLibrary.NodeId value) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function at(NodeIdDeque storage deque, uint256 index) internal view returns (SequenceLibrary.NodeId value) {
         return SequenceLibrary.wrapNodeId(
             uint256(
                 DoubleEndedQueue.at(deque.inner, index)
@@ -108,30 +120,38 @@ library TypedDoubleEndedQueue {
     /**
      * @dev Returns the number of items in the queue.
      */
-    function length(NodeIdDeque storage deque) public view returns (uint256 lengthValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function length(NodeIdDeque storage deque) internal view returns (uint256 lengthValue) {
         return DoubleEndedQueue.length(deque.inner);
     }
 
     /**
      * @dev Returns true if the queue is empty.
      */
-    function empty(NodeIdDeque storage deque) public view returns (bool isEmpty) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function empty(NodeIdDeque storage deque) internal view returns (bool isEmpty) {
         return DoubleEndedQueue.empty(deque.inner);
     }
 
-    // ValueIdDeque - public view
+    // ValueIdDeque - internal view
 
     /**
      * @dev Returns true if the queue is empty.
      */
-    function empty(ValueIdDeque storage deque) public view returns (bool isEmpty) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function empty(ValueIdDeque storage deque) internal view returns (bool isEmpty) {
         return DoubleEndedQueue.empty(deque.inner);
     }
 
     /**
      * @dev Returns the number of items in the queue.
      */
-    function length(ValueIdDeque storage deque) public view returns (uint256 lengthValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function length(ValueIdDeque storage deque) internal view returns (uint256 lengthValue) {
         return DoubleEndedQueue.length(deque.inner);
     }
 
@@ -140,7 +160,9 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueEmpty` if the queue is empty.
      */
-    function back(ValueIdDeque storage deque) public view returns (TimelineLibrary.ValueId valueId) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function back(ValueIdDeque storage deque) internal view returns (TimelineLibrary.ValueId valueId) {
         return TimelineLibrary.wrapValueId(DoubleEndedQueue.back(deque.inner));
     }
 
@@ -150,7 +172,9 @@ library TypedDoubleEndedQueue {
      *
      * Reverts with `QueueOutOfBounds` if the index is out of bounds.
      */
-    function at(ValueIdDeque storage deque, uint256 index) public view returns (TimelineLibrary.ValueId valueId) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function at(ValueIdDeque storage deque, uint256 index) internal view returns (TimelineLibrary.ValueId valueId) {
         return TimelineLibrary.wrapValueId(
                 DoubleEndedQueue.at(deque.inner, index)
         );

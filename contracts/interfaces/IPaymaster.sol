@@ -33,6 +33,7 @@ type SchainHash is bytes32;
 type ValidatorId is uint256;
 
 interface IPaymaster {
+    function initialize(address initialAuthority) external;
     function addSchain(string calldata name) external;
     function removeSchain(SchainHash schainHash) external;
     function addValidator(ValidatorId id, address validatorAddress) external;

@@ -63,7 +63,9 @@ library TimelineLibrary {
         uint256 value;
     }
 
-    function process(Timeline storage timeline, Timestamp until) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function process(Timeline storage timeline, Timestamp until) internal {
         if (until <= timeline.processedUntil) {
             return;
         }
@@ -89,7 +91,13 @@ library TimelineLibrary {
         timeline.processedUntil = until;
     }
 
-    function getSum(Timeline storage timeline, Timestamp from, Timestamp to) public view returns (uint256 sum) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable private-vars-leading-underscore
+
+    // False positive detection of the dead code. The function is used in `Paymaster::_loadFromTimeline` function
+    // slither-disable-next-line dead-code
+    function getSum(Timeline storage timeline, Timestamp from, Timestamp to) internal view returns (uint256 sum) {
+    // solhint-enable private-vars-leading-underscore
         _validateTimeInterval(timeline, from , to, true);
         if (timeline.valuesQueue.empty()) {
             return 0;
@@ -116,7 +124,9 @@ library TimelineLibrary {
         }
     }
 
-    function add(Timeline storage timeline, Timestamp from, Timestamp to, uint256 value) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function add(Timeline storage timeline, Timestamp from, Timestamp to, uint256 value) internal {
         _validateTimeInterval(timeline, from , to, false);
         Seconds duration = DateTimeUtils.duration(from, to);
         uint256 rate = value / Seconds.unwrap(duration);
@@ -128,7 +138,9 @@ library TimelineLibrary {
         _addChange(timeline, to, 0, rate + reminder);
     }
 
-    function clear(Timeline storage timeline, Timestamp before) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function clear(Timeline storage timeline, Timestamp before) internal {
         if (timeline.processedUntil < before) {
             revert ClearUnprocessed();
         }
@@ -146,7 +158,10 @@ library TimelineLibrary {
     // because current version fails on
     // TimelineLibrary.ValueId.unwrap(value)
     // TODO: remove the function after slither fix the issue
-    function unwrapValueId(ValueId value) public pure returns (bytes32 unwrappedValue) {
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function unwrapValueId(ValueId value) internal pure returns (bytes32 unwrappedValue) {
         return ValueId.unwrap(value);
     }
 
@@ -154,7 +169,10 @@ library TimelineLibrary {
     // because current version fails on
     // TimelineLibrary.ValueId.wrap(value)
     // TODO: remove the function after slither fix the issue
-    function wrapValueId(bytes32 unwrappedValue) public pure returns (ValueId wrappedValue) {
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function wrapValueId(bytes32 unwrappedValue) internal pure returns (ValueId wrappedValue) {
         return ValueId.wrap(unwrappedValue);
     }
 
@@ -217,6 +235,8 @@ library TimelineLibrary {
         return timeline.values[timeline.valuesQueue.at(index)];
     }
 
+    // False positive detection of the dead code. The function is used in `getSum` function
+    // slither-disable-next-line dead-code
     function _getLowerBoundIndex(Timeline storage timeline, Timestamp timestamp) private view returns (uint256 index) {
         if (timestamp < _getValueByIndex(timeline, 0).timestamp) {
             revert TimestampIsOutOfValues();

@@ -75,29 +75,39 @@ function _timestampEqual(Timestamp left, Timestamp right) pure returns (bool res
 }
 
 library DateTimeUtils {
-    function timestamp() public view returns (Timestamp timestampValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function timestamp() internal view returns (Timestamp timestampValue) {
         return Timestamp.wrap(block.timestamp);
     }
 
     // Conversion functions
 
-    function day(uint256 untypedDay) public pure returns (Day dayValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function day(uint256 untypedDay) internal pure returns (Day dayValue) {
         return Day.wrap(untypedDay);
     }
 
-    function months(uint256 untypedMonths) public pure returns (Months monthsValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function months(uint256 untypedMonths) internal pure returns (Months monthsValue) {
         return Months.wrap(untypedMonths);
     }
 
     // Untyped functions wrappers
 
-    function timestampToDate(Timestamp timestampValue) public pure returns (Year _year, Month _month, Day dayValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function timestampToDate(Timestamp timestampValue) internal pure returns (Year _year, Month _month, Day dayValue) {
         (uint256 untypedYear, uint256 untypedMonth, uint256 untypedDay) =
             UntypedDateTime.timestampToDate(Timestamp.unwrap(timestampValue));
         return (Year.wrap(untypedYear), Month.wrap(untypedMonth), Day.wrap(untypedDay));
     }
 
-    function timestampFromDate(Year year, Month month, Day dayValue) public pure returns (Timestamp timestampValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function timestampFromDate(Year year, Month month, Day dayValue) internal pure returns (Timestamp timestampValue) {
         timestampValue = Timestamp.wrap(UntypedDateTime.timestampFromDate(
             Year.unwrap(year),
             Month.unwrap(month),
@@ -105,7 +115,9 @@ library DateTimeUtils {
         ));
     }
 
-    function addMonths(Timestamp timestampValue, Months monthsValue) public pure returns (Timestamp newTimestamp) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function addMonths(Timestamp timestampValue, Months monthsValue) internal pure returns (Timestamp newTimestamp) {
         newTimestamp = Timestamp.wrap(
             UntypedDateTime.addMonths(
                 Timestamp.unwrap(timestampValue),
@@ -114,7 +126,9 @@ library DateTimeUtils {
         );
     }
 
-    function subSeconds(Timestamp timestampValue, Seconds secondsValue) public pure returns (Timestamp newTimestamp) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function subSeconds(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
         newTimestamp = Timestamp.wrap(
             UntypedDateTime.subSeconds(
                 Timestamp.unwrap(timestampValue),
@@ -125,33 +139,45 @@ library DateTimeUtils {
 
     // Operations
 
-    function add(Timestamp timestampValue, Months monthsValue) public pure returns (Timestamp newTimestamp) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function add(Timestamp timestampValue, Months monthsValue) internal pure returns (Timestamp newTimestamp) {
         newTimestamp = addMonths(timestampValue, monthsValue);
     }
 
-    function sub(Timestamp timestampValue, Seconds secondsValue) public pure returns (Timestamp newTimestamp) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function sub(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
         newTimestamp = subSeconds(timestampValue, secondsValue);
     }
 
-    function duration(Timestamp from, Timestamp to) public pure returns (Seconds difference) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function duration(Timestamp from, Timestamp to) internal pure returns (Seconds difference) {
         difference = Seconds.wrap(Timestamp.unwrap(to) - Timestamp.unwrap(from));
     }
 
     // Auxiliary functions
 
-    function firstDayOfMonth(Timestamp timestampValue) public pure returns (Timestamp newTimestamp) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function firstDayOfMonth(Timestamp timestampValue) internal pure returns (Timestamp newTimestamp) {
         (Year year, Month month, ) = timestampToDate(timestampValue);
         return timestampFromDate(year, month, day(1));
     }
 
-    function nextMonth(Timestamp timestampValue) public pure returns (Timestamp newTimestamp) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function nextMonth(Timestamp timestampValue) internal pure returns (Timestamp newTimestamp) {
         return add(
             firstDayOfMonth(timestampValue),
             months(1)
         );
     }
 
-    function min(Timestamp a, Timestamp b) public pure returns (Timestamp minimum) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function min(Timestamp a, Timestamp b) internal pure returns (Timestamp minimum) {
         minimum = Timestamp.wrap(Math.min(Timestamp.unwrap(a), Timestamp.unwrap(b)));
     }
 }

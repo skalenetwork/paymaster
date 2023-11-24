@@ -36,18 +36,24 @@ library PriorityQueueLibrary {
         mapping (uint256 => Value[]) values;
     }
 
-    function push(PriorityQueue storage queue, uint256 priority, Value value) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function push(PriorityQueue storage queue, uint256 priority, Value value) internal {
         if (queue.values[priority].length == 0) {
             queue.priorities.add(priority);
         }
         queue.values[priority].push(value);
     }
 
-    function empty(PriorityQueue storage queue) public view returns (bool result) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function empty(PriorityQueue storage queue) internal view returns (bool result) {
         return queue.priorities.size == 0;
     }
 
-    function front(PriorityQueue storage queue) public view returns (Value value) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function front(PriorityQueue storage queue) internal view returns (Value value) {
         if (empty(queue)) {
             revert AccessToEmptyPriorityQueue();
         }
@@ -55,7 +61,9 @@ library PriorityQueueLibrary {
         return queue.values[priority][queue.values[priority].length - 1];
     }
 
-    function pop(PriorityQueue storage queue) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function pop(PriorityQueue storage queue) internal {
         if (empty(queue)) {
             revert AccessToEmptyPriorityQueue();
         }
@@ -71,7 +79,10 @@ library PriorityQueueLibrary {
     // because current version fails on
     // PriorityQueueLibrary.Value.unwrap(value)
     // TODO: remove the function after slither fix the issue
-    function unwrapValue(Value value) public pure returns (uint256 unwrappedValue) {
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function unwrapValue(Value value) internal pure returns (uint256 unwrappedValue) {
         return Value.unwrap(value);
     }
 
@@ -79,7 +90,10 @@ library PriorityQueueLibrary {
     // because current version fails on
     // PriorityQueueLibrary.Value.wrap(value)
     // TODO: remove the function after slither fix the issue
-    function wrapValue(uint256 unwrappedValue) public pure returns (Value wrappedValue) {
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function wrapValue(uint256 unwrappedValue) internal pure returns (Value wrappedValue) {
         return Value.wrap(unwrappedValue);
     }
 }

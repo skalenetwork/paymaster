@@ -12,5 +12,6 @@ rules:
   capitalized-comments: ["error", "always", { "ignoreConsecutiveComments": true }]
   multiline-comment-style: ["error", "separate-lines"]
   no-console: off
+  no-warning-comments: warn
   one-var: ["error", "never"]
 

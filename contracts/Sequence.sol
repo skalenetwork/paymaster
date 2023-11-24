@@ -53,7 +53,9 @@ library SequenceLibrary {
         Timestamp nextTimestamp;
     }
 
-    function add(Sequence storage sequence, Timestamp timestamp, uint256 value) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function add(Sequence storage sequence, Timestamp timestamp, uint256 value) internal {
         uint256 length = sequence.ids.length();
         if (length > 0) {
             if (timestamp <= _getNodeByIndex(sequence, length - 1).timestamp) {
@@ -68,11 +70,13 @@ library SequenceLibrary {
         sequence.ids.pushBack(nodeId);
     }
 
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
     function getIterator(
         Sequence storage sequence,
         Timestamp timestamp
     )
-        public
+        internal
         view
         returns (Iterator memory iterator)
     {
@@ -115,7 +119,9 @@ library SequenceLibrary {
         });
     }
 
-    function getValue(Sequence storage sequence, Iterator memory iterator) public view returns (uint256 value) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function getValue(Sequence storage sequence, Iterator memory iterator) internal view returns (uint256 value) {
         if(iterator.idIndex == _EMPTY_ITERATOR_INDEX) {
             return 0;
         }
@@ -125,7 +131,9 @@ library SequenceLibrary {
         return _getNodeByIndex(sequence, iterator.idIndex).value;
     }
 
-    function getLastValue(Sequence storage sequence) public view returns (uint256 lastValue) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function getLastValue(Sequence storage sequence) internal view returns (uint256 lastValue) {
         uint256 length = sequence.ids.length();
         if (length > 0) {
             return _getNodeByIndex(sequence, length - 1).value;
@@ -134,16 +142,22 @@ library SequenceLibrary {
         }
     }
 
-    function step(Iterator memory iterator) public pure returns (bool success) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function step(Iterator memory iterator) internal pure returns (bool success) {
         success = hasNext(iterator);
         iterator.idIndex += 1;
     }
 
-    function hasNext(Iterator memory iterator) public pure returns (bool exist) {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function hasNext(Iterator memory iterator) internal pure returns (bool exist) {
         return iterator.idIndex + 1 < iterator.sequenceSize;
     }
 
-    function clear(Sequence storage sequence) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function clear(Sequence storage sequence) internal {
         uint256 length = sequence.ids.length();
         for (uint256 i = 0; i < length; ++i) {
             Node storage node = _getNodeByIndex(sequence, i);
@@ -153,7 +167,9 @@ library SequenceLibrary {
         sequence.freeNodeId = NodeId.wrap(0);
     }
 
-    function clear(Sequence storage sequence, Timestamp before) public {
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function clear(Sequence storage sequence, Timestamp before) internal {
         // It's important to store the most right value
         for (uint256 nodesAmount = sequence.ids.length(); nodesAmount > 1; --nodesAmount) {
             if (before <= _getNodeByIndex(sequence, 0).timestamp) {
@@ -168,7 +184,10 @@ library SequenceLibrary {
     // because current version fails on
     // SequenceLibrary.NodeId.unwrap(value)
     // TODO: remove the function after slither fix the issue
-    function unwrapNodeId(NodeId value) public pure returns (uint256 unwrappedValue) {
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function unwrapNodeId(NodeId value) internal pure returns (uint256 unwrappedValue) {
         return NodeId.unwrap(value);
     }
 
@@ -176,7 +195,10 @@ library SequenceLibrary {
     // because current version fails on
     // SequenceLibrary.NodeId.wrap(value)
     // TODO: remove the function after slither fix the issue
-    function wrapNodeId(uint256 unwrappedValue) public pure returns (NodeId wrappedValue) {
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function wrapNodeId(uint256 unwrappedValue) internal pure returns (NodeId wrappedValue) {
         return NodeId.wrap(unwrappedValue);
     }
 

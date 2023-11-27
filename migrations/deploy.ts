@@ -1,6 +1,6 @@
 import { Paymaster, PaymasterAccessManager } from "../typechain-types";
+import { ethers, upgrades } from "hardhat";
 import { Addressable } from "ethers";
-import { ethers } from "hardhat";
 
 
 // TODO: remove fixed gas limit
@@ -9,26 +9,32 @@ const DEPLOY_GAS_LIMIT = 10e6;
 
 const deployAccessManager = async (owner: Addressable) => {
     console.log("Deploy AccessManager");
-    const accessManager = await ethers.deployContract(
-        "PaymasterAccessManager",
+    const factory = await ethers.getContractFactory("PaymasterAccessManager");
+    const accessManager = await upgrades.deployProxy(
+        factory,
         [await owner.getAddress()],
         {
-            "gasLimit": DEPLOY_GAS_LIMIT
+            txOverrides: {
+                "gasLimit": DEPLOY_GAS_LIMIT
+            }
         }
-    );
+    ) as unknown as PaymasterAccessManager;
     await accessManager.waitForDeployment();
     return accessManager;
 }
 
 const deployPaymaster = async (accessManager: PaymasterAccessManager) => {
     console.log("Deploy Paymaster");
-    const paymaster = await ethers.deployContract(
-        "Paymaster",
+    const factory = await ethers.getContractFactory("Paymaster");
+    const paymaster = await upgrades.deployProxy(
+        factory,
         [await accessManager.getAddress()],
         {
-            "gasLimit": DEPLOY_GAS_LIMIT
+            txOverrides: {
+                "gasLimit": DEPLOY_GAS_LIMIT
+            }
         }
-    );
+    ) as unknown as Paymaster;
     await paymaster.waitForDeployment();
     return paymaster;
 }

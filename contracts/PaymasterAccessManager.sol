@@ -30,10 +30,6 @@ import {IPaymasterAccessManager} from "./interfaces/IPaymasterAccessManager.sol"
 contract PaymasterAccessManager is IPaymasterAccessManager, AccessManagerUpgradeable {
     uint64 public constant PRICE_SETTER_ROLE = 1;
 
-    constructor(address initialAdmin) initializer {
-        initialize(initialAdmin);
-    }
-
     function initialize(address initialAdmin) public initializer override {
         __AccessManager_init(initialAdmin);
     }

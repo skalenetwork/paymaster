@@ -55,8 +55,8 @@ jobs:
     - name: Lint
       run: yarn fullCheck
 
-    # - name: Test deployment
-    #   run: ./scripts/test_deploy.sh
+    - name: Test deployment
+      run: ./scripts/test_deploy.sh
 
     # - name: Test upgrade
     #   env:

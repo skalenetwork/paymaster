@@ -45,7 +45,10 @@ const setupRoles = async (accessManager: PaymasterAccessManager, paymaster: Paym
         [paymaster.interface.getFunction("setSklPrice").selector],
         // It's uppercase because it's a constant inside a contract
         // eslint-disable-next-line new-cap
-        await accessManager.PRICE_SETTER_ROLE()
+        await accessManager.PRICE_SETTER_ROLE(),
+        {
+            "gasLimit": DEPLOY_GAS_LIMIT
+        }
     );
 }
 

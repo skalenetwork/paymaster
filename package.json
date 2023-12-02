@@ -18,7 +18,7 @@
     "@nomicfoundation/ethereumjs-trie": "^6.0.3",
     "@nomicfoundation/ethereumjs-util": "^9.0.3",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
-    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.1",

@@ -22,7 +22,7 @@
 pragma solidity ^0.8.19;
 
 import {DateTimeUtils, Paymaster, Seconds, Timestamp} from "../Paymaster.sol";
-import {IFastForwardPaymaster} from "../interfaces/test/IFastForwardPaymaster.sol";
+import {IFastForwardPaymaster, IPaymaster} from "../interfaces/test/IFastForwardPaymaster.sol";
 
 
 contract FastForwardPaymaster is Paymaster, IFastForwardPaymaster {
@@ -34,7 +34,12 @@ contract FastForwardPaymaster is Paymaster, IFastForwardPaymaster {
     }
 
     CheckPoint public checkPoint;
-    uint256 public timeMultiplier = 1e18;
+    uint256 public timeMultiplier;
+
+    function initialize(address initialAuthority) public override(IPaymaster, Paymaster) initializer {
+        super.initialize(initialAuthority);
+        timeMultiplier = 1e18;
+    }
 
     function skipTime(Seconds sec) external override {
         checkPoint.realTime = super._getTimestamp();

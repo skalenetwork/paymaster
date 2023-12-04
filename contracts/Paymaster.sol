@@ -119,7 +119,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     error ImportantDataRemoving();
 
-    function initialize(address initialAuthority) public initializer override {
+    function initialize(address initialAuthority) public virtual initializer override {
         __AccessManaged_init(initialAuthority);
     }
 

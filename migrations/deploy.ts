@@ -24,8 +24,12 @@ const deployAccessManager = async (owner: Addressable) => {
 }
 
 const deployPaymaster = async (accessManager: PaymasterAccessManager) => {
-    console.log("Deploy Paymaster");
-    const factory = await ethers.getContractFactory("Paymaster");
+    let contract = "Paymaster";
+    if (process.env.TEST) {
+        contract = "FastForwardPaymaster";
+    }
+    console.log(`Deploy ${contract}`);
+    const factory = await ethers.getContractFactory(contract);
     const paymaster = await upgrades.deployProxy(
         factory,
         [await accessManager.getAddress()],

@@ -28,17 +28,36 @@ import {IFastForwardPaymaster} from "../interfaces/test/IFastForwardPaymaster.so
 contract FastForwardPaymaster is Paymaster, IFastForwardPaymaster {
     using DateTimeUtils for Timestamp;
 
-    Seconds public offset = Seconds.wrap(0);
+    struct CheckPoint {
+        Timestamp realTime;
+        Timestamp effectiveTime;
+    }
+
+    CheckPoint public checkPoint;
+    uint256 public timeMultiplier = 1e18;
 
     function skipTime(Seconds sec) external override {
-        offset = offset + sec;
+        checkPoint.realTime = super._getTimestamp();
+        checkPoint.effectiveTime = _getTimestamp().add(sec);
+    }
+
+    function setTimeMultiplier(uint256 multiplier) external override {
+        checkPoint.realTime = super._getTimestamp();
+        checkPoint.effectiveTime = _getTimestamp();
+        timeMultiplier = multiplier;
     }
 
     function effectiveTimestamp() external view override returns (Timestamp timestamp) {
         return _getTimestamp();
     }
 
+    // Internal
+
     function _getTimestamp() internal view override returns (Timestamp timestamp) {
-        return super._getTimestamp().add(offset);
+        Seconds passed = DateTimeUtils.duration(checkPoint.realTime, super._getTimestamp());
+        Seconds diff = Seconds.wrap(Seconds.unwrap(passed) * timeMultiplier / 1e18);
+        return checkPoint.effectiveTime.add(diff);
     }
+
+    // Private
 }

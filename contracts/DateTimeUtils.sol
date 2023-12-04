@@ -35,9 +35,6 @@ type Timestamp is uint256;
 
 using DateTimeUtils for Timestamp global;
 using {
-    _secondsAdd as +
-} for Seconds global;
-using {
     _monthsLess as <,
     _monthsEqual as ==,
     _monthsGreater as >,
@@ -48,10 +45,6 @@ using {
     _timestampLessOrEqual as <=,
     _timestampEqual as ==
 } for Timestamp global;
-
-function _secondsAdd(Seconds a, Seconds b) pure returns (Seconds result) {
-    return Seconds.wrap(Seconds.unwrap(a) + Seconds.unwrap(b));
-}
 
 function _monthsLess(Months left, Months right) pure returns (bool result) {
     return Months.unwrap(left) < Months.unwrap(right);

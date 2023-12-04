@@ -26,6 +26,7 @@ import {IPaymaster} from "../IPaymaster.sol";
 
 
 interface IFastForwardPaymaster is IPaymaster {
+    function setTimeMultiplier(uint256 multiplier) external;
     function skipTime(Seconds sec) external;
     function effectiveTimestamp() external view returns (Timestamp timestamp);
 }

@@ -128,7 +128,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         Schain memory schain = Schain({
             hash: schainHash,
             name: name,
-            paidUntil: DateTimeUtils.timestamp().nextMonth()
+            paidUntil: _getTimestamp().nextMonth()
         });
         _addSchain(schain);
     }
@@ -148,7 +148,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         _validators[id].id = id;
         delete _validators[id].nodesAmount;
         delete _validators[id].activeNodesAmount;
-        _validators[id].claimedUntil = DateTimeUtils.timestamp();
+        _validators[id].claimedUntil = _getTimestamp();
         _validators[id].validatorAddress = validatorAddress;
         _validators[id].nodesHistory.clear();
     }
@@ -183,7 +183,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function setSklPrice(USD price) external override restricted {
         oneSklPrice = price;
-        sklPriceTimestamp = DateTimeUtils.timestamp();
+        sklPriceTimestamp = _getTimestamp();
     }
 
     function setSkaleToken(IERC20 token) external override restricted {
@@ -235,7 +235,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         SKL costPerMonth = SKL.wrap(SKL.unwrap(cost) / Months.unwrap(duration));
         Timestamp start = schain.paidUntil;
         Months oneMonth = Months.wrap(1);
-        Timestamp current = DateTimeUtils.timestamp();
+        Timestamp current = _getTimestamp();
         DebtId end = debtsEnd;
         for (Months i = Months.wrap(0); i < duration; i = i + oneMonth) {
             Timestamp from = start.add(i);
@@ -257,7 +257,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
         schain.paidUntil = start.add(duration);
 
-        _pullTokens(_msgSender(), cost);
+        _pullTokens(cost);
     }
 
     function claim(address to) external override {
@@ -267,7 +267,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function claimFor(ValidatorId validatorId, address to) public restricted override {
         Validator storage validator = _getValidator(validatorId);
-        Timestamp currentTime = DateTimeUtils.timestamp();
+        Timestamp currentTime = _getTimestamp();
         _totalRewards.process(currentTime);
 
         SKL rewards = _calculateRewards(
@@ -294,6 +294,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         if (!skaleToken.transfer(to, SKL.unwrap(rewards))) {
             revert TransferFailure();
         }
+    }
+
+    // Internal
+
+    function _getTimestamp() internal view virtual returns (Timestamp timestamp) {
+        return DateTimeUtils.timestamp();
     }
 
     // Private
@@ -329,7 +335,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function _activeNodesAmountChanged(Validator storage validator, uint256 oldAmount, uint256 newAmount) private {
-        Timestamp currentTime = DateTimeUtils.timestamp();
+        Timestamp currentTime = _getTimestamp();
         validator.nodesHistory.add(currentTime, newAmount);
 
         uint256 totalNodes = _totalNodesHistory.getLastValue();
@@ -380,12 +386,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function _pullTokens(address from, SKL amount) private {
+    function _pullTokens(SKL amount) private {
         if (address(skaleToken) == address(0)) {
             revert SkaleTokenIsNotSet();
         }
         SKL allowance = SKL.wrap(
-            skaleToken.allowance(from, address(this))
+            skaleToken.allowance(msg.sender, address(this))
         );
         if (allowance < amount) {
             revert TooSmallAllowance({
@@ -395,7 +401,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             });
         }
 
-        if (!skaleToken.transferFrom(from, address(this), SKL.unwrap(amount))) {
+        if (!skaleToken.transferFrom(msg.sender, address(this), SKL.unwrap(amount))) {
             revert TransferFailure();
         }
     }

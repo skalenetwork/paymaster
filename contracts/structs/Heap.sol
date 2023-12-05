@@ -93,6 +93,7 @@ library HeapLibrary {
 
     function _fixUp(Heap storage heap, NodeId node, uint256 value) private {
         if (_equals(node, _ROOT)) {
+            _setValue(heap, node, value);
             return;
         }
         NodeId parent = _getParentNode(node);
@@ -101,7 +102,7 @@ library HeapLibrary {
             _setValue(heap, node, value);
         } else {
             _setValue(heap, node, parentValue);
-            _fixUp(heap, parent, parentValue);
+            _fixUp(heap, parent, value);
         }
     }
 

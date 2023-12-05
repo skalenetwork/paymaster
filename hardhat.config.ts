@@ -7,25 +7,17 @@ import {HardhatUserConfig, task} from "hardhat/config";
 dotenv.config();
 
 const getCustomUrl = (url: string | undefined) => {
-
     if (url) {
-
         return url;
-
     }
     return "http://127.0.0.1:8545";
-
 };
 
 const getCustomPrivateKey = (privateKey: string | undefined) => {
-
     if (privateKey) {
-
         return [privateKey];
-
     }
     return [];
-
 };
 
 const config: HardhatUserConfig = {
@@ -47,7 +39,6 @@ task(
     addPositionalParam("paymasterAddress").
     addPositionalParam("accountAddress").
     setAction(async (taskArgs, hre) => {
-
         const paymaster = await hre.ethers.getContractAt(
             "Paymaster",
             taskArgs.paymasterAddress
@@ -72,5 +63,4 @@ task(
         );
 
         console.log("Done");
-
     });

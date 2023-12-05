@@ -14,4 +14,9 @@ rules:
   no-console: off
   no-warning-comments: warn
   one-var: ["error", "never"]
+overrides:
+  - files: [test/**/*.ts]
+    rules:
+      no-await-in-loop: ["off"]
+
 

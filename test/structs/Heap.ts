@@ -31,4 +31,4 @@ describe("Heap", () => {
             await heap.pop();
         }
     });
-  });
+});

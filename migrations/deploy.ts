@@ -7,7 +7,7 @@ import { Addressable } from "ethers";
 // after estimateGas fix in skaled
 const DEPLOY_GAS_LIMIT = 10e6;
 
-const deployAccessManager = async (owner: Addressable) => {
+export const deployAccessManager = async (owner: Addressable) => {
     console.log("Deploy AccessManager");
     const factory = await ethers.getContractFactory("PaymasterAccessManager");
     const accessManager = await upgrades.deployProxy(
@@ -23,7 +23,7 @@ const deployAccessManager = async (owner: Addressable) => {
     return accessManager;
 }
 
-const deployPaymaster = async (accessManager: PaymasterAccessManager) => {
+export const deployPaymaster = async (accessManager: PaymasterAccessManager) => {
     let contract = "Paymaster";
     if (process.env.TEST) {
         contract = "FastForwardPaymaster";
@@ -43,7 +43,7 @@ const deployPaymaster = async (accessManager: PaymasterAccessManager) => {
     return paymaster;
 }
 
-const setupRoles = async (accessManager: PaymasterAccessManager, paymaster: Paymaster) => {
+export const setupRoles = async (accessManager: PaymasterAccessManager, paymaster: Paymaster) => {
     await accessManager.setTargetFunctionRole(
         await paymaster.getAddress(),
         [paymaster.interface.getFunction("setSklPrice").selector],

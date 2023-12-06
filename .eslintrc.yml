@@ -18,5 +18,6 @@ overrides:
   - files: [test/**/*.ts]
     rules:
       no-await-in-loop: ["off"]
+      no-magic-numbers: ["error", { "ignore": [0, 1] }]
 
 

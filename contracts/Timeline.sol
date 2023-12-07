@@ -73,14 +73,21 @@ library TimelineLibrary {
         while (_hasFutureChanges(timeline)) {
             Change memory nextChange = _getNextChange(timeline);
             if (nextChange.timestamp < until) {
-                Value storage currentValue = _getCurrentValue(timeline);
-                if (currentValue.timestamp == nextChange.timestamp) {
-                    currentValue.value += nextChange.add - nextChange.subtract;
-                } else {
+                if (timeline.valuesQueue.empty()) {
                     _createValue(timeline, Value({
                         timestamp: nextChange.timestamp,
-                        value: currentValue.value += nextChange.add - nextChange.subtract
+                        value: nextChange.add - nextChange.subtract
                     }));
+                } else {
+                    Value storage currentValue = _getCurrentValue(timeline);
+                    if (currentValue.timestamp == nextChange.timestamp) {
+                        currentValue.value += nextChange.add - nextChange.subtract;
+                    } else {
+                        _createValue(timeline, Value({
+                            timestamp: nextChange.timestamp,
+                            value: currentValue.value + nextChange.add - nextChange.subtract
+                        }));
+                    }
                 }
                 _popNextChange(timeline);
             } else {

@@ -146,12 +146,19 @@ library SequenceLibrary {
     // solhint-disable-next-line private-vars-leading-underscore
     function step(Iterator memory iterator) internal pure returns (bool success) {
         success = hasNext(iterator);
-        iterator.idIndex += 1;
+        if (iterator.idIndex == _EMPTY_ITERATOR_INDEX) {
+            iterator.idIndex = 0;
+        } else {
+            iterator.idIndex += 1;
+        }
     }
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function hasNext(Iterator memory iterator) internal pure returns (bool exist) {
+        if (iterator.idIndex == _EMPTY_ITERATOR_INDEX) {
+            return iterator.sequenceSize > 0;
+        }
         return iterator.idIndex + 1 < iterator.sequenceSize;
     }
 

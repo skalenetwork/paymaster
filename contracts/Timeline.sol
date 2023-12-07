@@ -125,7 +125,7 @@ library TimelineLibrary {
                 }
             }
 
-            sum += _getValueByIndex(timeline, i+1).value * Seconds.unwrap(DateTimeUtils.duration(current, next));
+            sum += _getValueByIndex(timeline, i).value * Seconds.unwrap(DateTimeUtils.duration(current, next));
 
             current = next;
         }

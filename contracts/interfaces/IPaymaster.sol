@@ -48,4 +48,5 @@ interface IPaymaster {
     function pay(SchainHash schainHash, Months duration) external;
     function claim(address to) external;
     function claimFor(ValidatorId validatorId, address to) external;
+    function getSchainExpirationTimestamp(SchainHash schainHash) external view returns (Timestamp expiration);
 }

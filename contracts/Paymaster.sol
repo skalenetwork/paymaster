@@ -157,16 +157,16 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         _removeValidator(_getValidator(id));
     }
 
-    function setNodesAmount(ValidatorId id, uint256 amount) external override restricted {
-        Validator storage validator = _getValidator(id);
+    function setNodesAmount(ValidatorId validatorId, uint256 amount) external override restricted {
+        Validator storage validator = _getValidator(validatorId);
         uint256 oldActiveNodesAmount = validator.activeNodesAmount;
         validator.nodesAmount = amount;
         validator.activeNodesAmount = amount;
         _activeNodesAmountChanged(validator, oldActiveNodesAmount, amount);
     }
 
-    function setActiveNodes(ValidatorId id, uint256 amount) external override restricted {
-        Validator storage validator = _getValidator(id);
+    function setActiveNodes(ValidatorId validatorId, uint256 amount) external override restricted {
+        Validator storage validator = _getValidator(validatorId);
         uint256 oldActiveNodesAmount = validator.activeNodesAmount;
         uint256 activeNodesAmount = Math.min(amount, validator.nodesAmount);
         validator.activeNodesAmount = activeNodesAmount;
@@ -264,6 +264,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         Validator storage validator = _getValidatorByAddress(_msgSender());
         claimFor(validator.id, to);
     }
+
+    function getSchainExpirationTimestamp(SchainHash schainHash) external view override returns (Timestamp expiration) {
+        return _getSchain(schainHash).paidUntil;
+    }
+
+    // Public
 
     function claimFor(ValidatorId validatorId, address to) public restricted override {
         Validator storage validator = _getValidator(validatorId);

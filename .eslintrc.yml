@@ -17,6 +17,9 @@ rules:
 overrides:
   - files: [test/**/*.ts]
     rules:
+      init-declarations: ["off"]
+      max-lines-per-function: ["off"]
+      max-statements: ["off"]
       no-await-in-loop: ["off"]
       no-magic-numbers: ["error", { "ignore": [0, 1] }]
 

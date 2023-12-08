@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 
-const MS_PER_SEC = 1000;
+export const MS_PER_SEC = 1000;
 
 export const skipTime = async (seconds: bigint | number) => {
     await ethers.provider.send("evm_increaseTime", [seconds]);
@@ -15,6 +15,12 @@ export const currentTime = async () => {
     throw new Error("Can't fetch latest block");
 }
 
+export const skipTimeToSpecificDate = async (date: Date) => {
+    const timestamp = await currentTime();
+    const diffInSeconds = Math.round(date.getTime() / MS_PER_SEC) - timestamp;
+    await skipTime(diffInSeconds);
+}
+
 export const skipTimeToDate = async (day: number, monthIndex: number) => {
     const timestamp = await currentTime();
     const now = new Date(timestamp * MS_PER_SEC);
@@ -24,8 +30,7 @@ export const skipTimeToDate = async (day: number, monthIndex: number) => {
     while (targetTime < now) {
         targetTime.setFullYear(now.getFullYear() + 1);
     }
-    const diffInSeconds = Math.round(targetTime.getTime() / MS_PER_SEC) - timestamp;
-    await skipTime(diffInSeconds);
+    await skipTimeToSpecificDate(targetTime);
 }
 
 export const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];

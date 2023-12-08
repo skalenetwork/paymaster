@@ -1,5 +1,5 @@
+import { MS_PER_SEC, currentTime, nextMonth, skipTimeToSpecificDate } from "./tools/time";
 import { Paymaster, PaymasterAccessManager, Token } from "../typechain-types";
-import { currentTime, nextMonth } from "./tools/time";
 import {
     deployAccessManager,
     deployPaymaster,
@@ -25,7 +25,7 @@ describe("Paymaster", () => {
 
     const setup = async (paymaster: Paymaster, skaleToken: Token) => {
         const MAX_REPLENISHMENT_PERIOD = 24;
-        const SCHAIN_PRICE = 5000;
+        const SCHAIN_PRICE = ethers.parseEther("5000");
         const SKL_PRICE = ethers.parseEther("2");
 
         await skaleToken.mint(await user.getAddress(), BIG_AMOUNT);
@@ -70,13 +70,15 @@ describe("Paymaster", () => {
         expect(schain.paidUntil).to.be.equal(nextMonth(await currentTime()));
     });
 
-    describe("when 1 validator and 1 schain exist", () => {
+    describe("when 1 validator with 1 node and 1 schain exist", () => {
         const validatorId = 1;
+        const nodesAmount = 1;
 
         const addSchainAndValidatorFixture = async () => {
             const paymaster = await loadFixture(deployPaymasterFixture);
             await paymaster.addSchain(schainName);
             await paymaster.addValidator(validatorId, await validator.getAddress());
+            await paymaster.setNodesAmount(validatorId, nodesAmount);
             return paymaster;
         }
 
@@ -92,5 +94,23 @@ describe("Paymaster", () => {
             }
             expect(await paymaster.getSchainExpirationTimestamp(schainHash)).to.be.equal(extendedExpirationTime);
         });
+
+        describe("when schain was paid for 1 month", () => {
+            const payOneMonthFixture = async () => {
+                const paymaster = await loadFixture(addSchainAndValidatorFixture);
+                await paymaster.connect(user).pay(schainHash, 1);
+                return paymaster;
+            }
+
+            it("should claim rewards after month end", async () => {
+                const paymaster = await loadFixture(payOneMonthFixture);
+                const token = await ethers.getContractAt("Token", await paymaster.skaleToken());
+                const paidUntil = new Date( Number(await paymaster.getSchainExpirationTimestamp(schainHash)) * MS_PER_SEC);
+                await skipTimeToSpecificDate(paidUntil);
+                await paymaster.connect(validator).claim(await validator.getAddress());
+                const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+                expect((await token.balanceOf(await validator.getAddress()))).to.be.equal(tokensPerMonth);
+            })
+        })
     });
 });

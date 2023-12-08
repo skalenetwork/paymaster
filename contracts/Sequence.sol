@@ -34,7 +34,7 @@ library SequenceLibrary {
 
     error CannotAddToThePast();
 
-    uint256 private constant _EMPTY_ITERATOR_INDEX = type(uint256).max;
+    uint256 private constant _BEFORE_FIRST_ELEMENT = type(uint256).max;
 
     struct Node {
         Timestamp timestamp;
@@ -82,7 +82,7 @@ library SequenceLibrary {
     {
         if (sequence.ids.empty()) {
             return Iterator({
-                idIndex: _EMPTY_ITERATOR_INDEX,
+                idIndex: _BEFORE_FIRST_ELEMENT,
                 sequenceSize: 0,
                 nextTimestamp: Timestamp.wrap(0)
             });
@@ -91,7 +91,7 @@ library SequenceLibrary {
         Timestamp earliest = _getNodeByIndex(sequence, 0).timestamp;
         if (timestamp < earliest) {
             return Iterator({
-                idIndex: _EMPTY_ITERATOR_INDEX,
+                idIndex: _BEFORE_FIRST_ELEMENT,
                 sequenceSize: sequenceSize,
                 nextTimestamp: earliest
             });
@@ -122,7 +122,7 @@ library SequenceLibrary {
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function getValue(Sequence storage sequence, Iterator memory iterator) internal view returns (uint256 value) {
-        if(iterator.idIndex == _EMPTY_ITERATOR_INDEX) {
+        if(iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             return 0;
         }
         if(iterator.idIndex >= iterator.sequenceSize) {
@@ -146,7 +146,7 @@ library SequenceLibrary {
     // solhint-disable-next-line private-vars-leading-underscore
     function step(Iterator memory iterator) internal pure returns (bool success) {
         success = hasNext(iterator);
-        if (iterator.idIndex == _EMPTY_ITERATOR_INDEX) {
+        if (iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             iterator.idIndex = 0;
         } else {
             iterator.idIndex += 1;
@@ -156,7 +156,7 @@ library SequenceLibrary {
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function hasNext(Iterator memory iterator) internal pure returns (bool exist) {
-        if (iterator.idIndex == _EMPTY_ITERATOR_INDEX) {
+        if (iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             return iterator.sequenceSize > 0;
         }
         return iterator.idIndex + 1 < iterator.sequenceSize;

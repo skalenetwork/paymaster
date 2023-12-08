@@ -262,7 +262,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function claim(address to) external override {
         Validator storage validator = _getValidatorByAddress(_msgSender());
-        claimFor(validator.id, to);
+        _claimFor(validator.id, to);
     }
 
     function getSchainExpirationTimestamp(SchainHash schainHash) external view override returns (Timestamp expiration) {
@@ -272,6 +272,18 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     // Public
 
     function claimFor(ValidatorId validatorId, address to) public restricted override {
+        _claimFor(validatorId, to);
+    }
+
+    // Internal
+
+    function _getTimestamp() internal view virtual returns (Timestamp timestamp) {
+        return DateTimeUtils.timestamp();
+    }
+
+    // Private
+
+    function _claimFor(ValidatorId validatorId, address to) private {
         Validator storage validator = _getValidator(validatorId);
         Timestamp currentTime = _getTimestamp();
         _totalRewards.process(currentTime);
@@ -301,14 +313,6 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             revert TransferFailure();
         }
     }
-
-    // Internal
-
-    function _getTimestamp() internal view virtual returns (Timestamp timestamp) {
-        return DateTimeUtils.timestamp();
-    }
-
-    // Private
 
     function _addSchain(Schain memory schain) private {
         schains[schain.hash] = schain;
@@ -485,14 +489,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function _calculateRewards(
         Validator storage validator,
-        Payment memory debt,
+        Payment memory rewardSource,
         function (Timestamp, Timestamp, Payment memory) internal view returns (SKL) getTotalReward
     )
         private
         view
         returns (SKL rewards)
     {
-        Timestamp cursor = debt.from;
+        Timestamp cursor = rewardSource.from;
 
         SequenceLibrary.Iterator memory totalNodesHistoryIterator = _totalNodesHistory.getIterator(cursor);
         SequenceLibrary.Iterator memory nodesHistoryIterator = validator.nodesHistory.getIterator(cursor);
@@ -500,21 +504,23 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         rewards = SKL.wrap(0);
         uint256 activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
         uint256 totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
-        while (cursor < debt.to) {
 
-            Timestamp nextCursor = _getNextCursor(debt.to, totalNodesHistoryIterator, nodesHistoryIterator);
+        while (cursor < rewardSource.to) {
+            Timestamp nextCursor = _getNextCursor(rewardSource.to, totalNodesHistoryIterator, nodesHistoryIterator);
 
-            rewards = rewards + SKL.wrap(
-                SKL.unwrap(getTotalReward(cursor, nextCursor, debt)) * activeNodes / totalNodes
-            );
+            if (totalNodes > 0) {
+                rewards = rewards + SKL.wrap(
+                    SKL.unwrap(getTotalReward(cursor, nextCursor, rewardSource)) * activeNodes / totalNodes
+                );
+            }
 
             cursor = nextCursor;
-            while (totalNodesHistoryIterator.nextTimestamp < cursor) {
+            while (totalNodesHistoryIterator.hasNext() && totalNodesHistoryIterator.nextTimestamp <= cursor) {
                 if (totalNodesHistoryIterator.step()) {
                     totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
                 }
             }
-            while (nodesHistoryIterator.nextTimestamp < cursor) {
+            while (nodesHistoryIterator.hasNext() && nodesHistoryIterator.nextTimestamp <= cursor) {
                 if (nodesHistoryIterator.step()) {
                     activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
                 }

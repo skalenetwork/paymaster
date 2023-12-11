@@ -287,19 +287,19 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function _claimFor(ValidatorId validatorId, address to) private {
         Validator storage validator = _getValidator(validatorId);
-        Timestamp currentTime = _getTimestamp();
-        _totalRewards.process(currentTime);
+        Timestamp claimUntil = DateTimeUtils.firstDayOfMonth(_getTimestamp());
+        _totalRewards.process(claimUntil);
 
         SKL rewards = _calculateRewards(
             validator,
             Payment({
                 from: validator.claimedUntil,
-                to: currentTime,
+                to: claimUntil,
                 amount: SKL.wrap(0) // ignored by _loadFromTimeline
             }),
             _loadFromTimeline
         );
-        validator.claimedUntil = currentTime;
+        validator.claimedUntil = claimUntil;
 
         DebtId end = debtsEnd;
         for (DebtId debtId = validator.firstUnpaidDebt; _before(debtId, end); debtId = _next(debtId)) {

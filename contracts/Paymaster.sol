@@ -225,17 +225,19 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function pay(SchainHash schainHash, Months duration) external override {
-        if (duration > maxReplenishmentPeriod) {
+        Schain storage schain = _getSchain(schainHash);
+
+        Timestamp current = _getTimestamp();
+        Timestamp start = schain.paidUntil;
+        Timestamp finish = start.add(duration);
+        Timestamp limit = DateTimeUtils.nextMonth(current).add(maxReplenishmentPeriod);
+        if (limit < finish) {
             revert ReplenishmentPeriodIsTooBig();
         }
 
-        Schain storage schain = _getSchain(schainHash);
         SKL cost = _toSKL(_getCost(duration));
-
         SKL costPerMonth = SKL.wrap(SKL.unwrap(cost) / Months.unwrap(duration));
-        Timestamp start = schain.paidUntil;
         Months oneMonth = Months.wrap(1);
-        Timestamp current = _getTimestamp();
         DebtId end = debtsEnd;
         for (Months i = Months.wrap(0); i < duration; i = i + oneMonth) {
             Timestamp from = start.add(i);

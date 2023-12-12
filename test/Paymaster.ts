@@ -105,6 +105,16 @@ describe("Paymaster", () => {
                 .withArgs(schainHash);
         })
 
+        it("should remove validator", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            await paymaster.removeValidator(validatorId);
+
+            await expect(paymaster.setNodesAmount(validatorId, nodesAmount + 1))
+                .to.be.revertedWithCustomError(paymaster, "ValidatorNotFound")
+                .withArgs(validatorId);
+        });
+
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
                 const paymaster = await loadFixture(addSchainAndValidatorFixture);

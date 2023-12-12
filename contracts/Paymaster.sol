@@ -331,19 +331,19 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function _removeValidator(Validator storage validator) private {
-        validator.id = ValidatorId.wrap(0);
-        delete validator.nodesAmount;
-        delete validator.activeNodesAmount;
-        validator.claimedUntil = Timestamp.wrap(0);
-        delete validator.validatorAddress;
-        validator.nodesHistory.clear();
-
         if(!_validatorIds.remove(ValidatorId.unwrap(validator.id))) {
             revert ValidatorDeletionError(validator.id);
         }
         if(!_addressToValidatorId.remove(validator.validatorAddress)) {
             revert ValidatorDeletionError(validator.id);
         }
+
+        validator.id = ValidatorId.wrap(0);
+        delete validator.nodesAmount;
+        delete validator.activeNodesAmount;
+        validator.claimedUntil = Timestamp.wrap(0);
+        delete validator.validatorAddress;
+        validator.nodesHistory.clear();
     }
 
     function _activeNodesAmountChanged(Validator storage validator, uint256 oldAmount, uint256 newAmount) private {

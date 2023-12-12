@@ -324,10 +324,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function _removeSchain(Schain storage schain) private {
-        delete schains[schain.hash];
         if(!_schainHashes.remove(SchainHash.unwrap(schain.hash))) {
             revert SchainDeletionError(schain.hash);
         }
+        delete schains[schain.hash];
     }
 
     function _removeValidator(Validator storage validator) private {

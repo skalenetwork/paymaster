@@ -95,6 +95,16 @@ describe("Paymaster", () => {
             expect(await paymaster.getSchainExpirationTimestamp(schainHash)).to.be.equal(extendedExpirationTime);
         });
 
+        it("should remove schain", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            await paymaster.removeSchain(schainHash);
+
+            await expect(paymaster.getSchainExpirationTimestamp(schainHash))
+                .to.be.revertedWithCustomError(paymaster, "SchainNotFound")
+                .withArgs(schainHash);
+        })
+
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
                 const paymaster = await loadFixture(addSchainAndValidatorFixture);

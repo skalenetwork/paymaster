@@ -25,6 +25,9 @@ const config: HardhatUserConfig = {
         "custom": {
             "accounts": getCustomPrivateKey(process.env.PRIVATE_KEY),
             "url": getCustomUrl(process.env.ENDPOINT)
+        },
+        "hardhat": {
+            "allowUnlimitedContractSize": true
         }
     },
     "solidity": "0.8.20"

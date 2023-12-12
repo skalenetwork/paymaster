@@ -42,13 +42,13 @@ contract FastForwardPaymaster is Paymaster, IFastForwardPaymaster {
     }
 
     function skipTime(Seconds sec) external override {
-        checkPoint.realTime = super._getTimestamp();
         checkPoint.effectiveTime = _getTimestamp().add(sec);
+        checkPoint.realTime = super._getTimestamp();
     }
 
     function setTimeMultiplier(uint256 multiplier) external override {
-        checkPoint.realTime = super._getTimestamp();
         checkPoint.effectiveTime = _getTimestamp();
+        checkPoint.realTime = super._getTimestamp();
         timeMultiplier = multiplier;
     }
 

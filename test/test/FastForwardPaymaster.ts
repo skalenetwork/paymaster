@@ -4,6 +4,7 @@ import { PaymasterAccessManager } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { deployAccessManager } from "../../migrations/deploy";
 import { expect } from "chai";
+import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 
 describe("FastForwardPaymaster", () => {
@@ -27,7 +28,7 @@ describe("FastForwardPaymaster", () => {
 
     it("should allow to skip time", async () => {
         const skipSec = 1000;
-        const paymaster = await deployFastForwardPaymasterFixture();
+        const paymaster = await await loadFixture(deployFastForwardPaymasterFixture);
         expect(await paymaster.effectiveTimestamp()).to.be.equal(await currentTime());
 
         await paymaster.skipTime(skipSec);
@@ -38,7 +39,7 @@ describe("FastForwardPaymaster", () => {
     it("should allow to speed up time", async () => {
         const coefficient = 2;
         const skipSec = 1000;
-        const paymaster = await deployFastForwardPaymasterFixture();
+        const paymaster = await await loadFixture(deployFastForwardPaymasterFixture);
 
         await paymaster.setTimeMultiplier(ethers.parseEther(coefficient.toString()));
 

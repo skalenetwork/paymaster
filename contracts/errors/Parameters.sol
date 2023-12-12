@@ -25,3 +25,4 @@ pragma solidity ^0.8.18;
 error SchainPriceIsNotSet();
 error SkaleTokenIsNotSet();
 error SklPriceIsNotSet();
+error SklPriceIsOutdated();

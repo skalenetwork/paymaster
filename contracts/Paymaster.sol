@@ -32,7 +32,8 @@ from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeabl
 import {
     SchainPriceIsNotSet,
     SkaleTokenIsNotSet,
-    SklPriceIsNotSet
+    SklPriceIsNotSet,
+    SklPriceIsOutdated
 } from "./errors/Parameters.sol";
 import {
     ReplenishmentPeriodIsTooBig,
@@ -108,6 +109,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     USD public schainPricePerMonth;
     USD public oneSklPrice;
     Timestamp public sklPriceTimestamp;
+    Seconds public allowedSklPriceLag;
     IERC20 public skaleToken;
 
     TimelineLibrary.Timeline private _totalRewards;
@@ -184,6 +186,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function setSklPrice(USD price) external override restricted {
         oneSklPrice = price;
         sklPriceTimestamp = _getTimestamp();
+    }
+
+    function setAllowedSklPriceLag(Seconds lagSeconds) external override restricted {
+        allowedSklPriceLag = lagSeconds;
     }
 
     function setSkaleToken(IERC20 token) external override restricted {
@@ -474,11 +480,15 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function _toSKL(USD amount) private view returns (SKL result) {
-        if (oneSklPrice == USD.wrap(0)) {
+        USD price = oneSklPrice;
+        if (price == USD.wrap(0)) {
             revert SklPriceIsNotSet();
         }
+        if (allowedSklPriceLag < DateTimeUtils.duration(sklPriceTimestamp, _getTimestamp())) {
+            revert SklPriceIsOutdated();
+        }
         result = SKL.wrap(
-            USD.unwrap(amount) * 1e18 / USD.unwrap(oneSklPrice)
+            USD.unwrap(amount) * 1e18 / USD.unwrap(price)
         );
     }
 

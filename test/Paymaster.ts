@@ -24,6 +24,7 @@ describe("Paymaster", () => {
     let priceAgent: SignerWithAddress;
 
     const setup = async (paymaster: Paymaster, skaleToken: Token) => {
+        const minute = 60;
         const MAX_REPLENISHMENT_PERIOD = 24;
         const SCHAIN_PRICE = ethers.parseEther("5000");
         const SKL_PRICE = ethers.parseEther("2");
@@ -33,6 +34,7 @@ describe("Paymaster", () => {
 
         await paymaster.setMaxReplenishmentPeriod(MAX_REPLENISHMENT_PERIOD);
         await paymaster.setSchainPrice(SCHAIN_PRICE);
+        await paymaster.setAllowedSklPriceLag(minute);
         await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
         await paymaster.setSkaleToken(await skaleToken.getAddress());
     }

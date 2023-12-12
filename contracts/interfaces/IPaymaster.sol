@@ -25,7 +25,7 @@ pragma solidity ^0.8.18;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
-import {Months, Timestamp} from "../DateTimeUtils.sol";
+import {Months, Seconds, Timestamp} from "../DateTimeUtils.sol";
 import {USD} from "../types/Usd.sol";
 
 
@@ -43,6 +43,7 @@ interface IPaymaster {
     function setMaxReplenishmentPeriod(Months months) external;
     function setSchainPrice(USD price) external;
     function setSklPrice(USD price) external;
+    function setAllowedSklPriceLag(Seconds lagSeconds) external;
     function setSkaleToken(IERC20 token) external;
     function clearHistory(Timestamp before) external;
     function pay(SchainHash schainHash, Months duration) external;

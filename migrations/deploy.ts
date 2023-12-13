@@ -1,6 +1,7 @@
 import { Paymaster, PaymasterAccessManager } from "../typechain-types";
 import { ethers, upgrades } from "hardhat";
 import { Addressable } from "ethers";
+import { getVersion } from "@skalenetwork/upgrade-tools";
 
 
 // TODO: remove fixed gas limit
@@ -44,7 +45,7 @@ export const deployPaymaster = async (accessManager: PaymasterAccessManager) => 
 }
 
 export const setupRoles = async (accessManager: PaymasterAccessManager, paymaster: Paymaster) => {
-    await accessManager.setTargetFunctionRole(
+    const response = await accessManager.setTargetFunctionRole(
         await paymaster.getAddress(),
         [paymaster.interface.getFunction("setSklPrice").selector],
         // It's uppercase because it's a constant inside a contract
@@ -54,6 +55,13 @@ export const setupRoles = async (accessManager: PaymasterAccessManager, paymaste
             "gasLimit": DEPLOY_GAS_LIMIT
         }
     );
+    await response.wait();
+}
+
+export const setup = async (paymaster: Paymaster) => {
+    const version = await getVersion();
+    const response = await paymaster.setVersion(version);
+    await response.wait();
 }
 
 const main = async () => {
@@ -65,6 +73,7 @@ const main = async () => {
     console.log(`Paymaster address: ${await paymaster.getAddress()}`);
 
     await setupRoles(accessManager, paymaster);
+    await setup(paymaster);
 
     console.log("Done");
 };

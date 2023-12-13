@@ -45,6 +45,7 @@ interface IPaymaster {
     function setSklPrice(USD price) external;
     function setAllowedSklPriceLag(Seconds lagSeconds) external;
     function setSkaleToken(IERC20 token) external;
+    function setVersion(string calldata newVersion) external;
     function clearHistory(Timestamp before) external;
     function pay(SchainHash schainHash, Months duration) external;
     function claim(address to) external;

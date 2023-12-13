@@ -98,12 +98,16 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         DebtId firstUnpaidDebt;
     }
 
+    struct ValidatorData {
+        mapping(ValidatorId => Validator) validators;
+        EnumerableSet.UintSet validatorIds;
+        TypedMap.AddressToValidatorIdMap addressToValidatorId;
+    }
+
     mapping(SchainHash => Schain) public schains;
     EnumerableSet.Bytes32Set private _schainHashes;
 
-    mapping(ValidatorId => Validator) private _validators;
-    EnumerableSet.UintSet private _validatorIds;
-    TypedMap.AddressToValidatorIdMap private _addressToValidatorId;
+    ValidatorData private _validatorData;
 
     Months public maxReplenishmentPeriod;
     USD public schainPricePerMonth;
@@ -118,6 +122,8 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     mapping (DebtId => Payment) public debts;
     DebtId public debtsBegin;
     DebtId public debtsEnd;
+
+    string public version;
 
     error ImportantDataRemoving();
 
@@ -140,19 +146,19 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function addValidator(ValidatorId id, address validatorAddress) external override restricted {
-        if (!_validatorIds.add(ValidatorId.unwrap(id))) {
+        if (!_validatorData.validatorIds.add(ValidatorId.unwrap(id))) {
             revert ValidatorAddingError(id);
         }
-        if(!_addressToValidatorId.set(validatorAddress, id)) {
+        if(!_validatorData.addressToValidatorId.set(validatorAddress, id)) {
             revert ValidatorAddressAlreadyExists(validatorAddress);
         }
 
-        _validators[id].id = id;
-        delete _validators[id].nodesAmount;
-        delete _validators[id].activeNodesAmount;
-        _validators[id].claimedUntil = _getTimestamp();
-        _validators[id].validatorAddress = validatorAddress;
-        _validators[id].nodesHistory.clear();
+        _validatorData.validators[id].id = id;
+        delete _validatorData.validators[id].nodesAmount;
+        delete _validatorData.validators[id].activeNodesAmount;
+        _validatorData.validators[id].claimedUntil = _getTimestamp();
+        _validatorData.validators[id].validatorAddress = validatorAddress;
+        _validatorData.validators[id].nodesHistory.clear();
     }
 
     function removeValidator(ValidatorId id) external override restricted {
@@ -207,9 +213,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
 
         DebtId firstUnpaidDebt = debtsEnd;
-        uint256 validatorsAmount = _validatorIds.length();
+        uint256 validatorsAmount = _validatorData.validatorIds.length();
         for (uint256 i = 0; i < validatorsAmount; ++i) {
-            ValidatorId validatorId = ValidatorId.wrap(_validatorIds.at(i));
+            ValidatorId validatorId = ValidatorId.wrap(_validatorData.validatorIds.at(i));
             Validator storage validator = _getValidator(validatorId);
             if (validator.claimedUntil < before) {
                 revert ImportantDataRemoving();
@@ -271,6 +277,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function claim(address to) external override {
         Validator storage validator = _getValidatorByAddress(_msgSender());
         _claimFor(validator.id, to);
+    }
+
+    function setVersion(string calldata newVersion) external override restricted {
+        version = newVersion;
     }
 
     function getSchainExpirationTimestamp(SchainHash schainHash) external view override returns (Timestamp expiration) {
@@ -337,10 +347,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function _removeValidator(Validator storage validator) private {
-        if(!_validatorIds.remove(ValidatorId.unwrap(validator.id))) {
+        if(!_validatorData.validatorIds.remove(ValidatorId.unwrap(validator.id))) {
             revert ValidatorDeletionError(validator.id);
         }
-        if(!_addressToValidatorId.remove(validator.validatorAddress)) {
+        if(!_validatorData.addressToValidatorId.remove(validator.validatorAddress)) {
             revert ValidatorDeletionError(validator.id);
         }
 
@@ -463,15 +473,15 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function _getValidator(ValidatorId id) private view returns (Validator storage validator) {
-        if (_validatorIds.contains(ValidatorId.unwrap(id))) {
-            return _validators[id];
+        if (_validatorData.validatorIds.contains(ValidatorId.unwrap(id))) {
+            return _validatorData.validators[id];
         } else {
             revert ValidatorNotFound(id);
         }
     }
 
     function _getValidatorByAddress(address validatorAddress) private view returns (Validator storage validator) {
-        (bool success, ValidatorId id) = _addressToValidatorId.tryGet(validatorAddress);
+        (bool success, ValidatorId id) = _validatorData.addressToValidatorId.tryGet(validatorAddress);
         if (success) {
             return _getValidator(id);
         } else {

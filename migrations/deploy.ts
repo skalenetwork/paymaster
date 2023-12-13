@@ -1,7 +1,7 @@
 import { Paymaster, PaymasterAccessManager } from "../typechain-types";
 import { ethers, upgrades } from "hardhat";
 import { Addressable } from "ethers";
-import { getVersion } from "@skalenetwork/upgrade-tools";
+import { getVersion } from "./tools/version";
 
 
 // TODO: remove fixed gas limit

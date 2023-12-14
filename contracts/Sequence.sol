@@ -24,7 +24,7 @@ pragma solidity ^0.8.19;
 // cspell:words deque structs
 
 import {Timestamp} from "./DateTimeUtils.sol";
-import {TypedDoubleEndedQueue} from "./structs/TypedDoubleEndedQueue.sol";
+import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
 
 
 library SequenceLibrary {

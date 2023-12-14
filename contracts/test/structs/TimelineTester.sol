@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /*
-    HeapTester.sol - Paymaster
+    TimelineTester.sol - Paymaster
     Copyright (C) 2023-Present SKALE Labs
     @author Dmytro Stebaiev
 
@@ -23,24 +23,17 @@ pragma solidity ^0.8.19;
 
 // cspell:words structs
 
-import {IHeapTester} from "../../interfaces/test/structs/IHeapTester.sol";
-import {HeapLibrary} from "../../structs/Heap.sol";
+import {ITimelineTester} from "../../interfaces/test/structs/ITimelineTester.sol";
+import {TimelineLibrary} from "../../Timeline.sol";
+import {Timestamp} from "../../DateTimeUtils.sol";
 
 
-contract HeapTester is IHeapTester {
-    using HeapLibrary for HeapLibrary.Heap;
+contract TimelineTester is ITimelineTester {
+    using TimelineLibrary for TimelineLibrary.Timeline;
 
-    HeapLibrary.Heap private _heap;
+    TimelineLibrary.Timeline private _timeline;
 
-    function add(uint256 value) external override {
-        _heap.add(value);
-    }
-
-    function pop() external override {
-        _heap.pop();
-    }
-
-    function get() external view override returns (uint256 minimum) {
-        return _heap.get();
+    function getSum(Timestamp from, Timestamp to) external override returns (uint256 sum) {
+        return _timeline.getSum(from, to);
     }
 }

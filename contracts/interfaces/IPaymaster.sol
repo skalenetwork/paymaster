@@ -26,6 +26,7 @@ pragma solidity ^0.8.18;
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 
 import {Months, Seconds, Timestamp} from "../DateTimeUtils.sol";
+import {SKL} from "../types/Skl.sol";
 import {USD} from "../types/Usd.sol";
 
 
@@ -51,4 +52,6 @@ interface IPaymaster {
     function claim(address to) external;
     function claimFor(ValidatorId validatorId, address to) external;
     function getSchainExpirationTimestamp(SchainHash schainHash) external view returns (Timestamp expiration);
+    function getRewardAmount() external view returns (SKL reward);
+    function getRewardAmountFor(ValidatorId validatorId) external view returns (SKL reward);
 }

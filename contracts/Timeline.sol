@@ -23,8 +23,8 @@ pragma solidity ^0.8.19;
 
 // cspell:words deque structs
 
-import {PriorityQueueLibrary} from "./structs/PriorityQueue.sol";
-import {TypedDoubleEndedQueue} from "./structs/TypedDoubleEndedQueue.sol";
+import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
+import {TypedPriorityQueue} from "./structs/typed/TypedPriorityQueue.sol";
 import {DateTimeUtils, Seconds, Timestamp} from "./DateTimeUtils.sol";
 
 
@@ -33,7 +33,8 @@ library TimelineLibrary {
     type ValueId is bytes32;
 
     using TypedDoubleEndedQueue for TypedDoubleEndedQueue.ValueIdDeque;
-    using PriorityQueueLibrary for PriorityQueueLibrary.PriorityQueue;
+    using TypedPriorityQueue for TypedPriorityQueue.ChangeIdPriorityQueue;
+    using TypedPriorityQueue for TypedPriorityQueue.ChangeIdPriorityQueueIterator;
 
     error CannotSetValueInThePast();
     error TimeIntervalIsNotProcessed();
@@ -47,7 +48,7 @@ library TimelineLibrary {
 
         ChangeId changesEnd;
         mapping (ChangeId => Change) futureChanges;
-        PriorityQueueLibrary.PriorityQueue changesQueue;
+        TypedPriorityQueue.ChangeIdPriorityQueue changesQueue;
 
         ValueId valuesEnd;
         mapping (ValueId => Value) values;
@@ -105,30 +106,21 @@ library TimelineLibrary {
     // slither-disable-next-line dead-code
     function getSum(Timeline storage timeline, Timestamp from, Timestamp to) internal view returns (uint256 sum) {
     // solhint-enable private-vars-leading-underscore
-        _validateTimeInterval(timeline, from , to, true);
-        if (timeline.valuesQueue.empty()) {
-            return 0;
-        }
-        if (from < _getValueByIndex(timeline, 0).timestamp) {
-            return getSum(timeline, _getValueByIndex(timeline, 0).timestamp, to);
-        }
 
-        sum = 0;
-        uint256 queueLength = timeline.valuesQueue.length();
-        Timestamp current = from;
-        for (uint256 i = _getLowerBoundIndex(timeline, from); i < queueLength && current < to; ++i) {
-            Timestamp next = to;
-            if (i + 1 < queueLength) {
-                Timestamp nextInterval = _getValueByIndex(timeline, i+1).timestamp;
-                if (nextInterval < to) {
-                    next = nextInterval;
-                }
+        if (to < from) {
+            revert IncorrectTimeInterval();
+        }
+        Timestamp processedUntil = timeline.processedUntil;
+        if (processedUntil < to) {
+            if (processedUntil < from) {
+                return _getSumInUnprocessedSegment(timeline, to) - _getSumInUnprocessedSegment(timeline, from);
+            } else {
+                return _getSumInProcessedSegment(timeline, from, timeline.processedUntil) +
+                    _getSumInUnprocessedSegment(timeline, to);
             }
-
-            sum += _getValueByIndex(timeline, i).value * Seconds.unwrap(DateTimeUtils.duration(current, next));
-
-            current = next;
         }
+
+        return _getSumInProcessedSegment(timeline, from, to);
     }
 
     // Library internal functions should not have leading underscore
@@ -183,18 +175,106 @@ library TimelineLibrary {
         return ValueId.wrap(unwrappedValue);
     }
 
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // TimelineLibrary.ChangeId.unwrap(value)
+    // TODO: remove the function after slither fix the issue
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function unwrapChangeId(ChangeId value) internal pure returns (uint256 unwrappedValue) {
+        return ChangeId.unwrap(value);
+    }
+
+    // This function is a workaround to allow slither to analyze the code
+    // because current version fails on
+    // TimelineLibrary.ChangeId.wrap(value)
+    // TODO: remove the function after slither fix the issue
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function wrapChangeId(uint256 unwrappedValue) internal pure returns (ChangeId wrappedValue) {
+        return ChangeId.wrap(unwrappedValue);
+    }
+
     // Private
+
+    function _getSumInProcessedSegment(
+        Timeline storage timeline,
+        Timestamp from,
+        Timestamp to
+    )
+        private
+        view
+        returns (uint256 sum)
+    {
+        _validateTimeInterval(timeline, from , to, true);
+        if (timeline.valuesQueue.empty()) {
+            return 0;
+        }
+        if (from < _getValueByIndex(timeline, 0).timestamp) {
+            return getSum(timeline, _getValueByIndex(timeline, 0).timestamp, to);
+        }
+
+        sum = 0;
+        uint256 queueLength = timeline.valuesQueue.length();
+        Timestamp current = from;
+        for (uint256 i = _getLowerBoundIndex(timeline, from); i < queueLength && current < to; ++i) {
+            Timestamp next = to;
+            if (i + 1 < queueLength) {
+                Timestamp nextInterval = _getValueByIndex(timeline, i+1).timestamp;
+                if (nextInterval < to) {
+                    next = nextInterval;
+                }
+            }
+
+            sum += _getValueByIndex(timeline, i).value * Seconds.unwrap(DateTimeUtils.duration(current, next));
+
+            current = next;
+        }
+    }
+
+    function _getSumInUnprocessedSegment(Timeline storage timeline, Timestamp to) private view returns (uint256 sum) {
+        Value memory current;
+        if (timeline.valuesQueue.empty()) {
+            current = Value({
+                timestamp: Timestamp.wrap(0),
+                value: 0
+            });
+        } else {
+            current = _getCurrentValue(timeline);
+        }
+
+        if (!timeline.changesQueue.empty()) {
+            for (
+                TypedPriorityQueue.ChangeIdPriorityQueueIterator memory changeIdsIterator =
+                    timeline.changesQueue.getIterator();
+                changeIdsIterator.hasNext();
+                changeIdsIterator.step(timeline.changesQueue)
+            ) {
+                Change storage change = timeline.futureChanges[changeIdsIterator.getValue()];
+                Value memory nextValue = Value({
+                    timestamp: change.timestamp,
+                    value: current.value + change.add - change.subtract
+                });
+                if (to < nextValue.timestamp) {
+                    break;
+                }
+
+                sum += current.value * Seconds.unwrap(DateTimeUtils.duration(current.timestamp, nextValue.timestamp));
+                current = nextValue;
+            }
+        }
+
+        sum += current.value * Seconds.unwrap(DateTimeUtils.duration(current.timestamp, to));
+    }
 
     function _hasFutureChanges(Timeline storage timeline) private view returns (bool hasChanges) {
         return !timeline.changesQueue.empty();
     }
 
     function _getNextChange(Timeline storage timeline) private view returns (Change storage change) {
-        ChangeId changeId = ChangeId.wrap(
-            PriorityQueueLibrary.unwrapValue(
-                timeline.changesQueue.front()
-            )
-        );
+        ChangeId changeId = timeline.changesQueue.front();
         return timeline.futureChanges[changeId];
     }
 
@@ -215,16 +295,12 @@ library TimelineLibrary {
         });
         timeline.changesQueue.push(
             Timestamp.unwrap(timestamp),
-            PriorityQueueLibrary.wrapValue(ChangeId.unwrap(changeId))
+            changeId
         );
     }
 
     function _popNextChange(Timeline storage timeline) private {
-        ChangeId changeId = ChangeId.wrap(
-            PriorityQueueLibrary.unwrapValue(
-                timeline.changesQueue.front()
-            )
-        );
+        ChangeId changeId = timeline.changesQueue.front();
         timeline.changesQueue.pop();
         delete timeline.futureChanges[changeId];
     }

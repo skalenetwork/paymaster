@@ -133,6 +133,14 @@ describe("Paymaster", () => {
                 const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
                 expect((await token.balanceOf(await validator.getAddress()))).to.be.equal(tokensPerMonth);
             })
+
+            it("should calculate reward amount before claiming", async () => {
+                const paymaster = await loadFixture(payOneMonthFixture);
+                const paidUntil = new Date( Number(await paymaster.getSchainExpirationTimestamp(schainHash)) * MS_PER_SEC);
+                await skipTimeToSpecificDate(paidUntil);
+                const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+                expect(await paymaster.connect(validator).getRewardAmount()).to.be.equal(tokensPerMonth);
+            });
         })
     });
 });

@@ -54,7 +54,7 @@ import {
     USD,
     ValidatorId
 } from "./interfaces/IPaymaster.sol";
-import {TypedMap} from "./structs/TypedMap.sol";
+import {TypedMap} from "./structs/typed/TypedMap.sol";
 import {SKL} from "./types/Skl.sol";
 import {
     DateTimeUtils,
@@ -287,6 +287,18 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         return _getSchain(schainHash).paidUntil;
     }
 
+    function getRewardAmount() external view override returns (SKL reward) {
+        return getRewardAmountFor(_getValidatorByAddress(_msgSender()).id);
+    }
+
+    function getRewardAmountFor(ValidatorId validatorId) public view override returns (SKL reward) {
+        Validator storage validator = _getValidator(validatorId);
+        return _getRewardAmount(
+            validator,
+            DateTimeUtils.firstDayOfMonth(_getTimestamp())
+        );
+    }
+
     // Public
 
     function claimFor(ValidatorId validatorId, address to) public restricted override {
@@ -306,26 +318,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         Timestamp claimUntil = DateTimeUtils.firstDayOfMonth(_getTimestamp());
         _totalRewards.process(claimUntil);
 
-        SKL rewards = _calculateRewards(
-            validator,
-            Payment({
-                from: validator.claimedUntil,
-                to: claimUntil,
-                amount: SKL.wrap(0) // ignored by _loadFromTimeline
-            }),
-            _loadFromTimeline
-        );
+        SKL rewards = _getRewardAmount(validator, claimUntil);
         validator.claimedUntil = claimUntil;
-
-        DebtId end = debtsEnd;
-        for (DebtId debtId = validator.firstUnpaidDebt; _before(debtId, end); debtId = _next(debtId)) {
-            rewards = rewards + _calculateRewards(
-                validator,
-                debts[debtId],
-                _proportionalRewardGetter
-            );
-        }
-        validator.firstUnpaidDebt = end;
+        validator.firstUnpaidDebt = debtsEnd;
 
         if (!skaleToken.transfer(to, SKL.unwrap(rewards))) {
             revert TransferFailure();
@@ -438,6 +433,27 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         debts[id].from = Timestamp.wrap(0);
         debts[id].to = Timestamp.wrap(0);
         debts[id].amount = SKL.wrap(0);
+    }
+
+    function _getRewardAmount(Validator storage validator, Timestamp claimUntil) private view returns (SKL rewards) {
+        rewards = _calculateRewards(
+            validator,
+            Payment({
+                from: validator.claimedUntil,
+                to: claimUntil,
+                amount: SKL.wrap(0) // ignored by _loadFromTimeline
+            }),
+            _loadFromTimeline
+        );
+
+        DebtId end = debtsEnd;
+        for (DebtId debtId = validator.firstUnpaidDebt; _before(debtId, end); debtId = _next(debtId)) {
+            rewards = rewards + _calculateRewards(
+                validator,
+                debts[debtId],
+                _proportionalRewardGetter
+            );
+        }
     }
 
     // False positive detection of the dead code. The function is used in `claim` function

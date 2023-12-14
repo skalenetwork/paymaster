@@ -28,12 +28,20 @@ error AccessToEmptyPriorityQueue();
 
 library PriorityQueueLibrary {
     using HeapLibrary for HeapLibrary.Heap;
+    using HeapLibrary for HeapLibrary.Iterator;
 
     type Value is uint256;
 
     struct PriorityQueue {
         HeapLibrary.Heap priorities;
         mapping (uint256 => Value[]) values;
+    }
+
+    struct Iterator {
+        HeapLibrary.Iterator priorityIterator;
+        Value value;
+        uint256 valueIndex;
+        uint256 valuesLength;
     }
 
     // Library internal functions should not have leading underscore
@@ -48,7 +56,7 @@ library PriorityQueueLibrary {
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function empty(PriorityQueue storage queue) internal view returns (bool result) {
-        return queue.priorities.size == 0;
+        return queue.priorities.size() == 0;
     }
 
     // Library internal functions should not have leading underscore
@@ -73,6 +81,51 @@ library PriorityQueueLibrary {
         if (length == 1) {
             queue.priorities.pop();
         }
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function getIterator(PriorityQueue storage queue) internal view returns (Iterator memory iterator) {
+        if (empty(queue)) {
+            revert AccessToEmptyPriorityQueue();
+        }
+        HeapLibrary.Iterator memory priorityIterator = queue.priorities.getIterator();
+        return Iterator({
+            priorityIterator: priorityIterator,
+            value: queue.values[priorityIterator.getValue()][0],
+            valueIndex: 0,
+            valuesLength: queue.values[priorityIterator.getValue()].length
+        });
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function hasNext(Iterator memory iterator) internal pure returns (bool exists) {
+        if (iterator.valueIndex + 1 < iterator.valuesLength) {
+            return true;
+        } else {
+            return iterator.priorityIterator.hasNext();
+        }
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function step(Iterator memory iterator, PriorityQueue storage queue) internal view {
+        if (iterator.valueIndex + 1 < iterator.valuesLength) {
+            ++iterator.valueIndex;
+            iterator.value = queue.values[iterator.priorityIterator.getValue()][iterator.valueIndex];
+        } else {
+            iterator.priorityIterator.step();
+            iterator.valueIndex = 0;
+            iterator.valuesLength = queue.values[iterator.priorityIterator.getValue()].length;
+            iterator.value = queue.values[iterator.priorityIterator.getValue()][iterator.valueIndex];
+        }
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function getValue(Iterator memory iterator) internal pure returns (Value value) {
+        return iterator.value;
     }
 
     // This function is a workaround to allow slither to analyze the code

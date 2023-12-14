@@ -1,5 +1,4 @@
-// TODO:
-// Remove this file
+// TODO: Remove this file
 // and import it from @skalenetwork/upgrade-tools
 
 import {existsSync, promises as fs} from "fs";

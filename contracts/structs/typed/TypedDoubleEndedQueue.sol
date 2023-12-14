@@ -25,8 +25,8 @@ pragma solidity ^0.8.20;
 
 import {DoubleEndedQueue} from "@openzeppelin/contracts/utils/structs/DoubleEndedQueue.sol";
 
-import {SequenceLibrary} from "../Sequence.sol";
-import {TimelineLibrary} from "../Timeline.sol";
+import {SequenceLibrary} from "../../Sequence.sol";
+import {TimelineLibrary} from "../../Timeline.sol";
 
 
 library TypedDoubleEndedQueue {

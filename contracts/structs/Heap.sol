@@ -31,6 +31,10 @@ library HeapLibrary {
     NodeId private constant _ROOT = NodeId.wrap(1);
 
     struct Heap {
+        uint256[] values;
+    }
+
+    struct Iterator {
         uint256 size;
         uint256[] values;
     }
@@ -42,14 +46,13 @@ library HeapLibrary {
             heap.values.push(0);
         }
         heap.values.push(value);
-        heap.size += 1;
-        _fixUp(heap, NodeId.wrap(heap.values.length - 1), value);
+        _fixUp(heap, _getLastNode(heap), value);
     }
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function get(Heap storage heap) internal view returns (uint256 minimum) {
-        if (heap.size > 0) {
+        if (heap.values.length > 0) {
             return _getValue(heap, _ROOT);
         } else {
             revert AccessToEmptyHeap();
@@ -59,14 +62,57 @@ library HeapLibrary {
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function pop(Heap storage heap) internal {
-        if (heap.size > 0) {
+        if (size(heap) > 0) {
             uint256 lastValue = _getValue(heap, _getLastNode(heap));
-            --heap.size;
-            if (heap.size > 0) {
+            heap.values.pop();
+            if (size(heap) > 0) {
                 _fixDown(heap, _ROOT, _getLastNode(heap), lastValue);
             }
         } else {
             revert AccessToEmptyHeap();
+        }
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function size(Heap storage heap) internal view returns (uint256 heapSize) {
+        heapSize = heap.values.length;
+        if (heapSize > 0) {
+            --heapSize;
+        }
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function getIterator(Heap storage heap) internal view returns (Iterator memory iterator) {
+        return Iterator({
+            size: size(heap),
+            values: heap.values
+        });
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function getValue(Iterator memory iterator) internal pure returns (uint256 value) {
+        if (iterator.size == 0) {
+            revert AccessToEmptyHeap();
+        }
+        return iterator.values[NodeId.unwrap(_ROOT)];
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function hasNext(Iterator memory iterator) internal pure returns (bool exists) {
+        return iterator.size > 1;
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
+    function step(Iterator memory iterator) internal pure {
+        iterator.values[NodeId.unwrap(_ROOT)] = iterator.values[iterator.size];
+        --iterator.size;
+        if (iterator.size > 1) {
+            _fixDown(iterator, _ROOT, NodeId.wrap(iterator.size));
         }
     }
 
@@ -88,7 +134,7 @@ library HeapLibrary {
     }
 
     function _getLastNode(Heap storage heap) private view returns (NodeId last) {
-        last = NodeId.wrap(heap.size);
+        last = NodeId.wrap(heap.values.length - 1);
     }
 
     function _fixUp(Heap storage heap, NodeId node, uint256 value) private {
@@ -134,6 +180,31 @@ library HeapLibrary {
         }
     }
 
+    function _fixDown(Iterator memory iterator, NodeId node, NodeId lastNode) private pure {
+        NodeId left = _getLeftChild(node);
+        NodeId right = _getRightChild(node);
+
+        if (_exists(left, lastNode)) {
+            uint256 leftValue = _getValue(iterator, left);
+            uint256 minValue = leftValue;
+            NodeId minNode = left;
+            if (_exists(right, lastNode)) {
+                // left and right child exist
+                uint256 rightValue = _getValue(iterator, right);
+                if (rightValue < leftValue) {
+                    minNode = right;
+                    minValue = rightValue;
+                }
+            }
+            uint256 value = _getValue(iterator, node);
+            if (minValue < value) {
+                _setValue(iterator, node, minValue);
+                _setValue(iterator, minNode, value);
+                _fixDown(iterator, minNode, lastNode);
+            }
+        }
+    }
+
     function _equals(NodeId a, NodeId b) private pure returns (bool result) {
         return NodeId.unwrap(a) == NodeId.unwrap(b);
     }
@@ -146,7 +217,15 @@ library HeapLibrary {
         value = heap.values[NodeId.unwrap(node)];
     }
 
+    function _getValue(Iterator memory iterator, NodeId node) private pure returns (uint256 value) {
+        value = iterator.values[NodeId.unwrap(node)];
+    }
+
     function _setValue(Heap storage heap, NodeId node, uint256 value) private {
         heap.values[NodeId.unwrap(node)] = value;
+    }
+
+    function _setValue(Iterator memory iterator, NodeId node, uint256 value) private pure {
+        iterator.values[NodeId.unwrap(node)] = value;
     }
 }

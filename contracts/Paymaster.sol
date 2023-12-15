@@ -291,6 +291,29 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         return getRewardAmountFor(_getValidatorByAddress(_msgSender()).id);
     }
 
+    function getNodesNumber(ValidatorId validatorId) external view override returns (uint256 number) {
+        return _getValidator(validatorId).nodesAmount;
+    }
+
+    function getActiveNodesNumber(ValidatorId validatorId) external view override returns (uint256 number) {
+        return _getValidator(validatorId).activeNodesAmount;
+    }
+
+    function getValidatorsNumber() external view override returns (uint256 number) {
+        return _validatorData.validatorIds.length();
+    }
+
+    function getSchainsNames() external view override returns (string[] memory names) {
+        names = new string[](getSchainsNumber());
+        for (uint256 i = 0; i < names.length; ++i) {
+            names[i] = _getSchain(SchainHash.wrap(_schainHashes.at(i))).name;
+        }
+    }
+
+    function getSchainsNumber() public view override returns (uint256 number) {
+        return _schainHashes.length();
+    }
+
     function getRewardAmountFor(ValidatorId validatorId) public view override returns (SKL reward) {
         Validator storage validator = _getValidator(validatorId);
         return _getRewardAmount(

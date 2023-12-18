@@ -50,3 +50,8 @@ export const nextMonth = (timestamp: number | bigint) => {
 
     return new Date(Date.UTC(year, month, 1)).getTime() / MS_PER_SEC;
 }
+
+export const skipMonth = async () => {
+    const timestamp = await currentTime();
+    await skipTime(nextMonth(timestamp) - timestamp);
+}

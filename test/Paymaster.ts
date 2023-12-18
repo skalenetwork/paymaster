@@ -1,10 +1,11 @@
-import { MS_PER_SEC, currentTime, nextMonth, skipTimeToSpecificDate } from "./tools/time";
+import { MS_PER_SEC, currentTime, nextMonth, skipMonth, skipTimeToSpecificDate } from "./tools/time";
 import { Paymaster, PaymasterAccessManager, Token } from "../typechain-types";
 import {
     deployAccessManager,
     deployPaymaster,
     setupRoles
 } from "../migrations/deploy";
+import { HDNodeWallet } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { expect } from "chai";
@@ -17,6 +18,7 @@ describe("Paymaster", () => {
     const schainName = "d2-schain";
     const schainHash = ethers.solidityPackedKeccak256(["string"], [schainName]);
     const BIG_AMOUNT = ethers.parseEther("100000");
+    const precision = BigInt(1);
 
     let owner: SignerWithAddress;
     let validator: SignerWithAddress;
@@ -141,6 +143,100 @@ describe("Paymaster", () => {
                 const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
                 expect(await paymaster.connect(validator).getRewardAmount()).to.be.equal(tokensPerMonth);
             });
+        })
+    });
+
+    describe("when 7 validator and 7 schain exist", () => {
+        const validatorsNumber = 7;
+        const schainsNumber = 7;
+        const defaultBalance = ethers.parseEther("100");
+
+        const addSchainAndValidatorFixture = async () => {
+            const paymaster = await loadFixture(deployPaymasterFixture);
+            const token = await ethers.getContractAt("Token", await paymaster.skaleToken());
+            const validators: HDNodeWallet[] = [];
+            for (let index = 0; index < validatorsNumber; index += 1) {
+                validators.push(ethers.Wallet.createRandom(ethers.provider));
+            }
+
+            for (const [index, validatorWallet] of validators.entries()) {
+                if (await ethers.provider.getBalance(await validatorWallet.getAddress()) < defaultBalance) {
+                    await owner.sendTransaction({
+                        to: await validatorWallet.getAddress(),
+                        value: defaultBalance
+                    });
+                }
+                await paymaster.addValidator(index, await validatorWallet.getAddress());
+                await paymaster.setNodesAmount(index, index + 1);
+            }
+
+            const schains = [];
+
+            for (let index = 0; index < schainsNumber; index += 1) {
+                const currentSchainName = `schain-${index}`;
+                await paymaster.addSchain(currentSchainName);
+                schains.push(ethers.solidityPackedKeccak256(["string"], [currentSchainName]));
+            }
+
+            return { paymaster, schains, token, validators };
+        }
+
+        it("should claim reward even if not all chains paid in time", async () => {
+            const { paymaster, schains, token, validators } = await loadFixture(addSchainAndValidatorFixture);
+            const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+
+            // Month A
+
+            await paymaster.connect(user).pay(schains[0], 1);
+            await paymaster.connect(user).pay(schains[1], 1);
+
+            await skipMonth();
+
+            // Month B
+
+            // Chain does not pay for 0 (non full) month
+            expect(await paymaster.getRewardAmountFor(0)).to.be.equal(0);
+            await expect(paymaster.connect(validators[0]).claim(await validators[0].getAddress()))
+                .to.changeTokenBalance(token, validators[0], 0);
+
+            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+            const thirdChain = 2;
+            await paymaster.connect(user).pay(schains[thirdChain], 1);
+
+            await skipMonth();
+
+            // Month C
+
+            let totalNodesNumber = BigInt(0);
+            for (let index = 0; index < validators.length; index += 1) {
+                totalNodesNumber += await paymaster.getNodesNumber(index);
+            }
+
+            // Reward for month B is available
+            const amountOfPaidChains = 3;
+            const monthBReward = tokensPerMonth * BigInt(amountOfPaidChains);
+            expect(await paymaster.getRewardAmountFor(0)).to.be.equal(monthBReward / totalNodesNumber);
+            await expect(paymaster.connect(validators[0]).claim(await validators[0].getAddress()))
+                .to.changeTokenBalance(token, validators[0], monthBReward / totalNodesNumber);
+
+            // Should not get reward one more time
+            expect(await paymaster.getRewardAmountFor(0)).to.be.equal(0);
+            await expect(paymaster.connect(validators[0]).claim(await validators[0].getAddress()))
+                .to.changeTokenBalance(token, validators[0], 0);
+
+            // Reward for another validator
+            for (let anotherValidator = 1; anotherValidator < validators.length; anotherValidator += 1) {
+                const estimated = await paymaster.getRewardAmountFor(anotherValidator);
+                const calculated = monthBReward * (await paymaster.getNodesNumber(anotherValidator)) / totalNodesNumber;
+                expect(estimated).be.lessThanOrEqual(calculated);
+                expect(calculated - estimated).be.lessThanOrEqual(precision);
+                await expect(paymaster.connect(validators[anotherValidator]).claim(await validators[anotherValidator].getAddress()))
+                    .to.changeTokenBalance(
+                        token,
+                        validators[anotherValidator],
+                        estimated
+                    );
+            }
         })
     });
 });

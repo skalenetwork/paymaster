@@ -212,8 +212,12 @@ library TimelineLibrary {
         if (timeline.valuesQueue.empty()) {
             return 0;
         }
-        if (from < _getValueByIndex(timeline, 0).timestamp) {
-            return getSum(timeline, _getValueByIndex(timeline, 0).timestamp, to);
+        Timestamp firstValueTimestamp = _getValueByIndex(timeline, 0).timestamp;
+        if (to <= firstValueTimestamp) {
+            return 0;
+        }
+        if (from < firstValueTimestamp) {
+            return _getSumInProcessedSegment(timeline, firstValueTimestamp, to);
         }
 
         sum = 0;

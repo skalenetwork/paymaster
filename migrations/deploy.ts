@@ -60,7 +60,12 @@ export const setupRoles = async (accessManager: PaymasterAccessManager, paymaste
 
 export const setup = async (paymaster: Paymaster) => {
     const version = await getVersion();
-    const response = await paymaster.setVersion(version);
+    const response = await paymaster.setVersion(
+        version,
+        {
+            "gasLimit": DEPLOY_GAS_LIMIT
+        }
+    );
     await response.wait();
 }
 

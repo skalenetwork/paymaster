@@ -115,8 +115,8 @@ describe("Paymaster", () => {
             await paymaster.removeValidator(validatorId);
 
             await expect(paymaster.setNodesAmount(validatorId, nodesAmount + 1))
-                .to.be.revertedWithCustomError(paymaster, "ValidatorNotFound")
-                .withArgs(validatorId);
+                .to.be.revertedWithCustomError(paymaster, "ValidatorHasBeenRemoved")
+                .withArgs(validatorId, await currentTime());
         });
 
         describe("when schain was paid for 1 month", () => {

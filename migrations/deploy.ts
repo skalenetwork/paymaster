@@ -6,7 +6,7 @@ import { getVersion } from "./tools/version";
 
 // TODO: remove fixed gas limit
 // after estimateGas fix in skaled
-const DEPLOY_GAS_LIMIT = 10e6;
+const DEPLOY_GAS_LIMIT = 20e6;
 
 export const deployAccessManager = async (owner: Addressable) => {
     console.log("Deploy AccessManager");

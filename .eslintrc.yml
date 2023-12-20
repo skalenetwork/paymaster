@@ -19,6 +19,7 @@ overrides:
   - files: [test/**/*.ts]
     rules:
       init-declarations: ["off"]
+      max-lines: ["off"]
       max-lines-per-function: ["off"]
       max-statements: ["off"]
       no-await-in-loop: ["off"]

@@ -82,7 +82,7 @@ library TimelineLibrary {
                 } else {
                     Value storage currentValue = _getCurrentValue(timeline);
                     if (currentValue.timestamp == nextChange.timestamp) {
-                        currentValue.value += nextChange.add - nextChange.subtract;
+                        currentValue.value = currentValue.value + nextChange.add - nextChange.subtract;
                     } else {
                         _createValue(timeline, Value({
                             timestamp: nextChange.timestamp,

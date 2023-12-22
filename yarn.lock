@@ -1894,6 +1894,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@skalenetwork/skale-contracts-ethers-v6@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@skalenetwork/skale-contracts-ethers-v6@npm:1.0.0"
+  dependencies:
+    "@skalenetwork/skale-contracts": 1.0.0
+    ethers: ^6.7.1
+  checksum: 631f36d2f37a21bb0130a00104c734090014af31ef958595881604b5fed7cf082efdf155a5520a68ceb49068fd2d4a65614fd1b2a3aee89850eb75cf017c34e7
+  languageName: node
+  linkType: hard
+
+"@skalenetwork/skale-contracts@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@skalenetwork/skale-contracts@npm:1.0.0"
+  dependencies:
+    axios: ^1.4.0
+  checksum: 1199c9bcb01a098da6c544ee90f1d71e8be47a21151a5b4ab7555eb0ef259a16019e3c27653d72903f8d7d931800959aab18f6c4bb7d7e11dc8e06f57696924e
+  languageName: node
+  linkType: hard
+
 "@smithy/types@npm:^2.5.0":
   version: 2.6.0
   resolution: "@smithy/types@npm:2.6.0"
@@ -4388,9 +4407,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^6.4.0":
-  version: 6.8.0
-  resolution: "ethers@npm:6.8.0"
+"ethers@npm:^6.7.1, ethers@npm:^6.9.0":
+  version: 6.9.0
+  resolution: "ethers@npm:6.9.0"
   dependencies:
     "@adraffy/ens-normalize": 1.10.0
     "@noble/curves": 1.2.0
@@ -4399,7 +4418,7 @@ __metadata:
     aes-js: 4.0.0-beta.5
     tslib: 2.4.0
     ws: 8.5.0
-  checksum: 967e4bdc23eae48444361ededa77cd884271ab7af059a0458b3c2ec52338124258cb92dbb28b37f53c7b532313dcbb209792ea3232c87927c94164697948182d
+  checksum: e7b3b912b92b818fe65a192b32f4dd87ce0b71f4ffc194b4b3764b4b17d3b6ed953b667293e4c9276f785fa8c8659934c513843350317c61178af8e6165afbdd
   languageName: node
   linkType: hard
 
@@ -7057,6 +7076,7 @@ __metadata:
     "@openzeppelin/contracts-upgradeable": ^5.0.0
     "@openzeppelin/hardhat-upgrades": ^2.4.1
     "@quant-finance/solidity-datetime": ^2.2.0
+    "@skalenetwork/skale-contracts-ethers-v6": ^1.0.0
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.11
@@ -7069,7 +7089,7 @@ __metadata:
     cspell: ^7.3.8
     dotenv: ^16.3.1
     eslint: ^8.55.0
-    ethers: ^6.4.0
+    ethers: ^6.9.0
     hardhat: ^2.19.1
     hardhat-gas-reporter: ^1.0.8
     lodash: ^4.17.21

@@ -21,7 +21,7 @@
 
 pragma solidity ^0.8.18;
 
-import {ValidatorId} from "../interfaces/IPaymaster.sol";
+import {Timestamp, ValidatorId} from "../interfaces/IPaymaster.sol";
 
 
 error ValidatorNotFound(
@@ -42,4 +42,9 @@ error ValidatorDeletionError(
 
 error ValidatorAddressAlreadyExists(
     address validatorAddress
+);
+
+error ValidatorHasBeenRemoved(
+    ValidatorId id,
+    Timestamp when
 );

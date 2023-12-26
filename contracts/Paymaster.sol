@@ -46,7 +46,8 @@ import {
     ValidatorAddingError,
     ValidatorAddressAlreadyExists,
     ValidatorAddressNotFound,
-    ValidatorDeletionError
+    ValidatorDeletionError,
+    ValidatorHasBeenRemoved
 } from "./errors/Validator.sol";
 import {
     IPaymaster,
@@ -90,12 +91,13 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     struct Validator {
         ValidatorId id;
+        address validatorAddress;
         uint256 nodesAmount;
         uint256 activeNodesAmount;
-        Timestamp claimedUntil;
-        address validatorAddress;
         SequenceLibrary.Sequence nodesHistory;
+        Timestamp claimedUntil;
         DebtId firstUnpaidDebt;
+        Timestamp deleted;
     }
 
     struct ValidatorData {
@@ -162,15 +164,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function removeValidator(ValidatorId id) external override restricted {
-        _removeValidator(_getValidator(id));
-    }
-
-    function setNodesAmount(ValidatorId validatorId, uint256 amount) external override restricted {
-        Validator storage validator = _getValidator(validatorId);
-        uint256 oldActiveNodesAmount = validator.activeNodesAmount;
-        validator.nodesAmount = amount;
-        validator.activeNodesAmount = amount;
-        _activeNodesAmountChanged(validator, oldActiveNodesAmount, amount);
+        Validator storage validator = _getValidator(id);
+        setNodesAmount(id, 0);
+        validator.deleted = _getTimestamp();
     }
 
     function setActiveNodes(ValidatorId validatorId, uint256 amount) external override restricted {
@@ -203,37 +199,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function clearHistory(Timestamp before) external override restricted {
-        uint256 schainsAmount = _schainHashes.length();
-        for (uint256 i = 0; i < schainsAmount; ++i) {
-            SchainHash schainHash = SchainHash.wrap(_schainHashes.at(i));
-            Schain storage schain = _getSchain(schainHash);
-            if (schain.paidUntil < before) {
-                revert ImportantDataRemoving();
-            }
-        }
-
-        DebtId firstUnpaidDebt = debtsEnd;
-        uint256 validatorsAmount = _validatorData.validatorIds.length();
-        for (uint256 i = 0; i < validatorsAmount; ++i) {
-            ValidatorId validatorId = ValidatorId.wrap(_validatorData.validatorIds.at(i));
-            Validator storage validator = _getValidator(validatorId);
-            if (validator.claimedUntil < before) {
-                revert ImportantDataRemoving();
-            }
-            if (_before(validator.firstUnpaidDebt, firstUnpaidDebt)) {
-                firstUnpaidDebt = validator.firstUnpaidDebt;
-            }
-            validator.nodesHistory.clear(before);
-        }
-
-        for (DebtId id = debtsBegin; !_equal(id, firstUnpaidDebt); id = _next(id)) {
-            _clearDebt(id);
-        }
-        debtsBegin = firstUnpaidDebt;
-
-        _totalRewards.process(before);
-        _totalRewards.clear(before);
-        _totalNodesHistory.clear(before);
+        _clearSchainsHistory(before);
+        _clearValidatorsHistory(before);
+        _clearPaymentsHistory(before);
     }
 
     function pay(SchainHash schainHash, Months duration) external override {
@@ -291,6 +259,29 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         return getRewardAmountFor(_getValidatorByAddress(_msgSender()).id);
     }
 
+    function getNodesNumber(ValidatorId validatorId) external view override returns (uint256 number) {
+        return _getValidator(validatorId).nodesAmount;
+    }
+
+    function getActiveNodesNumber(ValidatorId validatorId) external view override returns (uint256 number) {
+        return _getValidator(validatorId).activeNodesAmount;
+    }
+
+    function getValidatorsNumber() external view override returns (uint256 number) {
+        return _validatorData.validatorIds.length();
+    }
+
+    function getSchainsNames() external view override returns (string[] memory names) {
+        names = new string[](getSchainsNumber());
+        for (uint256 i = 0; i < names.length; ++i) {
+            names[i] = _getSchain(SchainHash.wrap(_schainHashes.at(i))).name;
+        }
+    }
+
+    function getSchainsNumber() public view override returns (uint256 number) {
+        return _schainHashes.length();
+    }
+
     function getRewardAmountFor(ValidatorId validatorId) public view override returns (SKL reward) {
         Validator storage validator = _getValidator(validatorId);
         return _getRewardAmount(
@@ -300,6 +291,17 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     // Public
+
+    function setNodesAmount(ValidatorId validatorId, uint256 amount) public override restricted {
+        Validator storage validator = _getValidator(validatorId);
+        if (validator.deleted != Timestamp.wrap(0)) {
+            revert ValidatorHasBeenRemoved(validatorId, validator.deleted);
+        }
+        uint256 oldActiveNodesAmount = validator.activeNodesAmount;
+        validator.nodesAmount = amount;
+        validator.activeNodesAmount = amount;
+        _activeNodesAmountChanged(validator, oldActiveNodesAmount, amount);
+    }
 
     function claimFor(ValidatorId validatorId, address to) public restricted override {
         _claimFor(validatorId, to);
@@ -312,6 +314,48 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     // Private
+
+    function _clearSchainsHistory(Timestamp before) private {
+        uint256 schainsAmount = _schainHashes.length();
+        for (uint256 i = 0; i < schainsAmount; ++i) {
+            SchainHash schainHash = SchainHash.wrap(_schainHashes.at(i));
+            Schain storage schain = _getSchain(schainHash);
+            if (schain.paidUntil < before) {
+                revert ImportantDataRemoving();
+            }
+        }
+    }
+
+    function _clearValidatorsHistory(Timestamp before) private {
+        DebtId firstUnpaidDebt = debtsEnd;
+        uint256 validatorsAmount = _validatorData.validatorIds.length();
+        for (uint256 i = 0; i < validatorsAmount; ++i) {
+            ValidatorId validatorId = ValidatorId.wrap(_validatorData.validatorIds.at(i));
+            Validator storage validator = _getValidator(validatorId);
+            if (validator.claimedUntil < before) {
+                revert ImportantDataRemoving();
+            }
+            if (_before(validator.firstUnpaidDebt, firstUnpaidDebt)) {
+                firstUnpaidDebt = validator.firstUnpaidDebt;
+            }
+            validator.nodesHistory.clear(before);
+            if (validator.deleted <= before) {
+                _removeValidator(validator);
+            }
+        }
+
+        for (DebtId id = debtsBegin; !_equal(id, firstUnpaidDebt); id = _next(id)) {
+            _clearDebt(id);
+        }
+        debtsBegin = firstUnpaidDebt;
+
+        _totalNodesHistory.clear(before);
+    }
+
+    function _clearPaymentsHistory(Timestamp before) private {
+        _totalRewards.process(before);
+        _totalRewards.clear(before);
+    }
 
     function _claimFor(ValidatorId validatorId, address to) private {
         Validator storage validator = _getValidator(validatorId);
@@ -355,6 +399,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         validator.claimedUntil = Timestamp.wrap(0);
         delete validator.validatorAddress;
         validator.nodesHistory.clear();
+        validator.deleted = Timestamp.wrap(0);
     }
 
     function _activeNodesAmountChanged(Validator storage validator, uint256 oldAmount, uint256 newAmount) private {

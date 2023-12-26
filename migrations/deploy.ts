@@ -6,7 +6,7 @@ import { getVersion } from "./tools/version";
 
 // TODO: remove fixed gas limit
 // after estimateGas fix in skaled
-const DEPLOY_GAS_LIMIT = 10e6;
+const DEPLOY_GAS_LIMIT = 20e6;
 
 export const deployAccessManager = async (owner: Addressable) => {
     console.log("Deploy AccessManager");
@@ -60,7 +60,12 @@ export const setupRoles = async (accessManager: PaymasterAccessManager, paymaste
 
 export const setup = async (paymaster: Paymaster) => {
     const version = await getVersion();
-    const response = await paymaster.setVersion(version);
+    const response = await paymaster.setVersion(
+        version,
+        {
+            "gasLimit": DEPLOY_GAS_LIMIT
+        }
+    );
     await response.wait();
 }
 

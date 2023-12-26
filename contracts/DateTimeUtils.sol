@@ -44,7 +44,8 @@ using {
 using {
     _timestampLess as <,
     _timestampLessOrEqual as <=,
-    _timestampEqual as ==
+    _timestampEqual as ==,
+    _timestampNotEqual as !=
 } for Timestamp global;
 
 function _secondsLess(Seconds left, Seconds right) pure returns (bool result) {
@@ -69,6 +70,10 @@ function _timestampLess(Timestamp left, Timestamp right) pure returns (bool resu
 
 function _timestampEqual(Timestamp left, Timestamp right) pure returns (bool result) {
     return Timestamp.unwrap(left) == Timestamp.unwrap(right);
+}
+
+function _timestampNotEqual(Timestamp left, Timestamp right) pure returns (bool result) {
+    return Timestamp.unwrap(left) != Timestamp.unwrap(right);
 }
 
 library DateTimeUtils {

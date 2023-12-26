@@ -33,7 +33,7 @@ contract TimelineTester is ITimelineTester {
 
     TimelineLibrary.Timeline private _timeline;
 
-    function getSum(Timestamp from, Timestamp to) external override returns (uint256 sum) {
+    function getSum(Timestamp from, Timestamp to) external view override returns (uint256 sum) {
         return _timeline.getSum(from, to);
     }
 }

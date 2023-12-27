@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /*
-    TimelineTester.sol - Paymaster
+    ITimelineTester.sol - Paymaster
     Copyright (C) 2023-Present SKALE Labs
     @author Dmytro Stebaiev
 
@@ -21,19 +21,11 @@
 
 pragma solidity ^0.8.19;
 
-// cspell:words structs
-
-import {ITimelineTester} from "../../interfaces/test/structs/ITimelineTester.sol";
-import {TimelineLibrary} from "../../Timeline.sol";
 import {Timestamp} from "../../DateTimeUtils.sol";
 
 
-contract TimelineTester is ITimelineTester {
-    using TimelineLibrary for TimelineLibrary.Timeline;
-
-    TimelineLibrary.Timeline private _timeline;
-
-    function getSum(Timestamp from, Timestamp to) external view override returns (uint256 sum) {
-        return _timeline.getSum(from, to);
-    }
+interface ITimelineTester {
+    function process(Timestamp until) external ;
+    function add(Timestamp from, Timestamp to, uint256 value) external;
+    function getSum(Timestamp from, Timestamp to) external returns (uint256 sum);
 }

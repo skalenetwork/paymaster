@@ -7058,6 +7058,7 @@ __metadata:
     hardhat: ^2.19.1
     hardhat-gas-reporter: ^1.0.8
     lodash: ^4.17.21
+    prando: ^6.0.1
     solhint: ^4.0.0
     solidity-coverage: ^0.8.0
     ts-node: ">=10.9.2"
@@ -7097,6 +7098,13 @@ __metadata:
   version: 8.0.0
   resolution: "pluralize@npm:8.0.0"
   checksum: 08931d4a6a4a5561a7f94f67a31c17e6632cb21e459ab3ff4f6f629d9a822984cf8afef2311d2005fbea5d7ef26016ebb090db008e2d8bce39d0a9a9d218736e
+  languageName: node
+  linkType: hard
+
+"prando@npm:^6.0.1":
+  version: 6.0.1
+  resolution: "prando@npm:6.0.1"
+  checksum: c0c25dbb2cb92dff4b0f44781f0e2132886c34ab6a12f7f0839d6073c783d86589d4c632727819d8fb0a5a675a7e27223285c6907261d3b6a49167b4cbdc162a
   languageName: node
   linkType: hard
 

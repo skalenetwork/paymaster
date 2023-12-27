@@ -100,13 +100,8 @@ library TimelineLibrary {
     }
 
     // Library internal functions should not have leading underscore
-    // solhint-disable private-vars-leading-underscore
-
-    // False positive detection of the dead code. The function is used in `Paymaster::_loadFromTimeline` function
-    // slither-disable-next-line dead-code
+    // solhint-disable-next-line private-vars-leading-underscore
     function getSum(Timeline storage timeline, Timestamp from, Timestamp to) internal view returns (uint256 sum) {
-    // solhint-enable private-vars-leading-underscore
-
         if (to < from) {
             revert IncorrectTimeInterval();
         }
@@ -247,15 +242,13 @@ library TimelineLibrary {
             });
         } else {
             current = _getCurrentValue(timeline);
+            current.timestamp = timeline.processedUntil;
         }
 
         if (!timeline.changesQueue.empty()) {
-            for (
-                TypedPriorityQueue.ChangeIdPriorityQueueIterator memory changeIdsIterator =
+            TypedPriorityQueue.ChangeIdPriorityQueueIterator memory changeIdsIterator =
                     timeline.changesQueue.getIterator();
-                changeIdsIterator.hasNext();
-                changeIdsIterator.step(timeline.changesQueue)
-            ) {
+            while (true) {
                 Change storage change = timeline.futureChanges[changeIdsIterator.getValue()];
                 Value memory nextValue = Value({
                     timestamp: change.timestamp,
@@ -267,6 +260,12 @@ library TimelineLibrary {
 
                 sum += current.value * Seconds.unwrap(DateTimeUtils.duration(current.timestamp, nextValue.timestamp));
                 current = nextValue;
+
+                if (changeIdsIterator.hasNext()) {
+                    changeIdsIterator.step(timeline.changesQueue);
+                } else {
+                    break;
+                }
             }
         }
 

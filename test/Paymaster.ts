@@ -296,13 +296,12 @@ describe("Paymaster", () => {
             const calculated = monthCReward
             expect(estimated).be.lessThanOrEqual(calculated);
             expect(calculated - estimated).be.lessThanOrEqual(removedValidatorsReward);
-            // TODO: add this check
-            // await expect(paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress()))
-            //     .to.changeTokenBalance(
-            //         token,
-            //         validators[validatorId],
-            //         estimated
-            //     );
+            await expect(paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress()))
+                .to.changeTokenBalance(
+                    token,
+                    validators[validatorId],
+                    estimated
+                );
         });
     });
 });

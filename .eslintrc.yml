@@ -19,6 +19,7 @@ overrides:
   - files: [test/**/*.ts]
     rules:
       init-declarations: ["off"]
+      max-depth: ["off"]
       max-lines: ["off"]
       max-lines-per-function: ["off"]
       max-statements: ["off"]

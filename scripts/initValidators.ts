@@ -6,11 +6,11 @@ import { promises as fs } from "fs";
 
 
 interface ValidatorNodes {
-    [key: string]: {
+    [key: number]: {
       numberOfNodes: number;
       numberOfActiveNodes: number;
     };
-  }
+}
 
 async function getContract(contractName: string, instance: Instance | undefined) {
     let contract;
@@ -39,9 +39,16 @@ async function addValidators(instance: Instance | undefined, paymaster: Paymaste
     for (let validatorId = 1; validatorId <= numberOfValidators; ++validatorId) {
         const validator = await validatorService.getValidator(validatorId);
         const validatorAddress = validator[1];
-        await paymaster.addValidator(validatorId, validatorAddress);
-        const percentageComplete = (validatorId * 100 / Number(numberOfValidators)).toFixed(1)
-        process.stdout.write(`\rPercentage complete: ${percentageComplete}`);
+        try {
+            await paymaster.getNodesNumber(validatorId);
+        } catch (e) {
+            console.log(`${validatorId} will be added`);
+            await paymaster.addValidator(validatorId, validatorAddress, {gasLimit: 1000000});
+            continue;
+        }
+        console.log(`${validatorId} already added`);
+        // const percentageComplete = (validatorId * 100 / Number(numberOfValidators)).toFixed(1)
+        // process.stdout.write(`\rPercentage complete: ${percentageComplete}`);
     }
 }
 
@@ -51,7 +58,7 @@ async function getNodes(instance: Instance | undefined) {
     const numberOfNodes = await nodes.getNumberOfNodes();
     const validatorNodes: ValidatorNodes = {};
     for (let nodeId = 0; nodeId < numberOfNodes; ++nodeId) {
-        const validatorId = await nodes.getValidatorId(nodeId) as number;
+        const validatorId = Number(await nodes.getValidatorId(nodeId));
         const isNodeLeft = await nodes.isNodeLeft(nodeId);
         if (!(validatorId in validatorNodes)) {
             validatorNodes[validatorId] = {
@@ -68,6 +75,13 @@ async function getNodes(instance: Instance | undefined) {
         const percentageComplete = ((nodeId + 1) * 100 / Number(numberOfNodes)).toFixed(1)
         process.stdout.write(`\rPercentage complete: ${percentageComplete}`);
     }
+    const tableData = Object.keys(validatorNodes).map((validatorId) => ({
+        Validator: +validatorId,
+        "Active Nodes": validatorNodes[+validatorId].numberOfActiveNodes,
+        "All Nodes": validatorNodes[+validatorId].numberOfNodes,
+      }));
+    console.log();
+    console.table(tableData);
     return validatorNodes;
 }
 
@@ -77,8 +91,8 @@ async function setNodes(paymaster: Paymaster, validatorNodes: ValidatorNodes) {
     for (const validatorId in validatorNodes) {
         const numberOfNodes = validatorNodes[validatorId].numberOfNodes;
         const numberOfActiveNodes = validatorNodes[validatorId].numberOfActiveNodes;
-        await paymaster.setNodesAmount(validatorId, numberOfNodes);
-        await paymaster.setActiveNodes(validatorId, numberOfActiveNodes);
+        await paymaster.setNodesAmount(validatorId, numberOfNodes, {gasLimit: 1000000});
+        await paymaster.setActiveNodes(validatorId, numberOfActiveNodes, {gasLimit: 1000000});
         const percentageComplete = (++it * 100 / Object.keys(validatorNodes).length).toFixed(1);
         process.stdout.write(`\rPercentage complete: ${percentageComplete}`);
     }

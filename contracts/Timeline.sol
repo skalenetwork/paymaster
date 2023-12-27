@@ -64,6 +64,20 @@ library TimelineLibrary {
         uint256 value;
     }
 
+    event ProcessedUntil(
+        Timestamp timestamp
+    );
+
+    event AddedToTimeline(
+        Timestamp from,
+        Timestamp to,
+        uint256 value
+    );
+
+    event Cleared(
+        Timestamp until
+    );
+
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function process(Timeline storage timeline, Timestamp until) internal {
@@ -97,6 +111,8 @@ library TimelineLibrary {
         }
 
         timeline.processedUntil = until;
+
+        emit ProcessedUntil(until);
     }
 
     // Library internal functions should not have leading underscore
@@ -130,6 +146,8 @@ library TimelineLibrary {
             _addChange(timeline, to.sub(Seconds.wrap(1)), reminder, 0);
         }
         _addChange(timeline, to, 0, rate + reminder);
+
+        emit AddedToTimeline(from, to, value);
     }
 
     // Library internal functions should not have leading underscore
@@ -146,6 +164,8 @@ library TimelineLibrary {
             ValueId valueId = timeline.valuesQueue.popFront();
             _deleteValue(timeline.values[valueId]);
         }
+
+        emit Cleared(before);
     }
 
     // This function is a workaround to allow slither to analyze the code

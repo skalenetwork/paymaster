@@ -44,12 +44,12 @@ library PriorityQueueLibrary {
         uint256 valuesLength;
     }
 
-    event ValueAdded(
+    event PriorityQueueValueAdded(
         uint256 priority,
         Value value
     );
 
-    event ValueRemoved(
+    event PriorityQueueValueRemoved(
         uint256 priority,
         Value value
     );
@@ -61,7 +61,7 @@ library PriorityQueueLibrary {
             queue.priorities.add(priority);
         }
         queue.values[priority].push(value);
-        emit ValueAdded(priority, value);
+        emit PriorityQueueValueAdded(priority, value);
     }
 
     // Library internal functions should not have leading underscore
@@ -88,7 +88,7 @@ library PriorityQueueLibrary {
         }
         uint256 priority = queue.priorities.get();
         uint256 length = queue.values[priority].length;
-        emit ValueRemoved(priority, queue.values[priority][length - 1]);
+        emit PriorityQueueValueRemoved(priority, queue.values[priority][length - 1]);
         queue.values[priority].pop();
         if (length == 1) {
             queue.priorities.pop();

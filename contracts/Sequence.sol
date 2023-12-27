@@ -53,6 +53,15 @@ library SequenceLibrary {
         Timestamp nextTimestamp;
     }
 
+    event SequenceValueAdded(
+        Timestamp timestamp,
+        uint256 value
+    );
+
+    event Cleared();
+
+    event ClearedUntil(Timestamp timestamp);
+
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function add(Sequence storage sequence, Timestamp timestamp, uint256 value) internal {
@@ -68,6 +77,8 @@ library SequenceLibrary {
             value: value
         });
         sequence.ids.pushBack(nodeId);
+
+        emit SequenceValueAdded(timestamp, value);
     }
 
     // Library internal functions should not have leading underscore
@@ -172,6 +183,8 @@ library SequenceLibrary {
         }
         sequence.ids.clear();
         sequence.freeNodeId = NodeId.wrap(0);
+
+        emit Cleared();
     }
 
     // Library internal functions should not have leading underscore
@@ -185,6 +198,7 @@ library SequenceLibrary {
             NodeId nodeId = sequence.ids.popFront();
             _deleteNode(sequence.nodes[nodeId]);
         }
+        emit ClearedUntil(before);
     }
 
     // This function is a workaround to allow slither to analyze the code

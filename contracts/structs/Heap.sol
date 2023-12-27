@@ -39,11 +39,11 @@ library HeapLibrary {
         uint256[] values;
     }
 
-    event ValueAdded(
+    event HeapValueAdded(
         uint256 value
     );
 
-    event ValueRemoved(
+    event HeapValueRemoved(
         uint256 value
     );
 
@@ -55,7 +55,7 @@ library HeapLibrary {
         }
         heap.values.push(value);
         _fixUp(heap, _getLastNode(heap), value);
-        emit ValueAdded(value);
+        emit HeapValueAdded(value);
     }
 
     // Library internal functions should not have leading underscore
@@ -72,7 +72,7 @@ library HeapLibrary {
     // solhint-disable-next-line private-vars-leading-underscore
     function pop(Heap storage heap) internal {
         if (size(heap) > 0) {
-            emit ValueRemoved(_getValue(heap, _ROOT));
+            emit HeapValueRemoved(_getValue(heap, _ROOT));
             uint256 lastValue = _getValue(heap, _getLastNode(heap));
             heap.values.pop();
             if (size(heap) > 0) {

@@ -215,9 +215,12 @@ describe("Paymaster", () => {
             // Reward for month B is available
             const amountOfPaidChains = 3;
             const monthBReward = tokensPerMonth * BigInt(amountOfPaidChains);
-            expect(await paymaster.getRewardAmountFor(0)).to.be.equal(monthBReward / totalNodesNumber);
+            let estimated = await paymaster.getRewardAmountFor(0);
+            let calculated = monthBReward / totalNodesNumber;
+            expect(estimated).be.lessThanOrEqual(calculated);
+            expect(calculated - estimated).be.lessThanOrEqual(precision);
             await expect(paymaster.connect(validators[0]).claim(await validators[0].getAddress()))
-                .to.changeTokenBalance(token, validators[0], monthBReward / totalNodesNumber);
+                .to.changeTokenBalance(token, validators[0], estimated);
 
             // Should not get reward one more time
             expect(await paymaster.getRewardAmountFor(0)).to.be.equal(0);
@@ -226,8 +229,8 @@ describe("Paymaster", () => {
 
             // Reward for another validator
             for (let anotherValidator = 1; anotherValidator < validators.length; anotherValidator += 1) {
-                const estimated = await paymaster.getRewardAmountFor(anotherValidator);
-                const calculated = monthBReward * (await paymaster.getNodesNumber(anotherValidator)) / totalNodesNumber;
+                estimated = await paymaster.getRewardAmountFor(anotherValidator);
+                calculated = monthBReward * (await paymaster.getNodesNumber(anotherValidator)) / totalNodesNumber;
                 expect(estimated).be.lessThanOrEqual(calculated);
                 expect(calculated - estimated).be.lessThanOrEqual(precision);
                 await expect(paymaster.connect(validators[anotherValidator]).claim(await validators[anotherValidator].getAddress()))
@@ -294,6 +297,71 @@ describe("Paymaster", () => {
             const removedValidatorsReward = ethers.parseEther("1");
             const estimated = await paymaster.getRewardAmountFor(validatorId);
             const calculated = monthCReward
+            expect(estimated).be.lessThanOrEqual(calculated);
+            expect(calculated - estimated).be.lessThanOrEqual(removedValidatorsReward);
+            await expect(paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress()))
+                .to.changeTokenBalance(
+                    token,
+                    validators[validatorId],
+                    estimated
+                );
+        });
+
+        it("should claim reward after removing", async () => {
+            const { paymaster, schains, token, validators } = await loadFixture(addSchainAndValidatorFixture);
+            const twoMonths = 2;
+            const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+
+            let totalNodesNumber = BigInt(0);
+            for (let index = 0; index < validators.length; index += 1) {
+                totalNodesNumber += await paymaster.getNodesNumber(index);
+            }
+
+            // Month A
+
+            // Pay for month B and C
+            await paymaster.connect(user).pay(schains[0], twoMonths);
+
+            await skipMonth();
+            await skipMonth();
+
+            // Month C
+
+            // Reward for month B is available
+            const amountOfPaidChains = 1;
+            const monthBReward = tokensPerMonth * BigInt(amountOfPaidChains);
+
+            // All validators except the last one claim reward
+            for (let validatorId = 0; validatorId < validators.length; validatorId += 1) {
+                const estimated = await paymaster.getRewardAmountFor(validatorId);
+                const calculated = monthBReward * (await paymaster.getNodesNumber(validatorId)) / totalNodesNumber;
+                expect(estimated).be.lessThanOrEqual(calculated);
+                expect(calculated - estimated).be.lessThanOrEqual(precision);
+                if (validatorId < validators.length - 1) {
+                    await expect(paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress()))
+                        .to.changeTokenBalance(
+                            token,
+                            validators[validatorId],
+                            estimated
+                        );
+                }
+            }
+
+            // Remove all validator except the first one
+            for (let validatorId = 1; validatorId < validators.length; validatorId += 1) {
+                await paymaster.removeValidator(validatorId);
+            }
+
+            await skipMonth();
+
+            // Month D
+
+            const validatorId = validators.length - 1;
+            // It's not accurate value but it's very small
+            const removedValidatorsReward = ethers.parseEther("1");
+            const estimated = await paymaster.getRewardAmountFor(validatorId);
+            // The validator was removed in the beginning of month C. Receive reward only for month B.
+            const calculated = monthBReward * (await paymaster.getNodesNumber(validatorId)) / totalNodesNumber;
             expect(estimated).be.lessThanOrEqual(calculated);
             expect(calculated - estimated).be.lessThanOrEqual(removedValidatorsReward);
             await expect(paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress()))

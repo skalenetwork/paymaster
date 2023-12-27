@@ -44,6 +44,16 @@ library PriorityQueueLibrary {
         uint256 valuesLength;
     }
 
+    event ValueAdded(
+        uint256 priority,
+        Value value
+    );
+
+    event ValueRemoved(
+        uint256 priority,
+        Value value
+    );
+
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function push(PriorityQueue storage queue, uint256 priority, Value value) internal {
@@ -51,6 +61,7 @@ library PriorityQueueLibrary {
             queue.priorities.add(priority);
         }
         queue.values[priority].push(value);
+        emit ValueAdded(priority, value);
     }
 
     // Library internal functions should not have leading underscore
@@ -77,6 +88,7 @@ library PriorityQueueLibrary {
         }
         uint256 priority = queue.priorities.get();
         uint256 length = queue.values[priority].length;
+        emit ValueRemoved(priority, queue.values[priority][length - 1]);
         queue.values[priority].pop();
         if (length == 1) {
             queue.priorities.pop();

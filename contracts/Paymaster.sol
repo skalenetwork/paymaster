@@ -286,7 +286,6 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function clearHistory(Timestamp before) external override restricted {
         _clearSchainsHistory(before);
         _clearValidatorsHistory(before);
-        _clearPaymentsHistory(before);
 
         emit HistoryCleaned(before);
     }
@@ -346,8 +345,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         return _getSchain(schainHash).paidUntil;
     }
 
-    function getRewardAmount() external view override returns (SKL reward) {
-        return getRewardAmountFor(_getValidatorByAddress(_msgSender()).id);
+    function getRewardAmount(ValidatorId validatorId) external view override returns (SKL reward) {
+        Validator storage validator = _getValidator(validatorId);
+        return _getRewardAmount(
+            validator,
+            DateTimeUtils.firstDayOfMonth(_getTimestamp())
+        );
     }
 
     function getNodesNumber(ValidatorId validatorId) external view override returns (uint256 number) {
@@ -371,14 +374,6 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function getSchainsNumber() public view override returns (uint256 number) {
         return _schainHashes.length();
-    }
-
-    function getRewardAmountFor(ValidatorId validatorId) public view override returns (SKL reward) {
-        Validator storage validator = _getValidator(validatorId);
-        return _getRewardAmount(
-            validator,
-            DateTimeUtils.firstDayOfMonth(_getTimestamp())
-        );
     }
 
     // Public
@@ -415,6 +410,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                 revert ImportantDataRemoving();
             }
         }
+        _clearPaymentsHistory(before);
     }
 
     function _clearValidatorsHistory(Timestamp before) private {

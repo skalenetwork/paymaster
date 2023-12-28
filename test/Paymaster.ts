@@ -141,7 +141,7 @@ describe("Paymaster", () => {
                 const paidUntil = new Date( Number(await paymaster.getSchainExpirationTimestamp(schainHash)) * MS_PER_SEC);
                 await skipTimeToSpecificDate(paidUntil);
                 const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
-                expect(await paymaster.connect(validator).getRewardAmount()).to.be.equal(tokensPerMonth);
+                expect(await paymaster.getRewardAmount(validatorId)).to.be.equal(tokensPerMonth);
             });
         })
     });
@@ -195,7 +195,7 @@ describe("Paymaster", () => {
             // Month B
 
             // Chain does not pay for 0 (non full) month
-            expect(await paymaster.getRewardAmountFor(0)).to.be.equal(0);
+            expect(await paymaster.getRewardAmount(0)).to.be.equal(0);
             await expect(paymaster.connect(validators[0]).claim(await validators[0].getAddress()))
                 .to.changeTokenBalance(token, validators[0], 0);
 
@@ -215,7 +215,7 @@ describe("Paymaster", () => {
             // Reward for month B is available
             const amountOfPaidChains = 3;
             const monthBReward = tokensPerMonth * BigInt(amountOfPaidChains);
-            let estimated = await paymaster.getRewardAmountFor(0);
+            let estimated = await paymaster.getRewardAmount(0);
             let calculated = monthBReward / totalNodesNumber;
             expect(estimated).be.lessThanOrEqual(calculated);
             expect(calculated - estimated).be.lessThanOrEqual(precision);
@@ -223,13 +223,13 @@ describe("Paymaster", () => {
                 .to.changeTokenBalance(token, validators[0], estimated);
 
             // Should not get reward one more time
-            expect(await paymaster.getRewardAmountFor(0)).to.be.equal(0);
+            expect(await paymaster.getRewardAmount(0)).to.be.equal(0);
             await expect(paymaster.connect(validators[0]).claim(await validators[0].getAddress()))
                 .to.changeTokenBalance(token, validators[0], 0);
 
             // Reward for another validator
             for (let anotherValidator = 1; anotherValidator < validators.length; anotherValidator += 1) {
-                estimated = await paymaster.getRewardAmountFor(anotherValidator);
+                estimated = await paymaster.getRewardAmount(anotherValidator);
                 calculated = monthBReward * (await paymaster.getNodesNumber(anotherValidator)) / totalNodesNumber;
                 expect(estimated).be.lessThanOrEqual(calculated);
                 expect(calculated - estimated).be.lessThanOrEqual(precision);
@@ -268,7 +268,7 @@ describe("Paymaster", () => {
 
             // All validators except the last one claim reward
             for (let validatorId = 0; validatorId < validators.length - 1; validatorId += 1) {
-                const estimated = await paymaster.getRewardAmountFor(validatorId);
+                const estimated = await paymaster.getRewardAmount(validatorId);
                 const calculated = monthBReward * (await paymaster.getNodesNumber(validatorId)) / totalNodesNumber;
                 expect(estimated).be.lessThanOrEqual(calculated);
                 expect(calculated - estimated).be.lessThanOrEqual(precision);
@@ -295,7 +295,7 @@ describe("Paymaster", () => {
 
             const validatorId = 0;
             const removedValidatorsReward = ethers.parseEther("1");
-            const estimated = await paymaster.getRewardAmountFor(validatorId);
+            const estimated = await paymaster.getRewardAmount(validatorId);
             const calculated = monthCReward
             expect(estimated).be.lessThanOrEqual(calculated);
             expect(calculated - estimated).be.lessThanOrEqual(removedValidatorsReward);
@@ -333,7 +333,7 @@ describe("Paymaster", () => {
 
             // All validators except the last one claim reward
             for (let validatorId = 0; validatorId < validators.length; validatorId += 1) {
-                const estimated = await paymaster.getRewardAmountFor(validatorId);
+                const estimated = await paymaster.getRewardAmount(validatorId);
                 const calculated = monthBReward * (await paymaster.getNodesNumber(validatorId)) / totalNodesNumber;
                 expect(estimated).be.lessThanOrEqual(calculated);
                 expect(calculated - estimated).be.lessThanOrEqual(precision);
@@ -359,7 +359,7 @@ describe("Paymaster", () => {
             const validatorId = validators.length - 1;
             // It's not accurate value but it's very small
             const removedValidatorsReward = ethers.parseEther("1");
-            const estimated = await paymaster.getRewardAmountFor(validatorId);
+            const estimated = await paymaster.getRewardAmount(validatorId);
             // The validator was removed in the beginning of month C. Receive reward only for month B.
             const calculated = monthBReward * (await paymaster.getNodesNumber(validatorId)) / totalNodesNumber;
             expect(estimated).be.lessThanOrEqual(calculated);

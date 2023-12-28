@@ -1,0 +1,48 @@
+name: Publish
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+      - beta
+      - stable
+      - 'v*.*.*'
+  push:
+    tags:
+      - 'custom-release-*'
+
+env:
+  NODE_VERSION: 20
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Install NODE JS
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'yarn'
+
+    - name: Install project
+      run: yarn install
+
+    - name: Calculate version
+      run: |
+        export BRANCH=${GITHUB_REF##*/}
+        export VERSION=$(bash ./scripts/calculate_version.sh)
+        echo "Version $VERSION"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        ( test $BRANCH = "stable" && export PRERELEASE=false ) || export PRERELEASE=true
+        echo "PRERELEASE=$PRERELEASE" >> $GITHUB_ENV
+
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+        tag: ${{ env.VERSION }}
+        prerelease: ${{ env.PRERELEASE }}

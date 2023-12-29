@@ -17,8 +17,8 @@ import {
 describe("Paymaster", () => {
     const schainName = "d2-schain";
     const schainHash = ethers.solidityPackedKeccak256(["string"], [schainName]);
-    const BIG_AMOUNT = ethers.parseEther("100000");
-    const precision = BigInt(1);
+    const BIG_AMOUNT = ethers.parseEther("1000000");
+    const precision = 5n;
 
     let owner: SignerWithAddress;
     let validator: SignerWithAddress;
@@ -143,6 +143,99 @@ describe("Paymaster", () => {
                 const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
                 expect(await paymaster.getRewardAmount(validatorId)).to.be.equal(tokensPerMonth);
             });
+
+            it("should be able to clear history", async () => {
+                const paymaster = await loadFixture(payOneMonthFixture);
+
+                // Paid:    [^         |##########]
+                // Claimed: [^         |          ]
+
+                await skipMonth();
+                await skipMonth();
+
+                // Paid:    [          |##########|^]
+                // Claimed: [          |          |^]
+
+                await paymaster.connect(validator).claim(await validator.getAddress());
+
+                // Paid:    [          |##########|^]
+                // Claimed: [##########|##########|^]
+
+                await skipMonth();
+
+                // Paid:    [          |##########|          |^]
+                // Claimed: [##########|##########|          |^]
+
+                await paymaster.connect(validator).claim(await validator.getAddress());
+                let claimedUntil = (await paymaster.queryFilter(paymaster.filters.RewardClaimed, "latest"))[0].args.until;
+
+                // Paid:    [          |##########|          |^]
+                // Claimed: [##########|##########|##########|^]
+
+                await expect(paymaster.clearHistory(claimedUntil))
+                    .to.be.revertedWithCustomError(paymaster, "ImportantDataRemoving");
+
+                await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+                await paymaster.connect(user).pay(schainHash, 1);
+
+                // Paid:    [          |##########|**********|^]
+                // Claimed: [##########|##########|##########|^]
+
+                await expect(paymaster.clearHistory(claimedUntil))
+                    .to.be.revertedWithCustomError(paymaster, "ImportantDataRemoving");
+
+                await paymaster.connect(validator).claim(await validator.getAddress());
+
+                // Paid:    [          |##########|##########|^]
+                // Claimed: [##########|##########|##########|^]
+
+                claimedUntil = (await paymaster.queryFilter(paymaster.filters.RewardClaimed, "latest"))[0].args.until;
+                await paymaster.clearHistory(claimedUntil);
+
+                // Paid:    [          |          |          |^]
+                // Claimed: [          |          |          |^]
+
+                expect(await paymaster.getTotalReward(0, claimedUntil)).to.be.equal(0);
+                expect(await paymaster.getHistoricalActiveNodesNumber(validatorId, claimedUntil - 1n)).to.be.equal(0);
+                expect(await paymaster.getHistoricalTotalActiveNodesNumber(claimedUntil - 1n)).to.be.equal(0);
+                expect(await paymaster.debtsBegin()).to.be.equal(1);
+                expect(await paymaster.debtsEnd()).to.be.equal(1);
+
+                await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+                await paymaster.connect(user).pay(schainHash, 1);
+
+                // Paid:    [          |          |          |^#########]
+                // Claimed: [          |          |          |^         ]
+
+                await skipMonth();
+
+                // Paid:    [          |          |          |##########|^]
+                // Claimed: [          |          |          |          |^]
+
+                const token = await ethers.getContractAt("Token", await paymaster.skaleToken());
+                const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+                const estimated = await paymaster.getRewardAmount(validatorId);
+                const calculated = tokensPerMonth;
+                expect(estimated).be.lessThanOrEqual(calculated);
+                expect(calculated - estimated).be.lessThanOrEqual(precision);
+                await expect(paymaster.connect(validator).claim(await validator.getAddress()))
+                    .to.changeTokenBalance(token, validator, estimated);
+
+                // Paid:    [          |          |          |##########|^]
+                // Claimed: [          |          |          |##########|^]
+
+                claimedUntil = (await paymaster.queryFilter(paymaster.filters.RewardClaimed, "latest"))[0].args.until;
+                await paymaster.clearHistory(claimedUntil);
+
+                // Paid:    [          |          |          |          |^]
+                // Claimed: [          |          |          |          |^]
+
+                expect(await paymaster.getTotalReward(0, claimedUntil)).to.be.equal(0);
+                expect(await paymaster.getHistoricalActiveNodesNumber(validatorId, claimedUntil - 1n)).to.be.equal(0);
+                expect(await paymaster.getHistoricalTotalActiveNodesNumber(claimedUntil - 1n)).to.be.equal(0);
+                expect(await paymaster.debtsBegin()).to.be.equal(2);
+                expect(await paymaster.debtsEnd()).to.be.equal(2);
+            })
         })
     });
 
@@ -420,6 +513,6 @@ describe("Paymaster", () => {
                     validators[validatorId],
                     estimated
                 );
-        })
+        });
     });
 });

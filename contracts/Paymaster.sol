@@ -381,6 +381,22 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         return _getValidator(validatorId).activeNodesAmount;
     }
 
+    function getHistoricalActiveNodesNumber(
+        ValidatorId validatorId,
+        Timestamp when
+    )
+        external
+        view
+        override
+        returns (uint256 number)
+    {
+        return _getValidator(validatorId).nodesHistory.getValueByTimestamp(when);
+    }
+
+    function getHistoricalTotalActiveNodesNumber(Timestamp when) external view override returns (uint256 number) {
+        return _totalNodesHistory.getValueByTimestamp(when);
+    }
+
     function getValidatorsNumber() external view override returns (uint256 number) {
         return _validatorData.validatorIds.length();
     }
@@ -392,8 +408,8 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function getSchainsNumber() public view override returns (uint256 number) {
-        return _schainHashes.length();
+    function getTotalReward(Timestamp from, Timestamp to) external view override returns (SKL reward) {
+        return SKL.wrap(_totalRewards.getSum(from, to));
     }
 
     // Public
@@ -411,6 +427,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function claimFor(ValidatorId validatorId, address to) public restricted override {
         _claimFor(validatorId, to);
+    }
+
+    function getSchainsNumber() public view override returns (uint256 number) {
+        return _schainHashes.length();
     }
 
     // Internal
@@ -446,9 +466,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                 firstUnpaidDebt = validator.firstUnpaidDebt;
             }
             validator.nodesHistory.clear(before);
-            if (validator.deleted <= before) {
+            if (Timestamp.wrap(0) != validator.deleted && validator.deleted <= before) {
                 _removeValidator(validator);
             }
+        }
+        if (_before(firstUnpaidDebt, debtsEnd) && debts[firstUnpaidDebt].from < before) {
+            revert ImportantDataRemoving();
         }
 
         for (DebtId id = debtsBegin; !_equal(id, firstUnpaidDebt); id = _next(id)) {
@@ -695,7 +718,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function _calculateRewards(
         Validator storage validator,
         Payment memory rewardSource,
-        function (Timestamp, Timestamp, Payment memory) internal view returns (SKL) getTotalReward
+        function (Timestamp, Timestamp, Payment memory) internal view returns (SKL) getTotalRewardFunction
     )
         private
         view
@@ -715,7 +738,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
             if (totalNodes > 0) {
                 rewards = rewards + SKL.wrap(
-                    SKL.unwrap(getTotalReward(cursor, nextCursor, rewardSource)) * activeNodes / totalNodes
+                    SKL.unwrap(getTotalRewardFunction(cursor, nextCursor, rewardSource)) * activeNodes / totalNodes
                 );
             }
 

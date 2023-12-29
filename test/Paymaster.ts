@@ -357,11 +357,13 @@ describe("Paymaster", () => {
             // Month D
 
             const validatorId = validators.length - 1;
+            const validatorNodesAmount = BigInt(validators.length);
             // It's not accurate value but it's very small
             const removedValidatorsReward = ethers.parseEther("1");
+            const monthCReward = ethers.parseEther("0.01");
             const estimated = await paymaster.getRewardAmount(validatorId);
             // The validator was removed in the beginning of month C. Receive reward only for month B.
-            const calculated = monthBReward * (await paymaster.getNodesNumber(validatorId)) / totalNodesNumber;
+            const calculated = monthBReward * validatorNodesAmount / totalNodesNumber + monthCReward;
             expect(estimated).be.lessThanOrEqual(calculated);
             expect(calculated - estimated).be.lessThanOrEqual(removedValidatorsReward);
             await expect(paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress()))

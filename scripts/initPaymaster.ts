@@ -4,7 +4,7 @@ import { deployAccessManager, deployPaymaster } from "../migrations/deploy";
 import { Paymaster } from "../typechain-types";
 import { promises as fs } from "fs";
 
-
+const DEFAULT_GAS_LIMIT = 1e6;
 interface ValidatorNodes {
     [key: number]: {
       numberOfNodes: number;
@@ -43,13 +43,40 @@ async function addValidators(instance: Instance | undefined, paymaster: Paymaste
             await paymaster.getNodesNumber(validatorId);
         } catch (e) {
             console.log(`${validatorId} will be added`);
-            await paymaster.addValidator(validatorId, validatorAddress, {gasLimit: 1000000});
+            await paymaster.addValidator(validatorId, validatorAddress, {gasLimit: DEFAULT_GAS_LIMIT});
             continue;
         }
         console.log(`${validatorId} already added`);
-        // const percentageComplete = (validatorId * 100 / Number(numberOfValidators)).toFixed(1)
-        // process.stdout.write(`\rPercentage complete: ${percentageComplete}`);
     }
+}
+
+async function addSchains(instance: Instance | undefined, paymaster: Paymaster) {
+    console.log("Adding schains");
+    const schainsInternal = await getContract("SchainsInternal", instance) as any;
+    const schainHashes = await schainsInternal.getSchains();
+    const schainNamesInPaymaster = await paymaster.getSchainsNames();
+    const schains: {[key: number]: {schainName: string, schainStatus: string}} = {};
+    for (let i = 0; i < schainHashes.length; i++) {
+        const schainHash = schainHashes[i];
+        const schainName = await schainsInternal.getSchainName(schainHash);
+        if (!(schainNamesInPaymaster.includes(schainName))) {
+            schains[i] = {
+                schainName: schainName,
+                schainStatus: "Will be added"
+            };
+            await paymaster.addSchain(schainName, {gasLimit: DEFAULT_GAS_LIMIT});
+        } else {
+            schains[i] = {
+                schainName: schainName,
+                schainStatus: "Already addded"
+            };
+        }
+    }
+    const tableData = Object.keys(schains).map((id) => ({
+        "Name": schains[parseInt(id)].schainName,
+        "Status": schains[parseInt(id)].schainStatus,
+      }));
+    console.table(tableData);
 }
 
 async function getNodes(instance: Instance | undefined) {
@@ -91,8 +118,8 @@ async function setNodes(paymaster: Paymaster, validatorNodes: ValidatorNodes) {
     for (const validatorId in validatorNodes) {
         const numberOfNodes = validatorNodes[validatorId].numberOfNodes;
         const numberOfActiveNodes = validatorNodes[validatorId].numberOfActiveNodes;
-        await paymaster.setNodesAmount(validatorId, numberOfNodes, {gasLimit: 1000000});
-        await paymaster.setActiveNodes(validatorId, numberOfActiveNodes, {gasLimit: 1000000});
+        await paymaster.setNodesAmount(validatorId, numberOfNodes, {gasLimit: DEFAULT_GAS_LIMIT});
+        await paymaster.setActiveNodes(validatorId, numberOfActiveNodes, {gasLimit: DEFAULT_GAS_LIMIT});
         const percentageComplete = (++it * 100 / Object.keys(validatorNodes).length).toFixed(1);
         process.stdout.write(`\rPercentage complete: ${percentageComplete}`);
     }
@@ -126,8 +153,8 @@ const main = async () => {
         throw new Error("Set MAINNET_ENDPOINT");
     }
     
-    
     await addValidators(instance, paymaster);
+    await addSchains(instance, paymaster);
     const validatorNodes = await getNodes(instance);
     await setNodes(paymaster, validatorNodes);
 

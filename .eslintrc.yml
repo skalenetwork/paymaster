@@ -24,6 +24,6 @@ overrides:
       max-lines-per-function: ["off"]
       max-statements: ["off"]
       no-await-in-loop: ["off"]
-      no-magic-numbers: ["error", { "ignore": [0, 1] }]
+      no-magic-numbers: ["error", { "ignore": [0, 0n, 1, 1n, 2, 2n] }]
 
 

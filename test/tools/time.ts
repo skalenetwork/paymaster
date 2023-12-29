@@ -51,6 +51,14 @@ export const nextMonth = (timestamp: number | bigint) => {
     return new Date(Date.UTC(year, month, 1)).getTime() / MS_PER_SEC;
 }
 
+export const monthBegin = (timestamp: number | bigint) => {
+    const timestampNumber = Number(timestamp) * MS_PER_SEC;
+    const date = new Date(timestampNumber);
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    return new Date(Date.UTC(year, month, 1)).getTime() / MS_PER_SEC;
+}
+
 export const skipMonth = async () => {
     const timestamp = await currentTime();
     await skipTime(nextMonth(timestamp) - timestamp);

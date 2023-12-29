@@ -155,12 +155,17 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function step(Iterator memory iterator) internal pure returns (bool success) {
+    function step(Iterator memory iterator, Sequence storage sequence) internal view returns (bool success) {
         success = hasNext(iterator);
         if (iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             iterator.idIndex = 0;
         } else {
             iterator.idIndex += 1;
+        }
+        if (iterator.idIndex + 1 < iterator.sequenceSize) {
+            iterator.nextTimestamp = _getNodeByIndex(sequence, iterator.idIndex + 1).timestamp;
+        } else {
+            iterator.nextTimestamp = Timestamp.wrap(type(uint256).max);
         }
     }
 

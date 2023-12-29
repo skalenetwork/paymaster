@@ -131,31 +131,37 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     event SchainAdded(
         string name,
-        SchainHash hash
+        SchainHash hash,
+        Timestamp timestamp
     );
 
     event SchainRemoved(
         string name,
-        SchainHash hash
+        SchainHash hash,
+        Timestamp timestamp
     );
 
     event ValidatorAdded(
         ValidatorId id,
-        address validatorAddress
+        address validatorAddress,
+        Timestamp timestamp
     );
 
     event ValidatorMarkedAsRemoved(
-        ValidatorId id
+        ValidatorId id,
+        Timestamp timestamp
     );
 
     event ValidatorRemoved(
-        ValidatorId id
+        ValidatorId id,
+        Timestamp timestamp
     );
 
     event ActiveNodesNumberChanged(
         ValidatorId validator,
         uint256 oldNumber,
-        uint256 newNumber
+        uint256 newNumber,
+        Timestamp timestamp
     );
 
     event MaxReplenishmentPeriodChanged(
@@ -163,11 +169,13 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     );
 
     event SchainPriceSet(
-        USD priceInUsd
+        USD priceInUsd,
+        Timestamp timestamp
     );
 
     event SklPriceSet(
-        USD priceInUsd
+        USD priceInUsd,
+        Timestamp timestamp
     );
 
     event SklPriceLagSet(
@@ -186,14 +194,16 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         SchainHash hash,
         Months period,
         SKL amount,
-        Timestamp newLifetime
+        Timestamp newLifetime,
+        Timestamp timestamp
     );
 
     event RewardClaimed(
         ValidatorId validator,
         address receiver,
         SKL amount,
-        Timestamp until
+        Timestamp until,
+        Timestamp timestamp
     );
 
     event VersionSet(
@@ -226,22 +236,25 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             revert ValidatorAddressAlreadyExists(validatorAddress);
         }
 
+        Timestamp currentTimestamp = _getTimestamp();
+
         _validatorData.validators[id].id = id;
         delete _validatorData.validators[id].nodesAmount;
         delete _validatorData.validators[id].activeNodesAmount;
-        _validatorData.validators[id].claimedUntil = _getTimestamp();
+        _validatorData.validators[id].claimedUntil = currentTimestamp;
         _validatorData.validators[id].validatorAddress = validatorAddress;
         _validatorData.validators[id].nodesHistory.clear();
 
-        emit ValidatorAdded(id, validatorAddress);
+        emit ValidatorAdded(id, validatorAddress, currentTimestamp);
     }
 
     function removeValidator(ValidatorId id) external override restricted {
+        Timestamp currentTimestamp = _getTimestamp();
         Validator storage validator = _getValidator(id);
         setNodesAmount(id, 0);
-        validator.deleted = _getTimestamp();
+        validator.deleted = currentTimestamp;
 
-        emit ValidatorMarkedAsRemoved(id);
+        emit ValidatorMarkedAsRemoved(id, currentTimestamp);
     }
 
     function setActiveNodes(ValidatorId validatorId, uint256 amount) external override restricted {
@@ -261,14 +274,15 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function setSchainPrice(USD price) external override restricted {
         schainPricePerMonth = price;
 
-        emit SchainPriceSet(price);
+        emit SchainPriceSet(price, _getTimestamp());
     }
 
     function setSklPrice(USD price) external override restricted {
+        Timestamp currentTimestamp = _getTimestamp();
         oneSklPrice = price;
-        sklPriceTimestamp = _getTimestamp();
+        sklPriceTimestamp = currentTimestamp;
 
-        emit SklPriceSet(price);
+        emit SklPriceSet(price, currentTimestamp);
     }
 
     function setAllowedSklPriceLag(Seconds lagSeconds) external override restricted {
@@ -325,7 +339,13 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
         schain.paidUntil = start.add(duration);
 
-        emit SchainPaid(schainHash, duration, cost, schain.paidUntil);
+        emit SchainPaid({
+            hash: schainHash,
+            period: duration,
+            amount: cost,
+            newLifetime: schain.paidUntil,
+            timestamp: current
+        });
 
         _pullTokens(cost);
     }
@@ -446,19 +466,21 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function _claimFor(ValidatorId validatorId, address to) private {
         Validator storage validator = _getValidator(validatorId);
-        Timestamp claimUntil = DateTimeUtils.firstDayOfMonth(_getTimestamp());
+        Timestamp currentTimestamp = _getTimestamp();
+        Timestamp claimUntil = DateTimeUtils.firstDayOfMonth(currentTimestamp);
         _totalRewards.process(claimUntil);
 
         SKL rewards = _getRewardAmount(validator, claimUntil);
         validator.claimedUntil = claimUntil;
         validator.firstUnpaidDebt = debtsEnd;
 
-        emit RewardClaimed(
-            validatorId,
-            to,
-            rewards,
-            claimUntil
-        );
+        emit RewardClaimed({
+            validator: validatorId,
+            receiver: to,
+            amount: rewards,
+            until: claimUntil,
+            timestamp: currentTimestamp
+        });
 
         if (!skaleToken.transfer(to, SKL.unwrap(rewards))) {
             revert TransferFailure();
@@ -470,14 +492,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         if (!_schainHashes.add(SchainHash.unwrap(schain.hash))) {
             revert SchainAddingError(schain.hash);
         }
-        emit SchainAdded(schain.name, schain.hash);
+        emit SchainAdded(schain.name, schain.hash, _getTimestamp());
     }
 
     function _removeSchain(Schain storage schain) private {
         if(!_schainHashes.remove(SchainHash.unwrap(schain.hash))) {
             revert SchainDeletionError(schain.hash);
         }
-        emit SchainRemoved(schain.name, schain.hash);
+        emit SchainRemoved(schain.name, schain.hash, _getTimestamp());
         delete schains[schain.hash];
     }
 
@@ -489,7 +511,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             revert ValidatorDeletionError(validator.id);
         }
 
-        emit ValidatorRemoved(validator.id);
+        emit ValidatorRemoved(validator.id, _getTimestamp());
 
         validator.id = ValidatorId.wrap(0);
         delete validator.nodesAmount;
@@ -507,7 +529,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         uint256 totalNodes = _totalNodesHistory.getLastValue();
         _totalNodesHistory.add(currentTime, totalNodes + newAmount - oldAmount);
 
-        emit ActiveNodesNumberChanged(validator.id, oldAmount, newAmount);
+        emit ActiveNodesNumberChanged(validator.id, oldAmount, newAmount, currentTime);
     }
 
     function _addDebt(Payment memory debt, DebtId id) private {
@@ -699,12 +721,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
             cursor = nextCursor;
             while (totalNodesHistoryIterator.hasNext() && totalNodesHistoryIterator.nextTimestamp <= cursor) {
-                if (totalNodesHistoryIterator.step()) {
+                if (totalNodesHistoryIterator.step(_totalNodesHistory)) {
                     totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
                 }
             }
             while (nodesHistoryIterator.hasNext() && nodesHistoryIterator.nextTimestamp <= cursor) {
-                if (nodesHistoryIterator.step()) {
+                if (nodesHistoryIterator.step(validator.nodesHistory)) {
                     activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
                 }
             }

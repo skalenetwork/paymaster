@@ -1,4 +1,4 @@
-import { MS_PER_SEC, currentTime, nextMonth, skipMonth, skipTimeToSpecificDate } from "./tools/time";
+import { MS_PER_SEC, currentTime, monthBegin, nextMonth, skipMonth, skipTime, skipTimeToSpecificDate } from "./tools/time";
 import { Paymaster, PaymasterAccessManager, Token } from "../typechain-types";
 import {
     deployAccessManager,
@@ -371,5 +371,53 @@ describe("Paymaster", () => {
                     estimated
                 );
         });
+
+        it("should not pay reward for inactive nodes", async () => {
+            const { paymaster, schains, token, validators } = await loadFixture(addSchainAndValidatorFixture);
+            const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+            const twoYears = 24;
+            const validatorId = 0;
+
+            let totalNodesNumber = BigInt(0);
+            for (let index = 0; index < validators.length; index += 1) {
+                totalNodesNumber += await paymaster.getNodesNumber(index);
+            }
+
+            // Month A
+
+            await paymaster.connect(user).pay(schains[0], twoYears);
+
+            await skipMonth();
+
+            // Month B
+
+            expect(await paymaster.getRewardAmount(validatorId)).to.be.equal(0);
+
+            // Fast forward to the middle of the month
+
+            const currentTimestamp = await currentTime();
+            await skipTime((nextMonth(currentTimestamp) + monthBegin(currentTimestamp)) / 2 - currentTimestamp);
+            const secondsInMonthB = BigInt(nextMonth(currentTimestamp) - monthBegin(currentTimestamp));
+
+            await paymaster.setActiveNodes(validatorId, 0);
+            const blacklistedTimestamp = (await paymaster.queryFilter(paymaster.filters.ActiveNodesNumberChanged, "latest"))[0].args.timestamp;
+
+            await skipMonth();
+
+            // Month C
+
+            const monthBReward = tokensPerMonth;
+            const rewardRate = monthBReward / secondsInMonthB;
+            const estimated = await paymaster.getRewardAmount(validatorId);
+            const calculated = rewardRate * (blacklistedTimestamp - BigInt(monthBegin(blacklistedTimestamp))) / totalNodesNumber;
+            expect(estimated).be.lessThanOrEqual(calculated);
+            expect(calculated - estimated).be.lessThanOrEqual(precision);
+            await expect(paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress()))
+                .to.changeTokenBalance(
+                    token,
+                    validators[validatorId],
+                    estimated
+                );
+        })
     });
 });

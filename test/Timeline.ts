@@ -5,7 +5,14 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 
 describe("Timeline", () => {
-    const deployTimelineFixture = async () => await ethers.deployContract("TimelineTester")
+    const precision = ethers.parseEther("0.000000000001");
+    const abs = (value: bigint) => {
+        if(value < 0n) {
+            return -value;
+        }
+        return value;
+    };
+    const deployTimelineFixture = async () => await ethers.deployContract("TimelineTester");
 
     describe("basic tests", () => {
         it("should calculate an entire segment", async () => {
@@ -28,6 +35,22 @@ describe("Timeline", () => {
             await timeline.add(from, to, value);
             await timeline.process(1);
             expect(await timeline.getSum(testFrom, testTo)).to.be.equal(testAnswer);
+        });
+
+        it("should calculate partial segments", async () => {
+            const timeline = await loadFixture(deployTimelineFixture);
+            const segment = {
+                from: 1704067200,
+                to: 1706745600,
+                value: ethers.parseEther("2500")
+            };
+            const previousMonth = 1703846562;
+            const middleOfTheMonth = 1705406400;
+
+            await timeline.add(segment.from, segment.to, segment.value);
+            const result = await timeline.getSum(previousMonth, middleOfTheMonth);
+            const correct = segment.value / 2n;
+            expect(abs(result - correct)).to.be.lessThan(precision);
         });
     });
 

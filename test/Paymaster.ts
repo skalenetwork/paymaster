@@ -18,6 +18,7 @@ describe("Paymaster", () => {
     const schainName = "d2-schain";
     const schainHash = ethers.solidityPackedKeccak256(["string"], [schainName]);
     const BIG_AMOUNT = ethers.parseEther("1000000");
+    const MAX_REPLENISHMENT_PERIOD = 24;
     const precision = 5n;
 
     let owner: SignerWithAddress;
@@ -27,7 +28,6 @@ describe("Paymaster", () => {
 
     const setup = async (paymaster: Paymaster, skaleToken: Token) => {
         const minute = 60;
-        const MAX_REPLENISHMENT_PERIOD = 24;
         const SCHAIN_PRICE = ethers.parseEther("5000");
         const SKL_PRICE = ethers.parseEther("2");
 
@@ -134,6 +134,25 @@ describe("Paymaster", () => {
                 .to.be.revertedWithCustomError(paymaster, "ValidatorAddressAlreadyExists")
                 .withArgs(await validator.getAddress());
         })
+
+        it("should not allow to top up more than max replenishment period", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+            const fiveMonths = 5;
+
+            await expect(paymaster.connect(user).pay(schainHash, MAX_REPLENISHMENT_PERIOD + 1))
+                .to.be.revertedWithCustomError(paymaster, "ReplenishmentPeriodIsTooBig")
+
+            for (let index = 0; index < fiveMonths; index += 1) {
+                await skipMonth();
+            }
+
+            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+            await expect(paymaster.connect(user).pay(schainHash, MAX_REPLENISHMENT_PERIOD + fiveMonths + 1))
+                .to.be.revertedWithCustomError(paymaster, "ReplenishmentPeriodIsTooBig")
+
+            await expect(paymaster.connect(user).pay(schainHash, MAX_REPLENISHMENT_PERIOD + fiveMonths))
+                .to.emit(paymaster, "SchainPaid");
+        });
 
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {

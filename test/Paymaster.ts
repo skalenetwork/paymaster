@@ -164,6 +164,23 @@ describe("Paymaster", () => {
                 .to.emit(paymaster, "SchainPaid");
         });
 
+        it("should allow to blacklist nodes", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            const nodesNumber = 7;
+            const blacklistedNodesNumber = 3;
+
+            await paymaster.setNodesAmount(validatorId, nodesNumber);
+            expect(await paymaster.getNodesNumber(validatorId)).to.be.equal(nodesNumber);
+            expect(await paymaster.getActiveNodesNumber(validatorId)).to.be.equal(nodesNumber);
+
+            // Blacklist
+            await paymaster.setActiveNodes(validatorId, nodesNumber - blacklistedNodesNumber);
+
+            expect(await paymaster.getNodesNumber(validatorId)).to.be.equal(nodesNumber);
+            expect(await paymaster.getActiveNodesNumber(validatorId)).to.be.equal(nodesNumber - blacklistedNodesNumber);
+        })
+
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
                 const paymaster = await loadFixture(addSchainAndValidatorFixture);

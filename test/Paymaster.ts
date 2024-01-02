@@ -576,5 +576,15 @@ describe("Paymaster", () => {
                     estimated
                 );
         });
+
+        it("should allow to get information about validators and schains", async () => {
+            const { paymaster, schains, validators } = await loadFixture(addSchainAndValidatorFixture);
+
+            expect(await paymaster.getValidatorsNumber()).to.be.equal(validators.length);
+            expect(await paymaster.getSchainsNumber()).to.be.equal(schains.length);
+            expect((await paymaster.getSchainsNames()).map(
+                (name) => ethers.solidityPackedKeccak256(["string"], [name])
+            )).to.have.same.members(schains);
+        })
     });
 });

@@ -74,6 +74,16 @@ describe("Paymaster", () => {
         expect(schain.paidUntil).to.be.equal(nextMonth(await currentTime()));
     });
 
+    it("should set version", async () => {
+        const paymaster = await loadFixture(deployPaymasterFixture);
+        const version = "version";
+        await expect(paymaster.setVersion(version))
+            .to.emit(paymaster, "VersionSet")
+            .withArgs(version);
+
+        expect(await paymaster.version()).to.be.equal(version);
+    })
+
     describe("when 1 validator with 1 node and 1 schain exist", () => {
         const validatorId = 1;
         const nodesAmount = 1;

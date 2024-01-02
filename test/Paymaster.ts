@@ -127,6 +127,14 @@ describe("Paymaster", () => {
                 .withArgs(validatorId);
         })
 
+        it("should not add validator with the same address", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            await expect(paymaster.addValidator(validatorId + 1, await validator.getAddress()))
+                .to.be.revertedWithCustomError(paymaster, "ValidatorAddressAlreadyExists")
+                .withArgs(await validator.getAddress());
+        })
+
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
                 const paymaster = await loadFixture(addSchainAndValidatorFixture);

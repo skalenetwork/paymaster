@@ -41,8 +41,17 @@ library TypedPriorityQueue {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function push(ChangeIdPriorityQueue storage queue, uint256 priority, TimelineLibrary.ChangeId value) internal {
-        queue.inner.push(priority, PriorityQueueLibrary.wrapValue(TimelineLibrary.unwrapChangeId(value)));
+    function push(
+        ChangeIdPriorityQueue storage queue,
+        uint256 priority,
+        TimelineLibrary.ChangeId value
+    )
+        internal
+    {
+        queue.inner.push(
+            priority,
+            PriorityQueueLibrary.wrapValue(TimelineLibrary.unwrapChangeId(value))
+        );
     }
 
     // Library internal functions should not have leading underscore
@@ -53,7 +62,13 @@ library TypedPriorityQueue {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function front(ChangeIdPriorityQueue storage queue) internal view returns (TimelineLibrary.ChangeId value) {
+    function front(
+        ChangeIdPriorityQueue storage queue
+    )
+        internal
+        view
+        returns (TimelineLibrary.ChangeId value)
+    {
         return TimelineLibrary.wrapChangeId(PriorityQueueLibrary.unwrapValue(queue.inner.front()));
     }
 
@@ -79,13 +94,25 @@ library TypedPriorityQueue {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function step(ChangeIdPriorityQueueIterator memory iterator, ChangeIdPriorityQueue storage queue) internal view {
+    function step(
+        ChangeIdPriorityQueueIterator memory iterator,
+        ChangeIdPriorityQueue storage queue
+    )
+        internal
+        view
+    {
         iterator.inner.step(queue.inner);
     }
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function hasNext(ChangeIdPriorityQueueIterator memory iterator) internal pure returns (bool exists) {
+    function hasNext(
+        ChangeIdPriorityQueueIterator memory iterator
+    )
+        internal
+        pure
+        returns (bool exists)
+    {
         return iterator.inner.hasNext();
     }
 
@@ -98,6 +125,8 @@ library TypedPriorityQueue {
         pure
         returns (TimelineLibrary.ChangeId value)
     {
-        return TimelineLibrary.wrapChangeId(PriorityQueueLibrary.unwrapValue(iterator.inner.getValue()));
+        return TimelineLibrary.wrapChangeId(
+            PriorityQueueLibrary.unwrapValue(iterator.inner.getValue())
+        );
     }
 }

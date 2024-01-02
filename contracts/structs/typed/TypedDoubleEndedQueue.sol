@@ -66,7 +66,8 @@ library TypedDoubleEndedQueue {
     /**
      * @dev Resets the queue back to being empty.
      *
-     * NOTE: The current items are left behind in storage. This does not affect the functioning of the queue, but misses
+     * NOTE: The current items are left behind in storage.
+     * This does not affect the functioning of the queue, but misses
      * out on potential gas refunds.
      */
     // Library internal functions should not have leading underscore
@@ -95,21 +96,33 @@ library TypedDoubleEndedQueue {
      */
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function popFront(ValueIdDeque storage deque) internal returns (TimelineLibrary.ValueId valueId) {
+    function popFront(
+        ValueIdDeque storage deque
+    )
+        internal
+        returns (TimelineLibrary.ValueId valueId)
+    {
         return TimelineLibrary.wrapValueId(DoubleEndedQueue.popFront(deque.inner));
     }
 
     // NodeIdDeque - internal view
 
     /**
-     * @dev Return the item at a position in the queue given by `index`, with the first item at 0 and last item at
-     * `length(deque) - 1`.
+     * @dev Return the item at a position in the queue given by `index`,
+     * with the first item at 0 and last item at `length(deque) - 1`.
      *
      * Reverts with `QueueOutOfBounds` if the index is out of bounds.
      */
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function at(NodeIdDeque storage deque, uint256 index) internal view returns (SequenceLibrary.NodeId value) {
+    function at(
+        NodeIdDeque storage deque,
+        uint256 index
+    )
+        internal
+        view
+        returns (SequenceLibrary.NodeId value)
+    {
         return SequenceLibrary.wrapNodeId(
             uint256(
                 DoubleEndedQueue.at(deque.inner, index)
@@ -162,19 +175,31 @@ library TypedDoubleEndedQueue {
      */
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function back(ValueIdDeque storage deque) internal view returns (TimelineLibrary.ValueId valueId) {
+    function back(
+        ValueIdDeque storage deque
+    )
+        internal
+        view returns (TimelineLibrary.ValueId valueId)
+    {
         return TimelineLibrary.wrapValueId(DoubleEndedQueue.back(deque.inner));
     }
 
     /**
-     * @dev Return the item at a position in the queue given by `index`, with the first item at 0 and last item at
-     * `length(deque) - 1`.
+     * @dev Return the item at a position in the queue given by `index`,
+     * with the first item at 0 and last item at `length(deque) - 1`.
      *
      * Reverts with `QueueOutOfBounds` if the index is out of bounds.
      */
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function at(ValueIdDeque storage deque, uint256 index) internal view returns (TimelineLibrary.ValueId valueId) {
+    function at(
+        ValueIdDeque storage deque,
+        uint256 index
+    )
+        internal
+        view
+        returns (TimelineLibrary.ValueId valueId)
+    {
         return TimelineLibrary.wrapValueId(
                 DoubleEndedQueue.at(deque.inner, index)
         );

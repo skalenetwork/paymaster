@@ -119,6 +119,14 @@ describe("Paymaster", () => {
                 .withArgs(validatorId, await currentTime());
         });
 
+        it("should not add validator with the same id", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            await expect(paymaster.addValidator(validatorId, await user.getAddress()))
+                .to.be.revertedWithCustomError(paymaster, "ValidatorAddingError")
+                .withArgs(validatorId);
+        })
+
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
                 const paymaster = await loadFixture(addSchainAndValidatorFixture);

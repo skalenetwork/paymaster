@@ -55,7 +55,16 @@ interface IPaymaster {
     function getRewardAmount(ValidatorId validatorId) external view returns (SKL reward);
     function getNodesNumber(ValidatorId validatorId) external view returns (uint256 number);
     function getActiveNodesNumber(ValidatorId validatorId) external view returns (uint256 number);
+    function getHistoricalActiveNodesNumber(
+        ValidatorId validatorId,
+        Timestamp when
+    )
+        external
+        view
+        returns (uint256 number);
+    function getHistoricalTotalActiveNodesNumber(Timestamp when) external view returns (uint256 number);
     function getValidatorsNumber() external view returns (uint256 number);
     function getSchainsNames() external view returns (string[] memory names);
     function getSchainsNumber() external view returns (uint256 number);
+    function getTotalReward(Timestamp from, Timestamp to) external view returns (SKL reward);
 }

@@ -144,6 +144,12 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
+    function getValueByTimestamp(Sequence storage sequence, Timestamp timestamp) internal view returns (uint256 value) {
+        return getValue(sequence, getIterator(sequence, timestamp));
+    }
+
+    // Library internal functions should not have leading underscore
+    // solhint-disable-next-line private-vars-leading-underscore
     function getLastValue(Sequence storage sequence) internal view returns (uint256 lastValue) {
         uint256 length = sequence.ids.length();
         if (length > 0) {
@@ -202,6 +208,9 @@ library SequenceLibrary {
             }
             NodeId nodeId = sequence.ids.popFront();
             _deleteNode(sequence.nodes[nodeId]);
+        }
+        if (_getNodeByIndex(sequence, 0).timestamp < before) {
+            _getNodeByIndex(sequence, 0).timestamp = before;
         }
         emit ClearedUntil(before);
     }

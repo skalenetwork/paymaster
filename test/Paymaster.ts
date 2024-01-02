@@ -239,7 +239,7 @@ describe("Paymaster", () => {
         })
     });
 
-    describe("when 7 validator and 7 schain exist", () => {
+    describe("when 7 validators and 7 schains exist", () => {
         const validatorsNumber = 7;
         const schainsNumber = 7;
         const defaultBalance = ethers.parseEther("100");

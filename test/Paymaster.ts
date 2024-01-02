@@ -198,6 +198,16 @@ describe("Paymaster", () => {
                 expect((await token.balanceOf(await validator.getAddress()))).to.be.equal(tokensPerMonth);
             })
 
+            it("should allow admin to claim rewards for the validator", async () => {
+                const paymaster = await loadFixture(payOneMonthFixture);
+                const token = await ethers.getContractAt("Token", await paymaster.skaleToken());
+                const paidUntil = new Date( Number(await paymaster.getSchainExpirationTimestamp(schainHash)) * MS_PER_SEC);
+                await skipTimeToSpecificDate(paidUntil);
+                const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+                await expect(paymaster.claimFor(validatorId, await validator.getAddress()))
+                    .to.changeTokenBalance(token, validator, tokensPerMonth);
+            })
+
             it("should calculate reward amount before claiming", async () => {
                 const paymaster = await loadFixture(payOneMonthFixture);
                 const paidUntil = new Date( Number(await paymaster.getSchainExpirationTimestamp(schainHash)) * MS_PER_SEC);

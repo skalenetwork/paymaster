@@ -122,11 +122,22 @@ describe("Paymaster", () => {
         it("should remove validator", async () => {
             const paymaster = await loadFixture(addSchainAndValidatorFixture);
 
-            await paymaster.removeValidator(validatorId);
+            await expect(paymaster.removeValidator(validatorId))
+                .to.emit(paymaster, "ValidatorMarkedAsRemoved");
 
             await expect(paymaster.setNodesAmount(validatorId, nodesAmount + 1))
                 .to.be.revertedWithCustomError(paymaster, "ValidatorHasBeenRemoved")
                 .withArgs(validatorId, await currentTime());
+
+            await expect(paymaster.clearHistory(await currentTime() + 1))
+                .to.be.revertedWithCustomError(paymaster, "ImportantDataRemoving");
+
+            const deletedTimestamp = await currentTime();
+            await skipMonth();
+            await paymaster.connect(validator).claim(await validator.getAddress());
+
+            await expect(paymaster.clearHistory(deletedTimestamp))
+                .to.emit(paymaster, "ValidatorRemoved");
         });
 
         it("should not add validator with the same id", async () => {

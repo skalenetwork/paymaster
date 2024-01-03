@@ -71,5 +71,27 @@ describe("Timeline", () => {
 
             expect(await sequence.getValueByTimestamp(offset)).to.be.equal(0);
         });
+
+        it("should clear values", async () => {
+            const sequence = await loadFixture(sequenceWithSampleData);
+
+            await sequence.clear(offset - 1);
+
+            const maxTimestamp = 100;
+            for (let timestamp = 0; timestamp < maxTimestamp; timestamp += 1) {
+                expect(await sequence.getValueByTimestamp(timestamp)).to.be.equal(getValue(timestamp));
+            }
+
+            const clearUntil = offset + number * space + 2;
+            await sequence.clear(clearUntil);
+
+            for (let timestamp = 0; timestamp < maxTimestamp; timestamp += 1) {
+                if (timestamp < clearUntil) {
+                    expect(await sequence.getValueByTimestamp(timestamp)).to.be.equal(0);
+                } else {
+                    expect(await sequence.getValueByTimestamp(timestamp)).to.be.equal(getValue(timestamp));
+                }
+            }
+        })
     });
 });

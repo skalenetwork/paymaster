@@ -14,6 +14,12 @@ describe("Timeline", () => {
     };
     const deployTimelineFixture = async () => await ethers.deployContract("TimelineTester");
 
+    it("should revert on incorrect time interval", async () => {
+        const timeline = await loadFixture(deployTimelineFixture);
+        await expect(timeline.getSum(1, 0))
+            .to.revertedWithCustomError(timeline, "IncorrectTimeInterval");
+    });
+
     describe("basic tests", () => {
         it("should calculate an entire segment", async () => {
             const timeline = await loadFixture(deployTimelineFixture);

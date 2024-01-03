@@ -28,4 +28,5 @@ interface ITimelineTester {
     function process(Timestamp until) external ;
     function add(Timestamp from, Timestamp to, uint256 value) external;
     function getSum(Timestamp from, Timestamp to) external returns (uint256 sum);
+    function clear(Timestamp before) external;
 }

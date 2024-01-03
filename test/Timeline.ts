@@ -58,6 +58,40 @@ describe("Timeline", () => {
             const correct = segment.value / 2n;
             expect(abs(result - correct)).to.be.lessThan(precision);
         });
+
+        describe("sample data", () => {
+            const offset = 10;
+
+            const timelineWithSampleDataFixture = async () => {
+                const segmentLength = 7;
+                const segmentsNumber = 5;
+                const timeline = await loadFixture(deployTimelineFixture);
+
+                for (let index = 0; index < segmentsNumber; index += 1) {
+                    const value = (index + 1) * segmentLength;
+                    const from = offset + index;
+                    const to = from + segmentLength;
+
+                    await timeline.add(from, to, value);
+                }
+
+                return timeline;
+            };
+
+            it("should not allow to clean unprocessed data", async () => {
+                const timeline = await loadFixture(timelineWithSampleDataFixture);
+                const processUntil = offset + 2;
+
+                await timeline.process(processUntil);
+
+                await expect(timeline.clear(processUntil + 1))
+                    .to.revertedWithCustomError(timeline, "ClearUnprocessed");
+
+                await expect(timeline.clear(processUntil))
+                    .to.emit(timeline, "Cleared")
+                    .withArgs(processUntil);
+            })
+        });
     });
 
     it("random test", async () => {

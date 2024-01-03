@@ -26,4 +26,5 @@ import {Timestamp} from "../../DateTimeUtils.sol";
 
 interface ISequenceTester {
     function add(Timestamp timestamp, uint256 value) external;
+    function getValueByTimestamp(Timestamp timestamp) external view returns (uint256 value);
 }

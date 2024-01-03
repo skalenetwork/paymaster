@@ -34,4 +34,13 @@ contract SequenceTester is ISequenceTester {
     function add(Timestamp timestamp, uint256 value) external override {
         _sequence.add(timestamp, value);
     }
+
+    function getValueByTimestamp(Timestamp timestamp)
+        external
+        view
+        override
+        returns (uint256 value)
+    {
+        return _sequence.getValueByTimestamp(timestamp);
+    }
 }

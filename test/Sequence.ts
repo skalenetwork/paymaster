@@ -65,5 +65,11 @@ describe("Timeline", () => {
                 expect(await sequence.getValueByTimestamp(timestamp)).to.be.equal(getValue(timestamp));
             }
         });
+
+        it("should get value of empty sequence", async () => {
+            const sequence = await loadFixture(deploySequenceFixture);
+
+            expect(await sequence.getValueByTimestamp(offset)).to.be.equal(0);
+        });
     });
 });

@@ -35,6 +35,10 @@ contract SequenceTester is ISequenceTester {
         _sequence.add(timestamp, value);
     }
 
+    function clear(Timestamp before) external override {
+        _sequence.clear(before);
+    }
+
     function getValueByTimestamp(Timestamp timestamp)
         external
         view

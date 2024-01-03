@@ -223,13 +223,17 @@ library SequenceLibrary {
     // solhint-disable-next-line private-vars-leading-underscore
     function clear(Sequence storage sequence, Timestamp before) internal {
         // It's important to store the most right value
-        for (uint256 nodesAmount = sequence.ids.length(); nodesAmount > 1; --nodesAmount) {
-            if (before <= _getNodeByIndex(sequence, 0).timestamp) {
-                break;
-            }
+
+        Iterator memory iterator = getIterator(sequence, before);
+        if(iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
+            return;
+        }
+
+        for (uint256 i = 0; i < iterator.idIndex; ++i) {
             NodeId nodeId = sequence.ids.popFront();
             _deleteNode(sequence.nodes[nodeId]);
         }
+
         if (_getNodeByIndex(sequence, 0).timestamp < before) {
             _getNodeByIndex(sequence, 0).timestamp = before;
         }

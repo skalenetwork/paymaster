@@ -87,6 +87,12 @@ describe("Timeline", () => {
                 await expect(timeline.clear(processUntil + 1))
                     .to.revertedWithCustomError(timeline, "ClearUnprocessed");
 
+                const beforeEverything = Math.round(offset / 2);
+
+                await expect(timeline.clear(beforeEverything))
+                    .to.emit(timeline, "Cleared")
+                    .withArgs(beforeEverything);
+
                 await expect(timeline.clear(processUntil))
                     .to.emit(timeline, "Cleared")
                     .withArgs(processUntil);

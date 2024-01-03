@@ -41,6 +41,10 @@ contract TimelineTester is ITimelineTester {
         _timeline.add(from, to, value);
     }
 
+    function clear(Timestamp before) external override {
+        _timeline.clear(before);
+    }
+
     function getSum(Timestamp from, Timestamp to) external view override returns (uint256 sum) {
         return _timeline.getSum(from, to);
     }

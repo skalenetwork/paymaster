@@ -1451,28 +1451,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-toolbox@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@nomicfoundation/hardhat-toolbox@npm:3.0.0"
+"@nomicfoundation/hardhat-toolbox@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "@nomicfoundation/hardhat-toolbox@npm:4.0.0"
   peerDependencies:
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.0
     "@nomicfoundation/hardhat-ethers": ^3.0.0
     "@nomicfoundation/hardhat-network-helpers": ^1.0.0
-    "@nomicfoundation/hardhat-verify": ^1.0.0
-    "@typechain/ethers-v6": ^0.4.0
-    "@typechain/hardhat": ^8.0.0
+    "@nomicfoundation/hardhat-verify": ^2.0.0
+    "@typechain/ethers-v6": ^0.5.0
+    "@typechain/hardhat": ^9.0.0
     "@types/chai": ^4.2.0
     "@types/mocha": ">=9.1.0"
-    "@types/node": ">=12.0.0"
+    "@types/node": ">=16.0.0"
     chai: ^4.2.0
     ethers: ^6.4.0
     hardhat: ^2.11.0
     hardhat-gas-reporter: ^1.0.8
     solidity-coverage: ^0.8.1
     ts-node: ">=8.0.0"
-    typechain: ^8.2.0
+    typechain: ^8.3.0
     typescript: ">=4.5.0"
-  checksum: d38d6d9224f10ec11edf5281b2204db7be0dd1bd5225e55bb6a3d8f89b4015f316f6407086914c6a22e1f19cf3968fc750014b81034e91fd51cf28696d2b7b68
+  checksum: 6ad2ebddc13ef37e66dbd8a2d88938fc7bff3190826708426fc53255f540c7b77f2b23070abfec7ad58ea1eab5dd1adcdcc0083f753edebcbe000aa37ff46bbf
   languageName: node
   linkType: hard
 
@@ -7036,7 +7036,7 @@ __metadata:
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.0
     "@nomicfoundation/hardhat-ethers": ^3.0.5
     "@nomicfoundation/hardhat-network-helpers": ^1.0.10
-    "@nomicfoundation/hardhat-toolbox": ^3.0.0
+    "@nomicfoundation/hardhat-toolbox": ^4.0.0
     "@nomicfoundation/hardhat-verify": ^2.0.3
     "@openzeppelin/contracts": ^5.0.0
     "@openzeppelin/contracts-upgradeable": ^5.0.0

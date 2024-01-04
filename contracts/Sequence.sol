@@ -132,7 +132,14 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function getValue(Sequence storage sequence, Iterator memory iterator) internal view returns (uint256 value) {
+    function getValue(
+        Sequence storage sequence,
+        Iterator memory iterator
+    )
+        internal
+        view
+        returns (uint256 value)
+    {
         if(iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             return 0;
         }
@@ -144,7 +151,14 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function getValueByTimestamp(Sequence storage sequence, Timestamp timestamp) internal view returns (uint256 value) {
+    function getValueByTimestamp(
+        Sequence storage sequence,
+        Timestamp timestamp
+    )
+        internal
+        view
+        returns (uint256 value)
+    {
         return getValue(sequence, getIterator(sequence, timestamp));
     }
 
@@ -161,7 +175,14 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function step(Iterator memory iterator, Sequence storage sequence) internal view returns (bool success) {
+    function step(
+        Iterator memory iterator,
+        Sequence storage sequence
+    )
+        internal
+        view
+        returns (bool success)
+    {
         success = hasNext(iterator);
         if (iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             iterator.idIndex = 0;
@@ -202,13 +223,17 @@ library SequenceLibrary {
     // solhint-disable-next-line private-vars-leading-underscore
     function clear(Sequence storage sequence, Timestamp before) internal {
         // It's important to store the most right value
-        for (uint256 nodesAmount = sequence.ids.length(); nodesAmount > 1; --nodesAmount) {
-            if (before <= _getNodeByIndex(sequence, 0).timestamp) {
-                break;
-            }
+
+        Iterator memory iterator = getIterator(sequence, before);
+        if(iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
+            return;
+        }
+
+        for (uint256 i = 0; i < iterator.idIndex; ++i) {
             NodeId nodeId = sequence.ids.popFront();
             _deleteNode(sequence.nodes[nodeId]);
         }
+
         if (_getNodeByIndex(sequence, 0).timestamp < before) {
             _getNodeByIndex(sequence, 0).timestamp = before;
         }
@@ -249,11 +274,25 @@ library SequenceLibrary {
         delete node.value;
     }
 
-    function _getNode(Sequence storage sequence, NodeId nodeId) private view returns (Node storage node) {
+    function _getNode(
+        Sequence storage sequence,
+        NodeId nodeId
+    )
+        private
+        view
+        returns (Node storage node)
+    {
         return sequence.nodes[nodeId];
     }
 
-    function _getNodeByIndex(Sequence storage sequence, uint256 index) private view returns (Node storage node) {
+    function _getNodeByIndex(
+        Sequence storage sequence,
+        uint256 index
+    )
+        private
+        view
+        returns (Node storage node)
+    {
         return _getNode(sequence, sequence.ids.at(index));
     }
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /*
-    ITimelineTester.sol - Paymaster
+    ISequenceTester.sol - Paymaster
     Copyright (C) 2023-Present SKALE Labs
     @author Dmytro Stebaiev
 
@@ -24,9 +24,8 @@ pragma solidity ^0.8.19;
 import {Timestamp} from "../../DateTimeUtils.sol";
 
 
-interface ITimelineTester {
-    function process(Timestamp until) external ;
-    function add(Timestamp from, Timestamp to, uint256 value) external;
-    function getSum(Timestamp from, Timestamp to) external returns (uint256 sum);
+interface ISequenceTester {
+    function add(Timestamp timestamp, uint256 value) external;
     function clear(Timestamp before) external;
+    function getValueByTimestamp(Timestamp timestamp) external view returns (uint256 value);
 }

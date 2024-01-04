@@ -51,7 +51,12 @@ interface IPaymaster {
     function pay(SchainHash schainHash, Months duration) external;
     function claim(address to) external;
     function claimFor(ValidatorId validatorId, address to) external;
-    function getSchainExpirationTimestamp(SchainHash schainHash) external view returns (Timestamp expiration);
+    function getSchainExpirationTimestamp(
+        SchainHash schainHash
+    )
+        external
+        view
+        returns (Timestamp expiration);
     function getRewardAmount(ValidatorId validatorId) external view returns (SKL reward);
     function getNodesNumber(ValidatorId validatorId) external view returns (uint256 number);
     function getActiveNodesNumber(ValidatorId validatorId) external view returns (uint256 number);
@@ -62,7 +67,12 @@ interface IPaymaster {
         external
         view
         returns (uint256 number);
-    function getHistoricalTotalActiveNodesNumber(Timestamp when) external view returns (uint256 number);
+    function getHistoricalTotalActiveNodesNumber(
+        Timestamp when
+    )
+        external
+        view
+        returns (uint256 number);
     function getValidatorsNumber() external view returns (uint256 number);
     function getSchainsNames() external view returns (string[] memory names);
     function getSchainsNumber() external view returns (uint256 number);

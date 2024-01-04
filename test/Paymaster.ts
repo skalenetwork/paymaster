@@ -18,6 +18,7 @@ describe("Paymaster", () => {
     const schainName = "d2-schain";
     const schainHash = ethers.solidityPackedKeccak256(["string"], [schainName]);
     const BIG_AMOUNT = ethers.parseEther("1000000");
+    const MAX_REPLENISHMENT_PERIOD = 24;
     const precision = 5n;
 
     let owner: SignerWithAddress;
@@ -27,7 +28,6 @@ describe("Paymaster", () => {
 
     const setup = async (paymaster: Paymaster, skaleToken: Token) => {
         const minute = 60;
-        const MAX_REPLENISHMENT_PERIOD = 24;
         const SCHAIN_PRICE = ethers.parseEther("5000");
         const SKL_PRICE = ethers.parseEther("2");
 
@@ -74,6 +74,16 @@ describe("Paymaster", () => {
         expect(schain.paidUntil).to.be.equal(nextMonth(await currentTime()));
     });
 
+    it("should set version", async () => {
+        const paymaster = await loadFixture(deployPaymasterFixture);
+        const version = "version";
+        await expect(paymaster.setVersion(version))
+            .to.emit(paymaster, "VersionSet")
+            .withArgs(version);
+
+        expect(await paymaster.version()).to.be.equal(version);
+    })
+
     describe("when 1 validator with 1 node and 1 schain exist", () => {
         const validatorId = 1;
         const nodesAmount = 1;
@@ -112,12 +122,75 @@ describe("Paymaster", () => {
         it("should remove validator", async () => {
             const paymaster = await loadFixture(addSchainAndValidatorFixture);
 
-            await paymaster.removeValidator(validatorId);
+            await expect(paymaster.removeValidator(validatorId))
+                .to.emit(paymaster, "ValidatorMarkedAsRemoved");
 
             await expect(paymaster.setNodesAmount(validatorId, nodesAmount + 1))
                 .to.be.revertedWithCustomError(paymaster, "ValidatorHasBeenRemoved")
                 .withArgs(validatorId, await currentTime());
+
+            await expect(paymaster.clearHistory(await currentTime() + 1))
+                .to.be.revertedWithCustomError(paymaster, "ImportantDataRemoving");
+
+            const deletedTimestamp = await currentTime();
+            await skipMonth();
+            await paymaster.connect(validator).claim(await validator.getAddress());
+
+            await expect(paymaster.clearHistory(deletedTimestamp))
+                .to.emit(paymaster, "ValidatorRemoved");
         });
+
+        it("should not add validator with the same id", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            await expect(paymaster.addValidator(validatorId, await user.getAddress()))
+                .to.be.revertedWithCustomError(paymaster, "ValidatorAddingError")
+                .withArgs(validatorId);
+        })
+
+        it("should not add validator with the same address", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            await expect(paymaster.addValidator(validatorId + 1, await validator.getAddress()))
+                .to.be.revertedWithCustomError(paymaster, "ValidatorAddressAlreadyExists")
+                .withArgs(await validator.getAddress());
+        })
+
+        it("should not allow to top up more than max replenishment period", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+            const fiveMonths = 5;
+
+            await expect(paymaster.connect(user).pay(schainHash, MAX_REPLENISHMENT_PERIOD + 1))
+                .to.be.revertedWithCustomError(paymaster, "ReplenishmentPeriodIsTooBig")
+
+            for (let index = 0; index < fiveMonths; index += 1) {
+                await skipMonth();
+            }
+
+            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+            await expect(paymaster.connect(user).pay(schainHash, MAX_REPLENISHMENT_PERIOD + fiveMonths + 1))
+                .to.be.revertedWithCustomError(paymaster, "ReplenishmentPeriodIsTooBig")
+
+            await expect(paymaster.connect(user).pay(schainHash, MAX_REPLENISHMENT_PERIOD + fiveMonths))
+                .to.emit(paymaster, "SchainPaid");
+        });
+
+        it("should allow to blacklist nodes", async () => {
+            const paymaster = await loadFixture(addSchainAndValidatorFixture);
+
+            const nodesNumber = 7;
+            const blacklistedNodesNumber = 3;
+
+            await paymaster.setNodesAmount(validatorId, nodesNumber);
+            expect(await paymaster.getNodesNumber(validatorId)).to.be.equal(nodesNumber);
+            expect(await paymaster.getActiveNodesNumber(validatorId)).to.be.equal(nodesNumber);
+
+            // Blacklist
+            await paymaster.setActiveNodes(validatorId, nodesNumber - blacklistedNodesNumber);
+
+            expect(await paymaster.getNodesNumber(validatorId)).to.be.equal(nodesNumber);
+            expect(await paymaster.getActiveNodesNumber(validatorId)).to.be.equal(nodesNumber - blacklistedNodesNumber);
+        })
 
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
@@ -134,6 +207,16 @@ describe("Paymaster", () => {
                 await paymaster.connect(validator).claim(await validator.getAddress());
                 const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
                 expect((await token.balanceOf(await validator.getAddress()))).to.be.equal(tokensPerMonth);
+            })
+
+            it("should allow admin to claim rewards for the validator", async () => {
+                const paymaster = await loadFixture(payOneMonthFixture);
+                const token = await ethers.getContractAt("Token", await paymaster.skaleToken());
+                const paidUntil = new Date( Number(await paymaster.getSchainExpirationTimestamp(schainHash)) * MS_PER_SEC);
+                await skipTimeToSpecificDate(paidUntil);
+                const tokensPerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+                await expect(paymaster.claimFor(validatorId, await validator.getAddress()))
+                    .to.changeTokenBalance(token, validator, tokensPerMonth);
             })
 
             it("should calculate reward amount before claiming", async () => {
@@ -239,7 +322,7 @@ describe("Paymaster", () => {
         })
     });
 
-    describe("when 7 validator and 7 schain exist", () => {
+    describe("when 7 validators and 7 schains exist", () => {
         const validatorsNumber = 7;
         const schainsNumber = 7;
         const defaultBalance = ethers.parseEther("100");
@@ -514,5 +597,15 @@ describe("Paymaster", () => {
                     estimated
                 );
         });
+
+        it("should allow to get information about validators and schains", async () => {
+            const { paymaster, schains, validators } = await loadFixture(addSchainAndValidatorFixture);
+
+            expect(await paymaster.getValidatorsNumber()).to.be.equal(validators.length);
+            expect(await paymaster.getSchainsNumber()).to.be.equal(schains.length);
+            expect((await paymaster.getSchainsNames()).map(
+                (name) => ethers.solidityPackedKeccak256(["string"], [name])
+            )).to.have.same.members(schains);
+        })
     });
 });

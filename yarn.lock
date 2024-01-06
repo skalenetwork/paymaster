@@ -1655,45 +1655,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@openzeppelin/defender-sdk-base-client@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@openzeppelin/defender-sdk-base-client@npm:1.5.0"
+"@openzeppelin/defender-sdk-base-client@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@openzeppelin/defender-sdk-base-client@npm:1.8.0"
   dependencies:
     amazon-cognito-identity-js: ^6.3.6
     async-retry: ^1.3.3
-  checksum: b522b4c82dcd05519a83379033e89128b1148a8ff048405f00b01dc826fd3cb1d75790070dd1761440399c16a45e9b6d3df043a72cde4a9d90ea100f7b4d484f
+  checksum: f5ba28d00c93dca1ce53d0140549741fe95d80611980e0e4243814007233b826c2a898cd38edccdc181aa22daf688d06f93ecfeda942e68a5f1a9fe8f06398d9
   languageName: node
   linkType: hard
 
-"@openzeppelin/defender-sdk-deploy-client@npm:^1.5.0":
-  version: 1.5.0
-  resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.5.0"
+"@openzeppelin/defender-sdk-deploy-client@npm:^1.8.0":
+  version: 1.8.0
+  resolution: "@openzeppelin/defender-sdk-deploy-client@npm:1.8.0"
   dependencies:
     "@ethersproject/abi": ^5.7.0
-    "@openzeppelin/defender-sdk-base-client": ^1.5.0
+    "@openzeppelin/defender-sdk-base-client": ^1.8.0
     axios: ^1.4.0
     lodash: ^4.17.21
-  checksum: fcb3564e7d1d367507dc900af6f55f7775089650e0a3e7e161163e91557c60192e924c23ede39f9a67ee5c0dc35824c7607a91fa1765ab116194455d8e42c00e
+  checksum: 586213fd27afd355488936f3dc785202dcb71b907657aed27bbd64ffdc838c9b17f6709c079215127da56bb07c5fce69a12c9026ac4718d75fe63cf6c7274997
   languageName: node
   linkType: hard
 
-"@openzeppelin/hardhat-upgrades@npm:^2.4.1":
-  version: 2.4.1
-  resolution: "@openzeppelin/hardhat-upgrades@npm:2.4.1"
+"@openzeppelin/hardhat-upgrades@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "@openzeppelin/hardhat-upgrades@npm:3.0.1"
   dependencies:
     "@openzeppelin/defender-admin-client": ^1.52.0
     "@openzeppelin/defender-base-client": ^1.52.0
-    "@openzeppelin/defender-sdk-base-client": ^1.5.0
-    "@openzeppelin/defender-sdk-deploy-client": ^1.5.0
-    "@openzeppelin/upgrades-core": ^1.30.1
+    "@openzeppelin/defender-sdk-base-client": ^1.8.0
+    "@openzeppelin/defender-sdk-deploy-client": ^1.8.0
+    "@openzeppelin/upgrades-core": ^1.32.0
     chalk: ^4.1.0
     debug: ^4.1.1
     ethereumjs-util: ^7.1.5
     proper-lockfile: ^4.1.1
-    undici: ^5.14.0
+    undici: ^5.28.2
   peerDependencies:
     "@nomicfoundation/hardhat-ethers": ^3.0.0
-    "@nomicfoundation/hardhat-verify": ^1.1.0
+    "@nomicfoundation/hardhat-verify": ^2.0.0
     ethers: ^6.6.0
     hardhat: ^2.0.2
   peerDependenciesMeta:
@@ -1701,13 +1701,13 @@ __metadata:
       optional: true
   bin:
     migrate-oz-cli-project: dist/scripts/migrate-oz-cli-project.js
-  checksum: 7d634ef0732c90e3bc2169f2294a391815552e7f833311c194aa837fee433e75bfa6b1102396085213c13c4fed1f29a7801834aab379660ad7272af8523177e7
+  checksum: 31bdb61931d0c690f46234052d00fb24036bd6d76345442326860c74b70ee66b5e3efa6a5963b34378d3f15674d0bec625910035b7e344c0d26c919a0986c071
   languageName: node
   linkType: hard
 
-"@openzeppelin/upgrades-core@npm:^1.30.1":
-  version: 1.31.1
-  resolution: "@openzeppelin/upgrades-core@npm:1.31.1"
+"@openzeppelin/upgrades-core@npm:^1.32.0":
+  version: 1.32.2
+  resolution: "@openzeppelin/upgrades-core@npm:1.32.2"
   dependencies:
     cbor: ^9.0.0
     chalk: ^4.1.0
@@ -1719,7 +1719,7 @@ __metadata:
     solidity-ast: ^0.4.51
   bin:
     openzeppelin-upgrades-core: dist/cli/cli.js
-  checksum: 5b424201e2deb41e8d1be00375768d8477b190ba70ca5af2385fb2437f9804be8fd5fee717c47734e3058a9568b52cad4101de47ef760abcf839e007df3eb2dd
+  checksum: b34753cb46926f017c917ffd9cc5dad69d6e644fdc55263525e911f8905392d40b871d6a76de0fc6206fe195324364d45224afa5aacdc193fa3924a7d8985c53
   languageName: node
   linkType: hard
 
@@ -7041,7 +7041,7 @@ __metadata:
     "@nomicfoundation/hardhat-verify": ^2.0.3
     "@openzeppelin/contracts": ^5.0.1
     "@openzeppelin/contracts-upgradeable": ^5.0.0
-    "@openzeppelin/hardhat-upgrades": ^2.4.1
+    "@openzeppelin/hardhat-upgrades": ^3.0.1
     "@quant-finance/solidity-datetime": ^2.2.0
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
@@ -8626,6 +8626,15 @@ __metadata:
   dependencies:
     "@fastify/busboy": ^2.0.0
   checksum: aaa9aadb712cf80e1a9cea2377e4842670105e00abbc184a21770ea5a8b77e4e2eadc200eac62442e74a1cd3b16a840c6f73b112b9e886bd3c1a125eb22e4f21
+  languageName: node
+  linkType: hard
+
+"undici@npm:^5.28.2":
+  version: 5.28.2
+  resolution: "undici@npm:5.28.2"
+  dependencies:
+    "@fastify/busboy": ^2.0.0
+  checksum: f9e9335803f962fff07c3c11c6d50bbc76248bacf97035047155adb29c3622a65bd6bff23a22218189740133149d22e63b68131d8c40e78ac6cb4b6d686a6dfa
   languageName: node
   linkType: hard
 

@@ -4394,9 +4394,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^6.4.0":
-  version: 6.8.0
-  resolution: "ethers@npm:6.8.0"
+"ethers@npm:^6.10.0":
+  version: 6.10.0
+  resolution: "ethers@npm:6.10.0"
   dependencies:
     "@adraffy/ens-normalize": 1.10.0
     "@noble/curves": 1.2.0
@@ -4405,7 +4405,7 @@ __metadata:
     aes-js: 4.0.0-beta.5
     tslib: 2.4.0
     ws: 8.5.0
-  checksum: 967e4bdc23eae48444361ededa77cd884271ab7af059a0458b3c2ec52338124258cb92dbb28b37f53c7b532313dcbb209792ea3232c87927c94164697948182d
+  checksum: 6f0a834b9b9bb31eceda9ac0a841b1061d5e2eefb5d0b042013db1c5abf48fa993ec0a602ae4c64d9e259d495fc01c100cf61f17e928e09eb43f0c7860f2a317
   languageName: node
   linkType: hard
 
@@ -7055,7 +7055,7 @@ __metadata:
     cspell: ^8.1.3
     dotenv: ^16.3.1
     eslint: ^8.56.0
-    ethers: ^6.4.0
+    ethers: ^6.10.0
     hardhat: ^2.19.4
     hardhat-gas-reporter: ^1.0.8
     lodash: ^4.17.21

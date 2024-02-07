@@ -1,4 +1,4 @@
-import { MS_PER_SEC, currentTime, monthBegin, nextMonth, skipMonth, skipTime, skipTimeToSpecificDate } from "./tools/time";
+import { MS_PER_SEC, currentTime, getResponseTimestamp, monthBegin, nextMonth, skipMonth, skipTime, skipTimeToSpecificDate } from "./tools/time";
 import { Paymaster, PaymasterAccessManager, Token } from "../typechain-types";
 import {
     deployAccessManager,
@@ -6,12 +6,15 @@ import {
     setupRoles
 } from "../migrations/deploy";
 import { HDNodeWallet } from "ethers";
+import Prando from 'prando';
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import {
     loadFixture
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { Rewards } from "./tools/rewards";
+import { NetworkComposition } from "./tools/network-composition";
 
 
 describe("Paymaster", () => {
@@ -334,6 +337,7 @@ describe("Paymaster", () => {
             for (let index = 0; index < validatorsNumber; index += 1) {
                 validators.push(ethers.Wallet.createRandom(ethers.provider));
             }
+            const rewards = new Rewards();
 
             for (const [index, validatorWallet] of validators.entries()) {
                 if (await ethers.provider.getBalance(await validatorWallet.getAddress()) < defaultBalance) {
@@ -343,18 +347,21 @@ describe("Paymaster", () => {
                     });
                 }
                 await paymaster.addValidator(index, await validatorWallet.getAddress());
-                await paymaster.setNodesAmount(index, index + 1);
+                const response = await paymaster.setNodesAmount(index, index + 1);
+                rewards.setNodesAmount(index, index + 1, await getResponseTimestamp(response));
             }
 
             const schains = [];
 
             for (let index = 0; index < schainsNumber; index += 1) {
                 const currentSchainName = `schain-${index}`;
-                await paymaster.addSchain(currentSchainName);
-                schains.push(ethers.solidityPackedKeccak256(["string"], [currentSchainName]));
+                const response = await paymaster.addSchain(currentSchainName);
+                const sHash = ethers.solidityPackedKeccak256(["string"], [currentSchainName]);
+                schains.push(sHash);
+                rewards.addSchain(sHash, await getResponseTimestamp(response));
             }
 
-            return { paymaster, schains, token, validators };
+            return { paymaster, rewards, schains, token, validators };
         }
 
         it("should claim reward even if not all chains paid in time", async () => {
@@ -607,5 +614,53 @@ describe("Paymaster", () => {
                 (name) => ethers.solidityPackedKeccak256(["string"], [name])
             )).to.have.same.members(schains);
         })
+
+        it.only("random test", async () => {
+            const timelimit = 5;
+            const maxTopUpMonths = 7;
+
+            const start = new Date().getTime();
+            const rnd = new Prando("D2");
+            const week = 604800;
+            const averageMonth = 2628288;
+
+            enum Event {
+                CLAIM,
+                TOP_UP_SCHAIN
+            }
+
+            const { paymaster, rewards, schains, token, validators } = await loadFixture(addSchainAndValidatorFixture);
+            const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+
+            while (new Date().getTime() - start < timelimit * MS_PER_SEC) {
+                const event = rnd.nextArrayItem(Object.values(Event));
+                if (event === Event.TOP_UP_SCHAIN) {
+                    const sHash = rnd.nextArrayItem(schains);
+                    const months = rnd.nextInt(0, maxTopUpMonths + 1);
+
+                    const paidUntil = Number(await paymaster.getSchainExpirationTimestamp(sHash));
+                    const target = nextMonth(await currentTime()) + months * averageMonth;
+
+                    if (target > paidUntil) {
+                        const period = Math.round((target - paidUntil) / averageMonth);
+                        await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+                        console.log(`Top up ${sHash} for ${period} months`);
+                        await expect(paymaster.connect(user).pay(sHash, period))
+                            .to.changeTokenBalance(
+                                token,
+                                await paymaster.getAddress(),
+                                BigInt(period) * pricePerMonth);
+                        rewards.addPayment(sHash, BigInt(period) * pricePerMonth, period);
+                    }
+                } else if (event === Event.CLAIM) {
+                    console.log("Claim");
+                    const vId = rnd.nextInt(0, validators.length - 1);
+
+                    const estimated = await paymaster.getRewardAmount(vId);
+                }
+
+                await skipTime(week);
+            }
+        });
     });
 });

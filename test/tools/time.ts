@@ -1,3 +1,4 @@
+import { ContractTransactionResponse } from "ethers";
 import { ethers } from "hardhat";
 
 export const MS_PER_SEC = 1000;
@@ -62,4 +63,13 @@ export const monthBegin = (timestamp: number | bigint) => {
 export const skipMonth = async () => {
     const timestamp = await currentTime();
     await skipTime(nextMonth(timestamp) - timestamp);
+}
+
+export const getResponseTimestamp = async (response: ContractTransactionResponse) => {
+    const receipt = await response.wait();
+    if (receipt) {
+        const block = await receipt.getBlock();
+        return block.timestamp;
+    }
+    throw new Error("Can't get transaction receipt");
 }

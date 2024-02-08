@@ -52,6 +52,22 @@ export const nextMonth = (timestamp: number | bigint) => {
     return new Date(Date.UTC(year, month, 1)).getTime() / MS_PER_SEC;
 }
 
+export const previousMonth = (timestamp: number | bigint) => {
+    const timestampNumber = Number(timestamp) * MS_PER_SEC;
+    const date = new Date(timestampNumber);
+    let month = date.getMonth();
+    let year = date.getFullYear();
+
+    month -= 1;
+
+    if (month < 0) {
+        month = months.length - 1;
+        year -= 1;
+    }
+
+    return new Date(Date.UTC(year, month, 1)).getTime() / MS_PER_SEC;
+}
+
 export const monthBegin = (timestamp: number | bigint) => {
     const timestampNumber = Number(timestamp) * MS_PER_SEC;
     const date = new Date(timestampNumber);

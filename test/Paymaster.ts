@@ -657,6 +657,17 @@ describe("Paymaster", () => {
                     const vId = rnd.nextInt(0, validators.length - 1);
 
                     const estimated = await paymaster.getRewardAmount(vId);
+
+                    const claimResponse = await paymaster.connect(validators[vId]).claim(await validators[vId].getAddress());
+                    await expect(claimResponse)
+                        .to.changeTokenBalance(
+                            token,
+                            validators[vId],
+                            estimated
+                        );
+
+                    const reward = rewards.claim(vId, await getResponseTimestamp(claimResponse));
+                    expect(estimated).to.be.equal(reward);
                 }
 
                 await skipTime(week);

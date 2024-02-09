@@ -616,8 +616,9 @@ describe("Paymaster", () => {
         })
 
         it.only("random test", async () => {
-            const timelimit = 5;
+            const timelimit = 15;
             const maxTopUpMonths = 7;
+            const maxNodesAmount = 5;
 
             const start = new Date().getTime();
             const rnd = new Prando("D2");
@@ -625,6 +626,7 @@ describe("Paymaster", () => {
             const averageMonth = 2628288;
 
             enum Event {
+                ADD_NODE,
                 CLAIM,
                 TOP_UP_SCHAIN
             }
@@ -653,7 +655,6 @@ describe("Paymaster", () => {
                         rewards.addPayment(sHash, BigInt(period) * pricePerMonth, period);
                     }
                 } else if (event === Event.CLAIM) {
-                    console.log("Claim");
                     const vId = rnd.nextInt(0, validators.length - 1);
 
                     const estimated = await paymaster.getRewardAmount(vId);
@@ -668,6 +669,16 @@ describe("Paymaster", () => {
 
                     const reward = rewards.claim(vId, await getResponseTimestamp(claimResponse));
                     expect(estimated).to.be.equal(reward);
+
+                    console.log(`Validator ${vId} claimed ${estimated} SKL`);
+                } else if (event === Event.ADD_NODE) {
+                    const vId = rnd.nextInt(0, validators.length - 1);
+                    const nodesAmount = rnd.nextInt(0, maxNodesAmount);
+
+                    console.log(`Validator ${vId} has ${nodesAmount} nodes`);
+
+                    const response = await paymaster.setNodesAmount(vId, nodesAmount);
+                    rewards.setNodesAmount(vId, nodesAmount, await getResponseTimestamp(response));
                 }
 
                 await skipTime(week);

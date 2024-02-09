@@ -44,17 +44,19 @@ export class Rewards {
             const totalNodesAmount = BigInt(this.networkComposition.getTotalNodesAmount(from));
             const withdrawn = this.withdrawals.getWithdrawal(validatorId, from, to);
 
-            const reward = income * nodeAmount / totalNodesAmount - withdrawn;
-            totalReward += reward;
+            if (totalNodesAmount > 0) {
+                const reward = income * nodeAmount / totalNodesAmount - withdrawn;
+                totalReward += reward;
 
-            this.withdrawals.addWithdrawal(
-                validatorId,
-                {
-                    from,
-                    to,
-                    value: reward
-                }
-            );
+                this.withdrawals.addWithdrawal(
+                    validatorId,
+                    {
+                        from,
+                        to,
+                        value: reward
+                    }
+                );
+            }
         }
 
         return totalReward;

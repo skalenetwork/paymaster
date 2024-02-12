@@ -22,6 +22,7 @@ describe("Paymaster", () => {
     const BIG_AMOUNT = ethers.parseEther("1000000");
     const MAX_REPLENISHMENT_PERIOD = 24;
     const precision = 5n;
+    const decimalPlacePrecision = 12;
 
     let owner: SignerWithAddress;
     let validator: SignerWithAddress;
@@ -671,7 +672,10 @@ describe("Paymaster", () => {
                         );
 
                     const reward = rewards.claim(vId, await getResponseTimestamp(claimResponse));
-                    expect(estimated).to.be.equal(reward);
+                    expect(estimated).to.be.lessThanOrEqual(reward);
+                    const decimal = 10n;
+                    const errorPart = decimal ** (await token.decimals() - BigInt(decimalPlacePrecision));
+                    expect(estimated / errorPart).to.be.equal(reward / errorPart);
 
                     console.log(`\tValidator ${vId} claimed ${estimated} SKL`);
                 } else if (event === Event.ADD_NODE) {

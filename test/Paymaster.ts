@@ -14,7 +14,6 @@ import {
     loadFixture
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 import { Rewards } from "./tools/rewards";
-import { NetworkComposition } from "./tools/network-composition";
 
 
 describe("Paymaster", () => {
@@ -635,6 +634,10 @@ describe("Paymaster", () => {
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
 
             while (new Date().getTime() - start < timelimit * MS_PER_SEC) {
+                console.log(
+                    `Time: ${new Date(await currentTime() * MS_PER_SEC).toISOString()}`,
+                    `(${await currentTime()})`
+                );
                 const event = rnd.nextArrayItem(Object.values(Event));
                 if (event === Event.TOP_UP_SCHAIN) {
                     const sHash = rnd.nextArrayItem(schains);
@@ -646,7 +649,7 @@ describe("Paymaster", () => {
                     if (target > paidUntil) {
                         const period = Math.round((target - paidUntil) / averageMonth);
                         await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
-                        console.log(`Top up ${sHash} for ${period} months`);
+                        console.log(`\tTop up ${sHash} for ${period} months`);
                         await expect(paymaster.connect(user).pay(sHash, period))
                             .to.changeTokenBalance(
                                 token,
@@ -670,12 +673,12 @@ describe("Paymaster", () => {
                     const reward = rewards.claim(vId, await getResponseTimestamp(claimResponse));
                     expect(estimated).to.be.equal(reward);
 
-                    console.log(`Validator ${vId} claimed ${estimated} SKL`);
+                    console.log(`\tValidator ${vId} claimed ${estimated} SKL`);
                 } else if (event === Event.ADD_NODE) {
                     const vId = rnd.nextInt(0, validators.length - 1);
                     const nodesAmount = rnd.nextInt(0, maxNodesAmount);
 
-                    console.log(`Validator ${vId} has ${nodesAmount} nodes`);
+                    console.log(`\tValidator ${vId} has ${nodesAmount} nodes`);
 
                     const response = await paymaster.setNodesAmount(vId, nodesAmount);
                     rewards.setNodesAmount(vId, nodesAmount, await getResponseTimestamp(response));

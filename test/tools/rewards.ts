@@ -1,7 +1,7 @@
 import { NetworkComposition } from "./network-composition";
 import { Payments } from "./payments";
-import { previousMonth } from "./time";
 import { Withdrawals } from "./withdrawals";
+import { monthBegin } from "./time";
 
 export class Rewards {
     private payments = new Payments();
@@ -28,7 +28,7 @@ export class Rewards {
 
     claim(validatorId: number, timestamp: number) {
         const changePoints = this.networkComposition.getChangePoints();
-        const until = previousMonth(timestamp);
+        const until = monthBegin(timestamp);
         let totalReward = 0n;
         for (let index = 0; index < changePoints.length && changePoints[index] < until; index += 1) {
             const from = changePoints[index];

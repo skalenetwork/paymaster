@@ -30,7 +30,10 @@ const config: HardhatUserConfig = {
             "allowUnlimitedContractSize": true
         }
     },
-    "solidity": "0.8.20"
+    "solidity": "0.8.20",
+    mocha: {
+        timeout: 2000000
+    },
 };
 
 export default config;

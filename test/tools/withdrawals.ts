@@ -8,6 +8,14 @@ interface Withdrawal {
 export class Withdrawals {
     private withdrawals = new Map<number, Array<Withdrawal>>();
 
+    clone () {
+        const withdrawals = new Withdrawals();
+        for (const [validatorId, claims] of this.withdrawals) {
+            withdrawals.withdrawals.set(validatorId, [...claims]);
+        }
+        return withdrawals;
+    }
+
     addWithdrawal(validatorId: number, withdrawal: Withdrawal) {
         if (!this.withdrawals.has(validatorId)) {
             this.withdrawals.set(validatorId, new Array<Withdrawal>());

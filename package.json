@@ -5,6 +5,7 @@
     "cleanCompile": "yarn exec hardhat clean && yarn compile",
     "compile": "yarn exec hardhat compile",
     "cspell": "yarn exec cspell \"**/*\"",
+    "debug": "yarn exec hardhat test",
     "eslint": "yarn exec eslint .",
     "fc": "yarn fullCheck",
     "fullCheck": "yarn compile && yarn lint && yarn tsc && yarn eslint && yarn slither",

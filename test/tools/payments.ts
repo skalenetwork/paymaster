@@ -10,6 +10,13 @@ export class Payments {
     private paidUntil = new Map<string, number>();
     private payments = new Array<Payment>();
 
+    clone() {
+        const payments = new Payments();
+        payments.paidUntil = new Map(this.paidUntil);
+        payments.payments = [...this.payments];
+        return payments;
+    }
+
     addSchain(schainHash: string, timestamp: number) {
         if (this.paidUntil.has(schainHash)) {
             throw new Error("Schain was already added");
@@ -42,6 +49,8 @@ export class Payments {
                 const right = Math.min(payment.to, toTimestamp);
 
                 sum += payment.value * BigInt(right - left) / BigInt(payment.to - payment.from);
+
+                console.log(`+ ${payment.value} * (${right} - ${left}) / (${payment.to} - ${payment.from}) = ${payment.value * BigInt(right - left) / BigInt(payment.to - payment.from)}`);
             }
         }
         return sum;

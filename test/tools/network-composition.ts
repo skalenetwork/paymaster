@@ -7,6 +7,14 @@ export class NetworkComposition {
     // }
     private nodes = new Map<number, Map<number, number>>();
 
+    clone() {
+        const networkComposition = new NetworkComposition();
+        for (const [validatorId, nodesHistory] of this.nodes.entries()) {
+            networkComposition.nodes.set(validatorId, new Map(nodesHistory));
+        }
+        return networkComposition;
+    }
+
     setNodesAmount(validatorId: number, nodesAmount: number, timestamp: number) {
         if(!this.nodes.has(validatorId)) {
             this.nodes.set(validatorId, new Map<number, number>([[0, 0]]));

@@ -52,10 +52,10 @@ export class Rewards {
             const totalNodesAmount = BigInt(this.networkComposition.getTotalNodesAmount(from));
             const withdrawn = this.withdrawals.getWithdrawal(validatorId, from, to);
 
-            if (income > 0) {
-                console.log(`[${new Date(from * MS_PER_SEC).toISOString()}, ${new Date(to * MS_PER_SEC).toISOString()})`)
-                console.log(income);
-            }
+            // if (income > 0) {
+            //     console.log(`[${new Date(from * MS_PER_SEC).toISOString()}, ${new Date(to * MS_PER_SEC).toISOString()})`)
+            //     console.log(income);
+            // }
 
             if (totalNodesAmount > 0) {
                 const reward = income * nodeAmount / totalNodesAmount - withdrawn;

@@ -5,15 +5,18 @@ import {
     deployPaymaster,
     setupRoles
 } from "../migrations/deploy";
+import { expect, use } from "chai";
 import { HDNodeWallet } from "ethers";
 import Prando from 'prando';
+import { Rewards } from "./tools/rewards";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
+import { d2ChaiMatchers } from "./tools/matchers";
 import { ethers } from "hardhat";
-import { expect } from "chai";
 import {
     loadFixture
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
-import { Rewards } from "./tools/rewards";
+
+use(d2ChaiMatchers);
 
 
 describe("Paymaster", () => {
@@ -257,7 +260,7 @@ describe("Paymaster", () => {
                 expect(await paymaster.getRewardAmount(validatorId)).to.be.equal(tokensPerMonth);
             });
 
-            it.only("should be able to clear history", async () => {
+            it("should be able to clear history", async () => {
                 const { baseRewards, paymaster, token } = await loadFixture(payOneMonthFixture);
                 const rewards = baseRewards.clone();
 
@@ -447,6 +450,7 @@ describe("Paymaster", () => {
             await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
             const thirdChain = 2;
             await paymaster.connect(user).pay(schains[thirdChain], 1);
+            rewards.addPayment(schains[thirdChain], tokensPerMonth, 1);
 
             await skipMonth();
 
@@ -466,10 +470,11 @@ describe("Paymaster", () => {
             expect(calculated - estimated).be.lessThanOrEqual(precision);
             claim = await paymaster.connect(validators[0]).claim(await validators[0].getAddress());
             await expect(claim).to.changeTokenBalance(token, validators[0], estimated);
-            await expect(claim).to.changeTokenBalance(
+            await expect(claim).to.approximatelyChangeTokenBalance(
                 token,
                 validators[0],
-                rewards.claim(0, await getResponseTimestamp(claim))
+                rewards.claim(0, await getResponseTimestamp(claim)),
+                precision
             );
 
             // Should not get reward one more time
@@ -494,10 +499,11 @@ describe("Paymaster", () => {
                     validators[anotherValidator],
                     estimated
                 );
-                await expect(claim).to.changeTokenBalance(
+                await expect(claim).to.approximatelyChangeTokenBalance(
                     token,
                     validators[anotherValidator],
-                    rewards.claim(anotherValidator, await getResponseTimestamp(claim))
+                    rewards.claim(anotherValidator, await getResponseTimestamp(claim)),
+                    precision
                 );
             }
         })

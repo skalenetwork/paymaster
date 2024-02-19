@@ -50,7 +50,7 @@ export class Payments {
 
                 sum += payment.value * BigInt(right - left) / BigInt(payment.to - payment.from);
 
-                console.log(`+ ${payment.value} * (${right} - ${left}) / (${payment.to} - ${payment.from}) = ${payment.value * BigInt(right - left) / BigInt(payment.to - payment.from)}`);
+                // console.log(`+ ${payment.value} * (${right} - ${left}) / (${payment.to} - ${payment.from}) = ${payment.value * BigInt(right - left) / BigInt(payment.to - payment.from)}`);
             }
         }
         return sum;

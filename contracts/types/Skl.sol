@@ -26,7 +26,8 @@ type SKL is uint256;
 
 using {
     _sklLess as <,
-    _sklAdd as +
+    _sklAdd as +,
+    _sklSub as -
 } for SKL global;
 
 function _sklLess(SKL left, SKL right) pure returns (bool result) {
@@ -35,4 +36,8 @@ function _sklLess(SKL left, SKL right) pure returns (bool result) {
 
 function _sklAdd(SKL a, SKL b) pure returns (SKL sum) {
     sum = SKL.wrap(SKL.unwrap(a) + SKL.unwrap(b));
+}
+
+function _sklSub(SKL a, SKL b) pure returns (SKL sum) {
+    sum = SKL.wrap(SKL.unwrap(a) - SKL.unwrap(b));
 }

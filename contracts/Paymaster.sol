@@ -624,15 +624,17 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             } else {
                 // payment is partially for the future
                 // and partially for the past
+                SKL pastPart = SKL.wrap(
+                    SKL.unwrap(payment.amount)
+                        * Seconds.unwrap(DateTimeUtils.duration(payment.from, current))
+                        / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to)
+                ));
+                SKL futurePart = payment.amount - pastPart;
                 _addDebt(
                     Payment({
                         from: payment.from,
                         to: current,
-                        amount: SKL.wrap(
-                            SKL.unwrap(payment.amount)
-                                * Seconds.unwrap(DateTimeUtils.duration(payment.from, current))
-                                / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to))
-                        )
+                        amount: pastPart
                     }),
                     end
                 );
@@ -640,9 +642,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                 _totalRewards.add(
                     current,
                     payment.to,
-                    SKL.unwrap(payment.amount)
-                        * Seconds.unwrap(DateTimeUtils.duration(current, payment.to))
-                        / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to))
+                    SKL.unwrap(futurePart)
                 );
             }
         }

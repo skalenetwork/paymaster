@@ -30,7 +30,7 @@ export class Payments {
         }
         let paidUntil = this.paidUntil.get(schainHash)!;
         for (let month = 0; month < periodInMonths; month += 1) {
-            this.payments.push({
+            this.addPaymentConsideringRoundingTrick({
                 from: paidUntil,
                 to: nextMonth(paidUntil),
                 value: value / BigInt(periodInMonths)
@@ -54,5 +54,18 @@ export class Payments {
             }
         }
         return sum;
+    }
+
+    private addPaymentConsideringRoundingTrick(payment: Payment) {
+        const duration = BigInt(payment.to - payment.from);
+        const rest = payment.value % duration;
+        this.payments.push({...payment, value: payment.value - rest})
+        if (rest > 0) {
+            this.payments.push({
+                value: rest,
+                from: payment.to - 1,
+                to: payment.to
+            });
+        }
     }
 }

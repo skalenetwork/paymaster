@@ -54,7 +54,10 @@ export class Rewards {
 
             // if (income > 0) {
             //     console.log(`[${new Date(from * MS_PER_SEC).toISOString()}, ${new Date(to * MS_PER_SEC).toISOString()})`)
-            //     console.log(income);
+            //     console.log("Income:", income);
+            //     const reward = income * nodeAmount / totalNodesAmount - withdrawn;
+            //     console.log("Reward:", reward);
+            //     console.log();
             // }
 
             if (totalNodesAmount > 0) {

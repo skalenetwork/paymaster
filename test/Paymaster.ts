@@ -522,7 +522,10 @@ describe("Paymaster", () => {
             // Month A
 
             await paymaster.connect(user).pay(schains[0], twoYears);
+            rewards.addPayment(schains[0], tokensPerMonth * BigInt(twoYears), twoYears);
+
             await paymaster.connect(user).pay(schains[1], 1);
+            rewards.addPayment(schains[1], tokensPerMonth, 1);
 
             await skipMonth();
             await skipMonth();
@@ -554,7 +557,8 @@ describe("Paymaster", () => {
 
             // Remove all validator except the first one
             for (let validatorId = 1; validatorId < validators.length; validatorId += 1) {
-                await paymaster.removeValidator(validatorId);
+                const response = await paymaster.removeValidator(validatorId);
+                rewards.setNodesAmount(validatorId, 0, await getResponseTimestamp(response));
             }
 
             await skipMonth();

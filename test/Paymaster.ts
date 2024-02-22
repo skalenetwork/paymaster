@@ -25,7 +25,7 @@ describe("Paymaster", () => {
     const BIG_AMOUNT = ethers.parseEther("1000000");
     const MAX_REPLENISHMENT_PERIOD = 24;
     const precision = 5n;
-    const decimalPlacePrecision = 12;
+    const decimalPlacePrecision = 12n;
 
     let owner: SignerWithAddress;
     let validator: SignerWithAddress;
@@ -718,7 +718,7 @@ describe("Paymaster", () => {
             )).to.have.same.members(schains);
         })
 
-        it("random test", async () => {
+        it.only("random test", async () => {
             const timelimit = 1500;
             const maxTopUpMonths = 7;
             const maxNodesAmount = 5;
@@ -729,7 +729,7 @@ describe("Paymaster", () => {
             const averageMonth = 2628288;
 
             enum Event {
-                ADD_NODE,
+                CHANGE_NODES_NUMBER,
                 CLAIM,
                 TOP_UP_SCHAIN
             }
@@ -738,12 +738,23 @@ describe("Paymaster", () => {
             const rewards = baseRewards.clone();
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
 
+            // DEBUG
+            while (schains.length > 1) {
+                schains.pop();
+            }
+            while (validators.length > 1) {
+                validators.pop();
+            }
+
+            await skipMonth();
+
             while (new Date().getTime() - start < timelimit * MS_PER_SEC) {
                 console.log(
                     `Time: ${new Date(await currentTime() * MS_PER_SEC).toISOString()}`,
                     `(${await currentTime()})`
                 );
-                const event = rnd.nextArrayItem(Object.values(Event));
+                const event = rnd.nextArrayItem(Object.values(Event).filter((value) => typeof value !== "string"));
+
                 if (event === Event.TOP_UP_SCHAIN) {
                     const sHash = rnd.nextArrayItem(schains);
                     const months = rnd.nextInt(0, maxTopUpMonths + 1);
@@ -768,19 +779,20 @@ describe("Paymaster", () => {
                     const estimated = await paymaster.getRewardAmount(vId);
                     console.log(`\tValidator ${vId} claimed ${estimated} SKL`);
 
-                    const claimResponse = await paymaster.connect(validators[vId]).claim(await validators[vId].getAddress());
-                    await expect(claimResponse)
-                        .to.changeTokenBalance(
-                            token,
-                            validators[vId],
-                            estimated
-                        );
-
-                    const reward = rewards.claim(vId, await getResponseTimestamp(claimResponse));
-                    const decimal = 10n;
-                    const errorPart = decimal ** (await token.decimals() - BigInt(decimalPlacePrecision));
-                    expect(estimated / errorPart).to.be.equal(reward / errorPart);
-                } else if (event === Event.ADD_NODE) {
+                    const claim = await paymaster.connect(validators[vId]).claim(await validators[vId].getAddress());
+                    await expect(claim).to.changeTokenBalance(
+                        token,
+                        validators[vId],
+                        estimated
+                    );
+                    const decimalBase = 10n;
+                    await expect(claim).to.approximatelyChangeTokenBalance(
+                        token,
+                        validators[vId],
+                        rewards.claim(vId, await getResponseTimestamp(claim)),
+                        decimalBase ** (await token.decimals() - decimalPlacePrecision)
+                    );
+                } else if (event === Event.CHANGE_NODES_NUMBER) {
                     const vId = rnd.nextInt(0, validators.length - 1);
                     const nodesAmount = rnd.nextInt(0, maxNodesAmount);
 

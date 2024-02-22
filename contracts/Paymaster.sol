@@ -37,6 +37,7 @@ import {
 } from "./errors/Parameters.sol";
 import {
     ReplenishmentPeriodIsTooBig,
+    ReplenishmentPeriodIsTooSmall,
     TooSmallAllowance,
     TransferFailure
 } from "./errors/Replenishment.sol";
@@ -313,6 +314,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         Timestamp limit = DateTimeUtils.nextMonth(current).add(maxReplenishmentPeriod);
         if (limit < finish) {
             revert ReplenishmentPeriodIsTooBig();
+        }
+        if (duration == DateTimeUtils.months(0)) {
+            revert ReplenishmentPeriodIsTooSmall();
         }
 
         SKL cost = _toSKL(_getCost(duration));

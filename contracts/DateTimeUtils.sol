@@ -39,7 +39,8 @@ using {
 } for Seconds global;
 using {
     _monthsLess as <,
-    _monthsAdd as +
+    _monthsAdd as +,
+    _monthsEqual as ==
 } for Months global;
 using {
     _timestampLess as <,
@@ -58,6 +59,10 @@ function _monthsLess(Months left, Months right) pure returns (bool result) {
 
 function _monthsAdd(Months a, Months b) pure returns (Months sum) {
     sum = Months.wrap(Months.unwrap(a) + Months.unwrap(b));
+}
+
+function _monthsEqual(Months a, Months b) pure returns (bool equal) {
+    return (Months.unwrap(a) == Months.unwrap(b));
 }
 
 function _timestampLessOrEqual(Timestamp left, Timestamp right) pure returns (bool result) {

@@ -98,6 +98,7 @@ describe("Paymaster", () => {
         const addSchainAndValidatorFixture = async () => {
             const { baseRewards, paymaster } = await loadFixture(deployPaymasterFixture);
             const rewards = baseRewards.clone();
+            const token = await ethers.getContractAt("Token", await paymaster.skaleToken());
             rewards.addSchain(
                 schainHash,
                 await getResponseTimestamp(await paymaster.addSchain(schainName))
@@ -108,7 +109,7 @@ describe("Paymaster", () => {
                 nodesAmount,
                 await getResponseTimestamp(await paymaster.setNodesAmount(validatorId, nodesAmount))
             );
-            return { baseRewards: rewards, paymaster };
+            return { baseRewards: rewards, paymaster, token };
         }
 
         it("should be able to pay for schain", async () => {
@@ -213,6 +214,22 @@ describe("Paymaster", () => {
             expect(await paymaster.getNodesNumber(validatorId)).to.be.equal(nodesNumber);
             expect(await paymaster.getActiveNodesNumber(validatorId)).to.be.equal(nodesNumber - blacklistedNodesNumber);
         })
+
+        it.only("should not pay debt before month end", async () => {
+            const { paymaster, token } = await loadFixture(addSchainAndValidatorFixture);
+
+            await skipMonth();
+
+            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+            await paymaster.connect(user).pay(schainHash, 1);
+
+            const claim = await paymaster.connect(validator).claim(await validator.getAddress());
+            await expect(claim).to.changeTokenBalance(
+                token,
+                await validator.getAddress(),
+                0
+            );
+        });
 
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
@@ -716,9 +733,9 @@ describe("Paymaster", () => {
             expect((await paymaster.getSchainsNames()).map(
                 (name) => ethers.solidityPackedKeccak256(["string"], [name])
             )).to.have.same.members(schains);
-        })
+        });
 
-        it.only("random test", async () => {
+        it("random test", async () => {
             const timelimit = 1500;
             const maxTopUpMonths = 7;
             const maxNodesAmount = 5;
@@ -742,9 +759,11 @@ describe("Paymaster", () => {
             while (schains.length > 1) {
                 schains.pop();
             }
-            while (validators.length > 1) {
+            while (validators.length > 3) {
                 validators.pop();
             }
+
+            // DEBUG END
 
             await skipMonth();
 
@@ -766,12 +785,18 @@ describe("Paymaster", () => {
                         const period = Math.round((target - paidUntil) / averageMonth);
                         await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
                         console.log(`\tTop up ${sHash} for ${period} months`);
-                        await expect(paymaster.connect(user).pay(sHash, period))
-                            .to.changeTokenBalance(
-                                token,
-                                await paymaster.getAddress(),
-                                BigInt(period) * pricePerMonth);
-                        rewards.addPayment(sHash, BigInt(period) * pricePerMonth, period);
+
+                        if (period > 0) {
+                            await expect(paymaster.connect(user).pay(sHash, period))
+                                .to.changeTokenBalance(
+                                    token,
+                                    await paymaster.getAddress(),
+                                    BigInt(period) * pricePerMonth);
+                            rewards.addPayment(sHash, BigInt(period) * pricePerMonth, period);
+                        } else {
+                            await expect(paymaster.connect(user).pay(sHash, period))
+                                .to.revertedWithCustomError(paymaster, "ReplenishmentPeriodIsTooSmall");
+                        }
                     }
                 } else if (event === Event.CLAIM) {
                     const vId = rnd.nextInt(0, validators.length - 1);

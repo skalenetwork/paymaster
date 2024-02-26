@@ -215,7 +215,7 @@ describe("Paymaster", () => {
             expect(await paymaster.getActiveNodesNumber(validatorId)).to.be.equal(nodesNumber - blacklistedNodesNumber);
         })
 
-        it.only("should not pay debt before month end", async () => {
+        it("should not pay debt before month end", async () => {
             const { paymaster, token } = await loadFixture(addSchainAndValidatorFixture);
 
             await skipMonth();
@@ -392,8 +392,8 @@ describe("Paymaster", () => {
                 expect(await paymaster.getTotalReward(0, claimedUntil)).to.be.equal(0);
                 expect(await paymaster.getHistoricalActiveNodesNumber(validatorId, claimedUntil - 1n)).to.be.equal(0);
                 expect(await paymaster.getHistoricalTotalActiveNodesNumber(claimedUntil - 1n)).to.be.equal(0);
-                expect(await paymaster.debtsBegin()).to.be.equal(2);
-                expect(await paymaster.debtsEnd()).to.be.equal(2);
+                expect(await paymaster.debtsBegin()).to.be.equal(1);
+                expect(await paymaster.debtsEnd()).to.be.equal(1);
             })
         })
     });
@@ -755,15 +755,15 @@ describe("Paymaster", () => {
             const rewards = baseRewards.clone();
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
 
-            // DEBUG
-            while (schains.length > 1) {
-                schains.pop();
-            }
-            while (validators.length > 3) {
-                validators.pop();
-            }
+            // // DEBUG
+            // while (schains.length > 1) {
+            //     schains.pop();
+            // }
+            // while (validators.length > 3) {
+            //     validators.pop();
+            // }
 
-            // DEBUG END
+            // // DEBUG END
 
             await skipMonth();
 

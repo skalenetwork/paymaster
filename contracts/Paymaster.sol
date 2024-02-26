@@ -332,7 +332,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                     to: to,
                     amount: costPerMonth
                 }),
-                current,
+                _totalRewards.processedUntil,
                 end
             )) {
                 end = _next(end);

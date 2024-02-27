@@ -6,7 +6,7 @@ import {
     setupRoles
 } from "../migrations/deploy";
 import { expect, use } from "chai";
-import { HDNodeWallet } from "ethers";
+import { ContractTransactionResponse, HDNodeWallet } from "ethers";
 import Prando from 'prando';
 import { Rewards } from "./tools/rewards";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
@@ -228,6 +228,35 @@ describe("Paymaster", () => {
                 token,
                 await validator.getAddress(),
                 0
+            );
+        });
+
+        it.only("generated test", async () => {
+            const { baseRewards, paymaster, token } = await loadFixture(addSchainAndValidatorFixture);
+            const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+            const rewards = baseRewards.clone();
+
+            await skipMonth();
+
+            let setNodesAmount = await paymaster.setNodesAmount(validatorId, 0);
+            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+
+            setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
+            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+
+            await skipMonth();
+
+            const period = 1;
+            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+            await paymaster.connect(user).pay(schainHash, period);
+            rewards.addPayment(schainHash, pricePerMonth * BigInt(period), period);
+
+            const claim = await paymaster.connect(validator).claim(await validator.getAddress());
+            await expect(claim).to.approximatelyChangeTokenBalance(
+                token,
+                validator,
+                rewards.claim(validatorId, await getResponseTimestamp(claim)),
+                10n ** (await token.decimals() - decimalPlacePrecision)
             );
         });
 
@@ -735,6 +764,53 @@ describe("Paymaster", () => {
             )).to.have.same.members(schains);
         });
 
+        it.only("generated test", async () => {
+            const { baseRewards, paymaster, schains, token, validators } = await loadFixture(addSchainAndValidatorFixture);
+            const rewards = baseRewards.clone();
+            const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
+            const week = 604800;
+
+            let validatorId = 0;
+            let schainHash = "d2";
+            let period = 0;
+            let nodesAmount = 0;
+            let claim, setNodesAmount: ContractTransactionResponse;
+
+            while (validators.length > 1) {
+                await paymaster.setNodesAmount(validators.length - 1, 0);
+                validators.pop();
+            }
+
+            await skipMonth();
+
+            validatorId = 0;
+            nodesAmount = 0;
+            setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
+            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+
+            validatorId = 0;
+            nodesAmount = 1;
+            setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
+            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+
+            await skipMonth();
+
+            schainHash = schains[0];
+            period = 1;
+            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+            await paymaster.connect(user).pay(schainHash, period);
+            rewards.addPayment(schainHash, pricePerMonth * BigInt(period), period);
+
+            validatorId = 0;
+            claim = await paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress());
+            await expect(claim).to.approximatelyChangeTokenBalance(
+                token,
+                validators[validatorId],
+                rewards.claim(validatorId, await getResponseTimestamp(claim)),
+                10n ** (await token.decimals() - decimalPlacePrecision)
+            );
+        });
+
         it("random test", async () => {
             const timelimit = 1500;
             const maxTopUpMonths = 7;
@@ -755,17 +831,28 @@ describe("Paymaster", () => {
             const rewards = baseRewards.clone();
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
 
-            // // DEBUG
-            // while (schains.length > 1) {
-            //     schains.pop();
-            // }
-            // while (validators.length > 3) {
-            //     validators.pop();
-            // }
+            // DEBUG
+            while (schains.length > 7) {
+                schains.pop();
+            }
+            while (validators.length > 7) {
+                validators.pop();
+            }
+            const test = new Array<string>();
+            // await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+            // await paymaster.connect(user).pay(schainHash, 1);
 
-            // // DEBUG END
+            // const claim = await paymaster.connect(validator).claim(await validator.getAddress());
+            // await expect(claim).to.changeTokenBalance(
+            //     token,
+            //     await validator.getAddress(),
+            //     0
+            // );
+            // DEBUG END
 
             await skipMonth();
+            test.push("// start -------------");
+            test.push("await skipMonth();")
 
             while (new Date().getTime() - start < timelimit * MS_PER_SEC) {
                 console.log(
@@ -793,6 +880,14 @@ describe("Paymaster", () => {
                                     await paymaster.getAddress(),
                                     BigInt(period) * pricePerMonth);
                             rewards.addPayment(sHash, BigInt(period) * pricePerMonth, period);
+
+                            test.push(`
+                                schainHash = "${sHash}";
+                                period = ${period};
+                                await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
+                                await paymaster.connect(user).pay(schainHash, period);
+                                rewards.addPayment(schainHash, pricePerMonth * BigInt(period), period);`
+                            );
                         } else {
                             await expect(paymaster.connect(user).pay(sHash, period))
                                 .to.revertedWithCustomError(paymaster, "ReplenishmentPeriodIsTooSmall");
@@ -800,6 +895,17 @@ describe("Paymaster", () => {
                     }
                 } else if (event === Event.CLAIM) {
                     const vId = rnd.nextInt(0, validators.length - 1);
+
+                    test.push(`
+                        validatorId = ${vId};
+                        claim = await paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress());
+                        await expect(claim).to.approximatelyChangeTokenBalance(
+                            token,
+                            validators[validatorId],
+                            rewards.claim(validatorId, await getResponseTimestamp(claim)),
+                            10n ** (await token.decimals() - decimalPlacePrecision)
+                        );
+                    `);
 
                     const estimated = await paymaster.getRewardAmount(vId);
                     console.log(`\tValidator ${vId} claimed ${estimated} SKL`);
@@ -811,15 +917,29 @@ describe("Paymaster", () => {
                         estimated
                     );
                     const decimalBase = 10n;
-                    await expect(claim).to.approximatelyChangeTokenBalance(
-                        token,
-                        validators[vId],
-                        rewards.claim(vId, await getResponseTimestamp(claim)),
-                        decimalBase ** (await token.decimals() - decimalPlacePrecision)
-                    );
+                    try {
+                        await expect(claim).to.approximatelyChangeTokenBalance(
+                            token,
+                            validators[vId],
+                            rewards.claim(vId, await getResponseTimestamp(claim)),
+                            decimalBase ** (await token.decimals() - decimalPlacePrecision)
+                        );
+                    } catch (e) {
+                        for (const line of test) {
+                            console.log(line);
+                        }
+                        process.exit(1);
+                    }
                 } else if (event === Event.CHANGE_NODES_NUMBER) {
                     const vId = rnd.nextInt(0, validators.length - 1);
                     const nodesAmount = rnd.nextInt(0, maxNodesAmount);
+
+                    test.push(`
+                        validatorId = ${vId};
+                        nodesAmount = ${nodesAmount};
+                        setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
+                        rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+                    `);
 
                     const response = await paymaster.setNodesAmount(vId, nodesAmount);
                     rewards.setNodesAmount(vId, nodesAmount, await getResponseTimestamp(response));
@@ -828,6 +948,7 @@ describe("Paymaster", () => {
                 }
 
                 await skipTime(week);
+                test.push("await skipTime(week);");
             }
         });
     });

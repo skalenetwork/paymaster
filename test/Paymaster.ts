@@ -239,7 +239,7 @@ describe("Paymaster", () => {
             await skipMonth();
 
             let setNodesAmount = await paymaster.setNodesAmount(validatorId, 0);
-            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+            rewards.setNodesAmount(validatorId, 0, await getResponseTimestamp(setNodesAmount));
 
             setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
             rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
@@ -769,6 +769,7 @@ describe("Paymaster", () => {
             const rewards = baseRewards.clone();
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
             const week = 604800;
+            console.log(pricePerMonth);
 
             let validatorId = 0;
             let schainHash = "d2";
@@ -777,7 +778,8 @@ describe("Paymaster", () => {
             let claim, setNodesAmount: ContractTransactionResponse;
 
             while (validators.length > 1) {
-                await paymaster.setNodesAmount(validators.length - 1, 0);
+                const setNodes = await paymaster.setNodesAmount(validators.length - 1, 0);
+                rewards.setNodesAmount(validators.length - 1, 0, await getResponseTimestamp(setNodes));
                 validators.pop();
             }
 
@@ -787,11 +789,19 @@ describe("Paymaster", () => {
             nodesAmount = 0;
             setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
             rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+            console.log(
+                `Time: ${new Date(await getResponseTimestamp(setNodesAmount) * MS_PER_SEC).toISOString()}`,
+                `(${await getResponseTimestamp(setNodesAmount)})`
+            );
 
             validatorId = 0;
             nodesAmount = 1;
             setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
             rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
+            console.log(
+                `Time: ${new Date(await getResponseTimestamp(setNodesAmount) * MS_PER_SEC).toISOString()}`,
+                `(${await getResponseTimestamp(setNodesAmount)})`
+            );
 
             await skipMonth();
 

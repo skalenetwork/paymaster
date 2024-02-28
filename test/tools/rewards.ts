@@ -47,20 +47,21 @@ export class Rewards {
                 to = Math.min(until, changePoints[index + 1]);
             }
 
+            const totalNodesAmount = BigInt(this.networkComposition.getTotalNodesAmount(from));
             const income = this.payments.getSum(from, to);
             const nodeAmount = BigInt(this.networkComposition.getNodesAmount(validatorId, from));
-            const totalNodesAmount = BigInt(this.networkComposition.getTotalNodesAmount(from));
             const withdrawn = this.withdrawals.getWithdrawal(validatorId, from, to);
 
-            // if (income > 0) {
-            //     console.log(`[${new Date(from * MS_PER_SEC).toISOString()}, ${new Date(to * MS_PER_SEC).toISOString()})`)
-            //     console.log("Income:", income);
-            //     const reward = income * nodeAmount / totalNodesAmount - withdrawn;
-            //     console.log("Reward:", reward);
-            //     console.log();
-            // }
-
             if (totalNodesAmount > 0) {
+                // if (income > 0) {
+                //     console.log(`[${new Date(from * MS_PER_SEC).toISOString()}, ${new Date(to * MS_PER_SEC).toISOString()})`)
+                //     console.log("Income:", income);
+                //     console.log(`Nodes: ${nodeAmount} of ${totalNodesAmount}`);
+                //     const reward = income * nodeAmount / totalNodesAmount - withdrawn;
+                //     console.log("Reward:", reward);
+                //     console.log();
+                // }
+
                 const reward = income * nodeAmount / totalNodesAmount - withdrawn;
                 totalReward += reward;
 

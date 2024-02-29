@@ -37,6 +37,7 @@ export class Rewards {
     claim(validatorId: number, timestamp: number) {
         const changePoints = this.networkComposition.getChangePoints();
         const until = monthBegin(timestamp);
+        this.payments.updateClaimedUntil(until);
         let totalReward = 0n;
         for (let index = 0; index < changePoints.length && changePoints[index] < until; index += 1) {
             const from = changePoints[index];

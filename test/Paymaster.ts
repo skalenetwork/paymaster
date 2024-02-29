@@ -22,7 +22,7 @@ use(d2ChaiMatchers);
 describe("Paymaster", () => {
     const schainName = "d2-schain";
     const schainHash = ethers.solidityPackedKeccak256(["string"], [schainName]);
-    const BIG_AMOUNT = ethers.parseEther("1000000");
+    const BIG_AMOUNT = ethers.parseEther("100000000");
     const MAX_REPLENISHMENT_PERIOD = 24;
     const precision = 5n;
     const decimalPlacePrecision = 12n;
@@ -228,35 +228,6 @@ describe("Paymaster", () => {
                 token,
                 await validator.getAddress(),
                 0
-            );
-        });
-
-        it.only("generated test", async () => {
-            const { baseRewards, paymaster, token } = await loadFixture(addSchainAndValidatorFixture);
-            const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
-            const rewards = baseRewards.clone();
-
-            await skipMonth();
-
-            let setNodesAmount = await paymaster.setNodesAmount(validatorId, 0);
-            rewards.setNodesAmount(validatorId, 0, await getResponseTimestamp(setNodesAmount));
-
-            setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
-            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
-
-            await skipMonth();
-
-            const period = 1;
-            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
-            await paymaster.connect(user).pay(schainHash, period);
-            rewards.addPayment(schainHash, pricePerMonth * BigInt(period), period);
-
-            const claim = await paymaster.connect(validator).claim(await validator.getAddress());
-            await expect(claim).to.approximatelyChangeTokenBalance(
-                token,
-                validator,
-                rewards.claim(validatorId, await getResponseTimestamp(claim)),
-                10n ** (await token.decimals() - decimalPlacePrecision)
             );
         });
 
@@ -764,63 +735,6 @@ describe("Paymaster", () => {
             )).to.have.same.members(schains);
         });
 
-        it.only("generated test", async () => {
-            const { baseRewards, paymaster, schains, token, validators } = await loadFixture(addSchainAndValidatorFixture);
-            const rewards = baseRewards.clone();
-            const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
-            const week = 604800;
-            console.log(pricePerMonth);
-
-            let validatorId = 0;
-            let schainHash = "d2";
-            let period = 0;
-            let nodesAmount = 0;
-            let claim, setNodesAmount: ContractTransactionResponse;
-
-            while (validators.length > 1) {
-                const setNodes = await paymaster.setNodesAmount(validators.length - 1, 0);
-                rewards.setNodesAmount(validators.length - 1, 0, await getResponseTimestamp(setNodes));
-                validators.pop();
-            }
-
-            await skipMonth();
-
-            validatorId = 0;
-            nodesAmount = 0;
-            setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
-            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
-            console.log(
-                `Time: ${new Date(await getResponseTimestamp(setNodesAmount) * MS_PER_SEC).toISOString()}`,
-                `(${await getResponseTimestamp(setNodesAmount)})`
-            );
-
-            validatorId = 0;
-            nodesAmount = 1;
-            setNodesAmount = await paymaster.setNodesAmount(validatorId, nodesAmount);
-            rewards.setNodesAmount(validatorId, nodesAmount, await getResponseTimestamp(setNodesAmount));
-            console.log(
-                `Time: ${new Date(await getResponseTimestamp(setNodesAmount) * MS_PER_SEC).toISOString()}`,
-                `(${await getResponseTimestamp(setNodesAmount)})`
-            );
-
-            await skipMonth();
-
-            schainHash = schains[0];
-            period = 1;
-            await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
-            await paymaster.connect(user).pay(schainHash, period);
-            rewards.addPayment(schainHash, pricePerMonth * BigInt(period), period);
-
-            validatorId = 0;
-            claim = await paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress());
-            await expect(claim).to.approximatelyChangeTokenBalance(
-                token,
-                validators[validatorId],
-                rewards.claim(validatorId, await getResponseTimestamp(claim)),
-                10n ** (await token.decimals() - decimalPlacePrecision)
-            );
-        });
-
         it("random test", async () => {
             const timelimit = 1500;
             const maxTopUpMonths = 7;
@@ -842,22 +756,13 @@ describe("Paymaster", () => {
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
 
             // DEBUG
-            while (schains.length > 7) {
-                schains.pop();
-            }
-            while (validators.length > 7) {
-                validators.pop();
-            }
+            // while (schains.length > 7) {
+            //     schains.pop();
+            // }
+            // while (validators.length > 7) {
+            //     validators.pop();
+            // }
             const test = new Array<string>();
-            // await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
-            // await paymaster.connect(user).pay(schainHash, 1);
-
-            // const claim = await paymaster.connect(validator).claim(await validator.getAddress());
-            // await expect(claim).to.changeTokenBalance(
-            //     token,
-            //     await validator.getAddress(),
-            //     0
-            // );
             // DEBUG END
 
             await skipMonth();

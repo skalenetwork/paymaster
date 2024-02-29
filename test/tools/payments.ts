@@ -9,12 +9,17 @@ interface Payment {
 export class Payments {
     private paidUntil = new Map<string, number>();
     private payments = new Array<Payment>();
+    private maxClaimedUntil = 0;
 
     clone() {
         const payments = new Payments();
         payments.paidUntil = new Map(this.paidUntil);
         payments.payments = [...this.payments];
         return payments;
+    }
+
+    updateClaimedUntil(until: number) {
+        this.maxClaimedUntil = Math.max(this.maxClaimedUntil, until);
     }
 
     addSchain(schainHash: string, timestamp: number) {
@@ -57,15 +62,35 @@ export class Payments {
     }
 
     private addPaymentConsideringRoundingTrick(payment: Payment) {
-        const duration = BigInt(payment.to - payment.from);
-        const rest = payment.value % duration;
-        this.payments.push({...payment, value: payment.value - rest})
-        if (rest > 0) {
-            this.payments.push({
-                value: rest,
-                from: payment.to - 1,
-                to: payment.to
-            });
+        if (payment.to <= this.maxClaimedUntil) {
+            // Everything in the past
+            this.payments.push(payment);
+        } else if (this.maxClaimedUntil <= payment.from) {
+            // Everything in the future
+            const duration = BigInt(payment.to - payment.from);
+            const rest = payment.value % duration;
+            this.payments.push({...payment, value: payment.value - rest})
+            if (rest > 0) {
+                this.payments.push({
+                    from: payment.to - 1,
+                    to: payment.to,
+                    value: rest
+                });
+            }
+        } else {
+            const pastPayment = {
+                ...payment,
+                to: this.maxClaimedUntil,
+                value: payment.value * BigInt(this.maxClaimedUntil - payment.from) / BigInt(payment.to - payment.from)
+            };
+            const futurePayment = {
+                ...payment,
+                from: this.maxClaimedUntil,
+                value: payment.value * BigInt(payment.to - this.maxClaimedUntil) / BigInt(payment.to - payment.from)
+            };
+            this.addPaymentConsideringRoundingTrick(pastPayment);
+            this.addPaymentConsideringRoundingTrick(futurePayment);
         }
+
     }
 }

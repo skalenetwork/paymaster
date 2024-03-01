@@ -8,7 +8,12 @@ import { preventAsyncMatcherChaining } from "@nomicfoundation/hardhat-chai-match
 declare global {
     export namespace Chai {
         interface Assertion {
-            approximatelyChangeTokenBalance(token: any, account: any, balance: any, error: any): AsyncAssertion;
+            approximatelyChangeTokenBalance(
+                token: BaseContract,
+                account: Addressable | string,
+                balance: BigNumberish,
+                error: BigNumberish
+            ): AsyncAssertion;
         }
     }
 }
@@ -23,24 +28,26 @@ const checkToken = (token: unknown, method: string) => {
     }
 }
 
-const tokenDescriptionsCache: Record<string, string> = {};
+const tokenDescriptionsCache = new Map<string, string>();
 
 const getTokenDescription = async (token: Token): Promise<string> => {
     const tokenAddress = await token.getAddress();
-    if (tokenDescriptionsCache[tokenAddress] === undefined) {
-      let tokenDescription = `<token at ${tokenAddress}>`;
+    if (!tokenDescriptionsCache.has(tokenAddress)) {
+      let tokenDescription;
       try {
         tokenDescription = await token.symbol();
       } catch (exc) {
         try {
           tokenDescription = await token.name();
-        } catch (e2) {}
+        } catch (e2) {
+            tokenDescription = `<token at ${tokenAddress}>`;
+        }
       }
 
-      tokenDescriptionsCache[tokenAddress] = tokenDescription;
+      tokenDescriptionsCache.set(tokenAddress, tokenDescription);
     }
 
-    return tokenDescriptionsCache[tokenAddress];
+    return tokenDescriptionsCache.get(tokenAddress)!;
   }
 
 

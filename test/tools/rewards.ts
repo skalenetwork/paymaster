@@ -1,7 +1,7 @@
 import { NetworkComposition } from "./network-composition";
 import { Payments } from "./payments";
 import { Withdrawals } from "./withdrawals";
-import { MS_PER_SEC, monthBegin } from "./time";
+import { monthBegin } from "./time";
 
 export class Rewards {
     private payments = new Payments();
@@ -54,15 +54,6 @@ export class Rewards {
             const withdrawn = this.withdrawals.getWithdrawal(validatorId, from, to);
 
             if (totalNodesAmount > 0) {
-                // if (income > 0) {
-                //     console.log(`[${new Date(from * MS_PER_SEC).toISOString()}, ${new Date(to * MS_PER_SEC).toISOString()})`)
-                //     console.log("Income:", income);
-                //     console.log(`Nodes: ${nodeAmount} of ${totalNodesAmount}`);
-                //     const reward = income * nodeAmount / totalNodesAmount - withdrawn;
-                //     console.log("Reward:", reward);
-                //     console.log();
-                // }
-
                 const reward = income * nodeAmount / totalNodesAmount - withdrawn;
                 totalReward += reward;
 

@@ -6,7 +6,7 @@ import {
     setupRoles
 } from "../migrations/deploy";
 import { expect, use } from "chai";
-import { ContractTransactionResponse, HDNodeWallet } from "ethers";
+import { HDNodeWallet } from "ethers";
 import Prando from 'prando';
 import { Rewards } from "./tools/rewards";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
@@ -17,7 +17,6 @@ import {
 } from "@nomicfoundation/hardhat-toolbox/network-helpers";
 
 use(d2ChaiMatchers);
-
 
 describe("Paymaster", () => {
     const schainName = "d2-schain";
@@ -745,12 +744,6 @@ describe("Paymaster", () => {
             const week = 604800;
             const averageMonth = 2628288;
 
-            enum Event {
-                CHANGE_NODES_NUMBER,
-                CLAIM,
-                TOP_UP_SCHAIN
-            }
-
             const { baseRewards, paymaster, schains, token, validators } = await loadFixture(addSchainAndValidatorFixture);
             const rewards = baseRewards.clone();
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
@@ -768,6 +761,12 @@ describe("Paymaster", () => {
             await skipMonth();
             test.push("// start -------------");
             test.push("await skipMonth();")
+
+            enum Event {
+                CHANGE_NODES_NUMBER,
+                CLAIM,
+                TOP_UP_SCHAIN
+            }
 
             while (new Date().getTime() - start < timelimit * MS_PER_SEC) {
                 console.log(
@@ -832,19 +831,12 @@ describe("Paymaster", () => {
                         estimated
                     );
                     const decimalBase = 10n;
-                    try {
-                        await expect(claim).to.approximatelyChangeTokenBalance(
-                            token,
-                            validators[vId],
-                            rewards.claim(vId, await getResponseTimestamp(claim)),
-                            decimalBase ** (await token.decimals() - decimalPlacePrecision)
-                        );
-                    } catch (e) {
-                        for (const line of test) {
-                            console.log(line);
-                        }
-                        process.exit(1);
-                    }
+                    await expect(claim).to.approximatelyChangeTokenBalance(
+                        token,
+                        validators[vId],
+                        rewards.claim(vId, await getResponseTimestamp(claim)),
+                        decimalBase ** (await token.decimals() - decimalPlacePrecision)
+                    );
                 } else if (event === Event.CHANGE_NODES_NUMBER) {
                     const vId = rnd.nextInt(0, validators.length - 1);
                     const nodesAmount = rnd.nextInt(0, maxNodesAmount);

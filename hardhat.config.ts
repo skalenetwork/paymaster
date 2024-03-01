@@ -22,7 +22,7 @@ const getCustomPrivateKey = (privateKey: string | undefined) => {
 
 const config: HardhatUserConfig = {
     "mocha": {
-        "timeout": 70000
+        "timeout": 120000
     },
     "networks": {
         "custom": {

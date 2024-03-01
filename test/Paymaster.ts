@@ -748,19 +748,7 @@ describe("Paymaster", () => {
             const rewards = baseRewards.clone();
             const pricePerMonth = (await paymaster.schainPricePerMonth()) * ethers.parseEther("1") / (await paymaster.oneSklPrice());
 
-            // DEBUG
-            // while (schains.length > 7) {
-            //     schains.pop();
-            // }
-            // while (validators.length > 7) {
-            //     validators.pop();
-            // }
             const test = new Array<string>();
-            // DEBUG END
-
-            await skipMonth();
-            test.push("// start -------------");
-            test.push("await skipMonth();")
 
             enum Event {
                 CHANGE_NODES_NUMBER,
@@ -768,11 +756,12 @@ describe("Paymaster", () => {
                 TOP_UP_SCHAIN
             }
 
+            await skipMonth();
+
+            test.push("// start -------------");
+            test.push("await skipMonth();")
+
             while (new Date().getTime() - start < timelimit * MS_PER_SEC) {
-                console.log(
-                    `Time: ${new Date(await currentTime() * MS_PER_SEC).toISOString()}`,
-                    `(${await currentTime()})`
-                );
                 const event = rnd.nextArrayItem(Object.values(Event).filter((value) => typeof value !== "string"));
 
                 if (event === Event.TOP_UP_SCHAIN) {
@@ -785,7 +774,6 @@ describe("Paymaster", () => {
                     if (target > paidUntil) {
                         const period = Math.round((target - paidUntil) / averageMonth);
                         await paymaster.connect(priceAgent).setSklPrice(await paymaster.oneSklPrice());
-                        console.log(`\tTop up ${sHash} for ${period} months`);
 
                         if (period > 0) {
                             await expect(paymaster.connect(user).pay(sHash, period))
@@ -822,7 +810,6 @@ describe("Paymaster", () => {
                     `);
 
                     const estimated = await paymaster.getRewardAmount(vId);
-                    console.log(`\tValidator ${vId} claimed ${estimated} SKL`);
 
                     const claim = await paymaster.connect(validators[vId]).claim(await validators[vId].getAddress());
                     await expect(claim).to.changeTokenBalance(
@@ -850,8 +837,6 @@ describe("Paymaster", () => {
 
                     const response = await paymaster.setNodesAmount(vId, nodesAmount);
                     rewards.setNodesAmount(vId, nodesAmount, await getResponseTimestamp(response));
-
-                    console.log(`\tValidator ${vId} has ${nodesAmount} nodes (${await getResponseTimestamp(response)})`);
                 }
 
                 await skipTime(week);

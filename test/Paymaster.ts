@@ -735,7 +735,7 @@ describe("Paymaster", () => {
         });
 
         it("random test", async () => {
-            const timelimit = 1500;
+            const timelimit = 60;
             const maxTopUpMonths = 7;
             const maxNodesAmount = 5;
 

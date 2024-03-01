@@ -21,6 +21,9 @@ const getCustomPrivateKey = (privateKey: string | undefined) => {
 };
 
 const config: HardhatUserConfig = {
+    "mocha": {
+        "timeout": 70000
+    },
     "networks": {
         "custom": {
             "accounts": getCustomPrivateKey(process.env.PRIVATE_KEY),

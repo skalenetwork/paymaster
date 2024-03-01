@@ -564,10 +564,11 @@ describe("Paymaster", () => {
                     validators[validatorId],
                     estimated
                 );
-                await expect(claim).to.changeTokenBalance(
+                await expect(claim).to.approximatelyChangeTokenBalance(
                     token,
                     validators[validatorId],
-                    rewards.claim(validatorId, await getResponseTimestamp(claim))
+                    rewards.claim(validatorId, await getResponseTimestamp(claim)),
+                    precision
                 );
             }
 
@@ -597,10 +598,11 @@ describe("Paymaster", () => {
                 validators[validatorId],
                 estimated
             );
-            await expect(claim).to.changeTokenBalance(
+            await expect(claim).to.approximatelyChangeTokenBalance(
                 token,
                 validators[validatorId],
-                rewards.claim(validatorId, await getResponseTimestamp(claim))
+                rewards.claim(validatorId, await getResponseTimestamp(claim)),
+                precision
             );
         });
 

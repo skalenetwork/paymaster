@@ -1929,6 +1929,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@solidity-parser/parser@npm:^0.18.0":
+  version: 0.18.0
+  resolution: "@solidity-parser/parser@npm:0.18.0"
+  checksum: 970d991529d632862fa88e107531339d84df35bf0374e31e8215ce301b19a01ede33fccf4d374402649814263f8bc278a8e6d62a0129bb877539fbdd16a604cc
+  languageName: node
+  linkType: hard
+
 "@szmarczak/http-timer@npm:^5.0.1":
   version: 5.0.1
   resolution: "@szmarczak/http-timer@npm:5.0.1"
@@ -2591,7 +2598,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"antlr4@npm:^4.11.0":
+"antlr4@npm:^4.13.1-patch-1":
   version: 4.13.1
   resolution: "antlr4@npm:4.13.1"
   checksum: 76dcb0c8ed2d0b83a16641579668088919f51d1288551604e3cdff46c67955b3eef25892aead9de1eca203b3968536fa952e6931f35ba877780af37971c055f1
@@ -7060,7 +7067,7 @@ __metadata:
     hardhat-gas-reporter: ^1.0.8
     lodash: ^4.17.21
     prando: ^6.0.1
-    solhint: ^4.0.0
+    solhint: ^4.5.2
     solidity-coverage: ^0.8.0
     ts-node: ">=10.9.2"
     typechain: ^8.3.2
@@ -7870,13 +7877,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"solhint@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "solhint@npm:4.0.0"
+"solhint@npm:^4.5.2":
+  version: 4.5.2
+  resolution: "solhint@npm:4.5.2"
   dependencies:
-    "@solidity-parser/parser": ^0.16.0
+    "@solidity-parser/parser": ^0.18.0
     ajv: ^6.12.6
-    antlr4: ^4.11.0
+    antlr4: ^4.13.1-patch-1
     ast-parents: ^0.0.1
     chalk: ^4.1.2
     commander: ^10.0.0
@@ -7898,7 +7905,7 @@ __metadata:
       optional: true
   bin:
     solhint: solhint.js
-  checksum: 14d6091732ece1526711ab462f9aa17463d76b99948b6b2322bf4953fe325e1df8eabab9a4debaea65ca87c28b856e9d154ceee37d9b4d2d45069292e89c62a1
+  checksum: eca674116bd48cf506b97c2fc074d905a0fdfaebc91f0f83674cb8e03c57165c303337eb304b4ba586c55915c267c9146a86e310dbbd599b168338bd85755c62
   languageName: node
   linkType: hard
 

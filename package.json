@@ -40,7 +40,7 @@
     "hardhat-gas-reporter": "^1.0.8",
     "lodash": "^4.17.21",
     "prando": "^6.0.1",
-    "solhint": "^4.0.0",
+    "solhint": "^4.5.2",
     "solidity-coverage": "^0.8.0",
     "ts-node": ">=10.9.2",
     "typechain": "^8.3.2",

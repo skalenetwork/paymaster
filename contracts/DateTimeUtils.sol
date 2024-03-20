@@ -39,7 +39,8 @@ using {
 } for Seconds global;
 using {
     _monthsLess as <,
-    _monthsAdd as +
+    _monthsAdd as +,
+    _monthsEqual as ==
 } for Months global;
 using {
     _timestampLess as <,
@@ -58,6 +59,10 @@ function _monthsLess(Months left, Months right) pure returns (bool result) {
 
 function _monthsAdd(Months a, Months b) pure returns (Months sum) {
     sum = Months.wrap(Months.unwrap(a) + Months.unwrap(b));
+}
+
+function _monthsEqual(Months a, Months b) pure returns (bool equal) {
+    return (Months.unwrap(a) == Months.unwrap(b));
 }
 
 function _timestampLessOrEqual(Timestamp left, Timestamp right) pure returns (bool result) {
@@ -101,7 +106,13 @@ library DateTimeUtils {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function timestampToDate(Timestamp timestampValue) internal pure returns (Year _year, Month _month, Day dayValue) {
+    function timestampToDate(
+        Timestamp timestampValue
+    )
+        internal
+        pure
+        returns (Year _year, Month _month, Day dayValue)
+    {
         (uint256 untypedYear, uint256 untypedMonth, uint256 untypedDay) =
             UntypedDateTime.timestampToDate(Timestamp.unwrap(timestampValue));
         return (Year.wrap(untypedYear), Month.wrap(untypedMonth), Day.wrap(untypedDay));
@@ -109,7 +120,15 @@ library DateTimeUtils {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function timestampFromDate(Year year, Month month, Day dayValue) internal pure returns (Timestamp timestampValue) {
+    function timestampFromDate(
+        Year year,
+        Month month,
+        Day dayValue
+    )
+        internal
+        pure
+        returns (Timestamp timestampValue)
+    {
         timestampValue = Timestamp.wrap(UntypedDateTime.timestampFromDate(
             Year.unwrap(year),
             Month.unwrap(month),
@@ -119,7 +138,14 @@ library DateTimeUtils {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function addSeconds(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
+    function addSeconds(
+        Timestamp timestampValue,
+        Seconds secondsValue
+    )
+        internal
+        pure
+        returns (Timestamp newTimestamp)
+    {
         newTimestamp = Timestamp.wrap(
             UntypedDateTime.addSeconds(
                 Timestamp.unwrap(timestampValue),
@@ -130,7 +156,14 @@ library DateTimeUtils {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function addMonths(Timestamp timestampValue, Months monthsValue) internal pure returns (Timestamp newTimestamp) {
+    function addMonths(
+        Timestamp timestampValue,
+        Months monthsValue
+    )
+        internal
+        pure
+        returns (Timestamp newTimestamp)
+    {
         newTimestamp = Timestamp.wrap(
             UntypedDateTime.addMonths(
                 Timestamp.unwrap(timestampValue),
@@ -141,7 +174,14 @@ library DateTimeUtils {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function subSeconds(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
+    function subSeconds(
+        Timestamp timestampValue,
+        Seconds secondsValue
+    )
+        internal
+        pure
+        returns (Timestamp newTimestamp)
+    {
         newTimestamp = Timestamp.wrap(
             UntypedDateTime.subSeconds(
                 Timestamp.unwrap(timestampValue),
@@ -154,19 +194,40 @@ library DateTimeUtils {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function add(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
+    function add(
+        Timestamp timestampValue,
+        Seconds secondsValue
+    )
+        internal
+        pure
+        returns (Timestamp newTimestamp)
+    {
         newTimestamp = addSeconds(timestampValue, secondsValue);
     }
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function add(Timestamp timestampValue, Months monthsValue) internal pure returns (Timestamp newTimestamp) {
+    function add(
+        Timestamp timestampValue,
+        Months monthsValue
+    )
+        internal
+        pure
+        returns (Timestamp newTimestamp)
+    {
         newTimestamp = addMonths(timestampValue, monthsValue);
     }
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function sub(Timestamp timestampValue, Seconds secondsValue) internal pure returns (Timestamp newTimestamp) {
+    function sub(
+        Timestamp timestampValue,
+        Seconds secondsValue
+    )
+        internal
+        pure
+        returns (Timestamp newTimestamp)
+    {
         newTimestamp = subSeconds(timestampValue, secondsValue);
     }
 
@@ -180,7 +241,13 @@ library DateTimeUtils {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function firstDayOfMonth(Timestamp timestampValue) internal pure returns (Timestamp newTimestamp) {
+    function firstDayOfMonth(
+        Timestamp timestampValue
+    )
+        internal
+        pure
+        returns (Timestamp newTimestamp)
+    {
         (Year year, Month month, ) = timestampToDate(timestampValue);
         return timestampFromDate(year, month, day(1));
     }

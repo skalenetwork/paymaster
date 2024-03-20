@@ -36,7 +36,13 @@ contract FastForwardPaymaster is Paymaster, IFastForwardPaymaster {
     CheckPoint public checkPoint;
     uint256 public timeMultiplier;
 
-    function initialize(address initialAuthority) public override(IPaymaster, Paymaster) initializer {
+    function initialize(
+        address initialAuthority
+    )
+        public
+        override(IPaymaster, Paymaster)
+        initializer
+    {
         super.initialize(initialAuthority);
         timeMultiplier = 1e18;
     }

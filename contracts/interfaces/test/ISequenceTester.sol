@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 /*
-    Skl.sol - Paymaster
+    ISequenceTester.sol - Paymaster
     Copyright (C) 2023-Present SKALE Labs
     @author Dmytro Stebaiev
 
@@ -19,25 +19,13 @@
     along with Paymaster.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
+
+import {Timestamp} from "../../DateTimeUtils.sol";
 
 
-type SKL is uint256;
-
-using {
-    _sklLess as <,
-    _sklAdd as +,
-    _sklSub as -
-} for SKL global;
-
-function _sklLess(SKL left, SKL right) pure returns (bool result) {
-    return SKL.unwrap(left) < SKL.unwrap(right);
-}
-
-function _sklAdd(SKL a, SKL b) pure returns (SKL sum) {
-    sum = SKL.wrap(SKL.unwrap(a) + SKL.unwrap(b));
-}
-
-function _sklSub(SKL a, SKL b) pure returns (SKL sum) {
-    sum = SKL.wrap(SKL.unwrap(a) - SKL.unwrap(b));
+interface ISequenceTester {
+    function add(Timestamp timestamp, uint256 value) external;
+    function clear(Timestamp before) external;
+    function getValueByTimestamp(Timestamp timestamp) external view returns (uint256 value);
 }

@@ -1,3 +1,4 @@
+import { ContractTransactionResponse } from "ethers";
 import { ethers } from "hardhat";
 
 export const MS_PER_SEC = 1000;
@@ -51,6 +52,22 @@ export const nextMonth = (timestamp: number | bigint) => {
     return new Date(Date.UTC(year, month, 1)).getTime() / MS_PER_SEC;
 }
 
+export const previousMonth = (timestamp: number | bigint) => {
+    const timestampNumber = Number(timestamp) * MS_PER_SEC;
+    const date = new Date(timestampNumber);
+    let month = date.getMonth();
+    let year = date.getFullYear();
+
+    month -= 1;
+
+    if (month < 0) {
+        month = months.length - 1;
+        year -= 1;
+    }
+
+    return new Date(Date.UTC(year, month, 1)).getTime() / MS_PER_SEC;
+}
+
 export const monthBegin = (timestamp: number | bigint) => {
     const timestampNumber = Number(timestamp) * MS_PER_SEC;
     const date = new Date(timestampNumber);
@@ -62,4 +79,13 @@ export const monthBegin = (timestamp: number | bigint) => {
 export const skipMonth = async () => {
     const timestamp = await currentTime();
     await skipTime(nextMonth(timestamp) - timestamp);
+}
+
+export const getResponseTimestamp = async (response: ContractTransactionResponse) => {
+    const receipt = await response.wait();
+    if (receipt) {
+        const block = await receipt.getBlock();
+        return block.timestamp;
+    }
+    throw new Error("Can't get transaction receipt");
 }

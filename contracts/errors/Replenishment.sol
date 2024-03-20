@@ -23,6 +23,7 @@ pragma solidity ^0.8.18;
 
 
 error ReplenishmentPeriodIsTooBig();
+error ReplenishmentPeriodIsTooSmall();
 error TooSmallAllowance(
     address spender,
     uint256 required,

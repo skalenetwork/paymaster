@@ -37,6 +37,7 @@ import {
 } from "./errors/Parameters.sol";
 import {
     ReplenishmentPeriodIsTooBig,
+    ReplenishmentPeriodIsTooSmall,
     TooSmallAllowance,
     TransferFailure
 } from "./errors/Replenishment.sol";
@@ -314,6 +315,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         if (limit < finish) {
             revert ReplenishmentPeriodIsTooBig();
         }
+        if (duration == DateTimeUtils.months(0)) {
+            revert ReplenishmentPeriodIsTooSmall();
+        }
 
         SKL cost = _toSKL(_getCost(duration));
         SKL costPerMonth = SKL.wrap(SKL.unwrap(cost) / Months.unwrap(duration));
@@ -328,7 +332,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                     to: to,
                     amount: costPerMonth
                 }),
-                current,
+                _totalRewards.processedUntil,
                 end
             )) {
                 end = _next(end);
@@ -361,7 +365,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         emit VersionSet(newVersion);
     }
 
-    function getSchainExpirationTimestamp(SchainHash schainHash) external view override returns (Timestamp expiration) {
+    function getSchainExpirationTimestamp(
+        SchainHash schainHash
+    )
+        external
+        view
+        override
+        returns (Timestamp expiration)
+    {
         return _getSchain(schainHash).paidUntil;
     }
 
@@ -373,11 +384,25 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         );
     }
 
-    function getNodesNumber(ValidatorId validatorId) external view override returns (uint256 number) {
+    function getNodesNumber(
+        ValidatorId validatorId
+    )
+        external
+        view
+        override
+        returns (uint256 number)
+    {
         return _getValidator(validatorId).nodesAmount;
     }
 
-    function getActiveNodesNumber(ValidatorId validatorId) external view override returns (uint256 number) {
+    function getActiveNodesNumber(
+        ValidatorId validatorId
+    )
+        external
+        view
+        override
+        returns (uint256 number)
+    {
         return _getValidator(validatorId).activeNodesAmount;
     }
 
@@ -393,7 +418,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         return _getValidator(validatorId).nodesHistory.getValueByTimestamp(when);
     }
 
-    function getHistoricalTotalActiveNodesNumber(Timestamp when) external view override returns (uint256 number) {
+    function getHistoricalTotalActiveNodesNumber(
+        Timestamp when
+    )
+        external
+        view
+        override
+        returns (uint256 number)
+    {
         return _totalNodesHistory.getValueByTimestamp(when);
     }
 
@@ -408,7 +440,15 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function getTotalReward(Timestamp from, Timestamp to) external view override returns (SKL reward) {
+    function getTotalReward(
+        Timestamp from,
+        Timestamp to
+    )
+        external
+        view
+        override
+        returns (SKL reward)
+    {
         return SKL.wrap(_totalRewards.getSum(from, to));
     }
 
@@ -545,7 +585,13 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         validator.deleted = Timestamp.wrap(0);
     }
 
-    function _activeNodesAmountChanged(Validator storage validator, uint256 oldAmount, uint256 newAmount) private {
+    function _activeNodesAmountChanged(
+        Validator storage validator,
+        uint256 oldAmount,
+        uint256 newAmount
+    )
+        private
+    {
         Timestamp currentTime = _getTimestamp();
         validator.nodesHistory.add(currentTime, newAmount);
 
@@ -559,7 +605,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         debts[id] = debt;
     }
 
-    function _addPayment(Payment memory payment, Timestamp current, DebtId end) private returns (bool debtWasCreated) {
+    function _addPayment(
+        Payment memory payment,
+        Timestamp current,
+        DebtId end
+    )
+        private
+        returns (bool debtWasCreated)
+    {
         debtWasCreated = false;
         if (current <= payment.from) {
             // payment for the future
@@ -575,15 +628,17 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
             } else {
                 // payment is partially for the future
                 // and partially for the past
+                SKL pastPart = SKL.wrap(
+                    SKL.unwrap(payment.amount)
+                        * Seconds.unwrap(DateTimeUtils.duration(payment.from, current))
+                        / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to)
+                ));
+                SKL futurePart = payment.amount - pastPart;
                 _addDebt(
                     Payment({
                         from: payment.from,
                         to: current,
-                        amount: SKL.wrap(
-                            SKL.unwrap(payment.amount)
-                                * Seconds.unwrap(DateTimeUtils.duration(payment.from, current))
-                                / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to))
-                        )
+                        amount: pastPart
                     }),
                     end
                 );
@@ -591,9 +646,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                 _totalRewards.add(
                     current,
                     payment.to,
-                    SKL.unwrap(payment.amount)
-                        * Seconds.unwrap(DateTimeUtils.duration(current, payment.to))
-                        / Seconds.unwrap(DateTimeUtils.duration(payment.from, payment.to))
+                    SKL.unwrap(futurePart)
                 );
             }
         }
@@ -625,7 +678,14 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         debts[id].amount = SKL.wrap(0);
     }
 
-    function _getRewardAmount(Validator storage validator, Timestamp claimUntil) private view returns (SKL rewards) {
+    function _getRewardAmount(
+        Validator storage validator,
+        Timestamp claimUntil
+    )
+        private
+        view
+        returns (SKL rewards)
+    {
         rewards = _calculateRewards(
             validator,
             Payment({
@@ -637,7 +697,11 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         );
 
         DebtId end = debtsEnd;
-        for (DebtId debtId = validator.firstUnpaidDebt; _before(debtId, end); debtId = _next(debtId)) {
+        for (
+            DebtId debtId = validator.firstUnpaidDebt;
+            _before(debtId, end);
+            debtId = _next(debtId)
+        ) {
             rewards = rewards + _calculateRewards(
                 validator,
                 debts[debtId],
@@ -648,7 +712,15 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     // False positive detection of the dead code. The function is used in `claim` function
     //slither-disable-next-line dead-code
-    function _loadFromTimeline(Timestamp from, Timestamp to, Payment memory) private view returns (SKL reward) {
+    function _loadFromTimeline(
+        Timestamp from,
+        Timestamp to,
+        Payment memory
+    )
+        private
+        view
+        returns (SKL reward)
+    {
         return SKL.wrap(_totalRewards.getSum(from, to));
     }
 
@@ -686,8 +758,15 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         }
     }
 
-    function _getValidatorByAddress(address validatorAddress) private view returns (Validator storage validator) {
-        (bool success, ValidatorId id) = _validatorData.addressToValidatorId.tryGet(validatorAddress);
+    function _getValidatorByAddress(
+        address validatorAddress
+    )
+        private
+        view
+        returns (Validator storage validator)
+    {
+        (bool success, ValidatorId id) =
+            _validatorData.addressToValidatorId.tryGet(validatorAddress);
         if (success) {
             return _getValidator(id);
         } else {
@@ -718,40 +797,70 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     function _calculateRewards(
         Validator storage validator,
         Payment memory rewardSource,
-        function (Timestamp, Timestamp, Payment memory) internal view returns (SKL) getTotalRewardFunction
+        function (
+            Timestamp,
+            Timestamp,
+            Payment memory
+        ) internal view returns (SKL) getTotalRewardFunction
     )
         private
         view
         returns (SKL rewards)
     {
         Timestamp cursor = rewardSource.from;
-
-        SequenceLibrary.Iterator memory totalNodesHistoryIterator = _totalNodesHistory.getIterator(cursor);
-        SequenceLibrary.Iterator memory nodesHistoryIterator = validator.nodesHistory.getIterator(cursor);
-
+        SequenceLibrary.Iterator memory totalNodesHistoryIterator =
+            _totalNodesHistory.getIterator(cursor);
+        SequenceLibrary.Iterator memory nodesHistoryIterator =
+            validator.nodesHistory.getIterator(cursor);
         rewards = SKL.wrap(0);
         uint256 activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
         uint256 totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
 
         while (cursor < rewardSource.to) {
-            Timestamp nextCursor = _getNextCursor(rewardSource.to, totalNodesHistoryIterator, nodesHistoryIterator);
+            Timestamp nextCursor = _getNextCursor(
+                rewardSource.to,
+                totalNodesHistoryIterator,
+                nodesHistoryIterator
+            );
 
             if (totalNodes > 0) {
                 rewards = rewards + SKL.wrap(
-                    SKL.unwrap(getTotalRewardFunction(cursor, nextCursor, rewardSource)) * activeNodes / totalNodes
+                    SKL.unwrap(
+                        getTotalRewardFunction(cursor, nextCursor, rewardSource)
+                    ) * activeNodes / totalNodes
                 );
             }
 
             cursor = nextCursor;
-            while (totalNodesHistoryIterator.hasNext() && totalNodesHistoryIterator.nextTimestamp <= cursor) {
-                if (totalNodesHistoryIterator.step(_totalNodesHistory)) {
-                    totalNodes = _totalNodesHistory.getValue(totalNodesHistoryIterator);
-                }
-            }
-            while (nodesHistoryIterator.hasNext() && nodesHistoryIterator.nextTimestamp <= cursor) {
-                if (nodesHistoryIterator.step(validator.nodesHistory)) {
-                    activeNodes = validator.nodesHistory.getValue(nodesHistoryIterator);
-                }
+            totalNodes = _updateNodesAmount(
+                totalNodesHistoryIterator,
+                _totalNodesHistory,
+                cursor,
+                totalNodes
+            );
+            activeNodes = _updateNodesAmount(
+                nodesHistoryIterator,
+                validator.nodesHistory,
+                cursor,
+                activeNodes
+            );
+        }
+    }
+
+    function _updateNodesAmount(
+        SequenceLibrary.Iterator memory nodesIterator,
+        SequenceLibrary.Sequence storage nodesHistory,
+        Timestamp cursor,
+        uint256 currentNodesNumber
+    )
+        private
+        view
+        returns (uint256 newNodesNumber)
+    {
+        newNodesNumber = currentNodesNumber;
+        while (nodesIterator.hasNext() && nodesIterator.nextTimestamp <= cursor) {
+            if (nodesIterator.step(nodesHistory)) {
+                newNodesNumber = nodesHistory.getValue(nodesIterator);
             }
         }
     }

@@ -1859,6 +1859,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@skalenetwork/paymaster-interfaces@npm:main":
+  version: 1.0.0-main.10
+  resolution: "@skalenetwork/paymaster-interfaces@npm:1.0.0-main.10"
+  dependencies:
+    "@quant-finance/solidity-datetime": ^2.2.0
+  checksum: ed9938ba9767791fd2d4e36e954607973b499cd6ab79337d60632b3ab6ce499be5542f40776135b1b4d29b5c9079c6aef71cf820a047ae2dc046e1ba0e6dd6c0
+  languageName: node
+  linkType: hard
+
 "@skalenetwork/skale-contracts-ethers-v6@npm:^1.0.2-develop.0":
   version: 1.0.2-develop.0
   resolution: "@skalenetwork/skale-contracts-ethers-v6@npm:1.0.2-develop.0"
@@ -7025,6 +7034,7 @@ __metadata:
     "@openzeppelin/hardhat-upgrades": ^3.2.1
     "@openzeppelin/upgrades-core": ^1.35.1
     "@quant-finance/solidity-datetime": ^2.2.0
+    "@skalenetwork/paymaster-interfaces": main
     "@skalenetwork/skale-contracts-ethers-v6": ^1.0.2-develop.0
     "@skalenetwork/upgrade-tools": 3.0.0-develop.13
     "@typechain/ethers-v6": ^0.5.1

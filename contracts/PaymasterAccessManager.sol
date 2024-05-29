@@ -24,7 +24,9 @@ pragma solidity ^0.8.20;
 import {AccessManagerUpgradeable}
 from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagerUpgradeable.sol";
 
-import {IPaymasterAccessManager} from "./interfaces/IPaymasterAccessManager.sol";
+import {
+    IPaymasterAccessManager
+} from "@skalenetwork/paymaster-interfaces/IPaymasterAccessManager.sol";
 
 
 contract PaymasterAccessManager is IPaymasterAccessManager, AccessManagerUpgradeable {

@@ -22,7 +22,7 @@
 pragma solidity ^0.8.18;
 
 import {Seconds, Timestamp} from "../../Paymaster.sol";
-import {IPaymaster} from "../IPaymaster.sol";
+import {IPaymaster} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 
 
 interface IFastForwardPaymaster is IPaymaster {

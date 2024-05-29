@@ -54,15 +54,15 @@ import {
     SchainHash,
     USD,
     ValidatorId
-} from "./interfaces/IPaymaster.sol";
+} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 import {TypedMap} from "./structs/typed/TypedMap.sol";
-import {SKL} from "./types/Skl.sol";
+import {SKL} from "@skalenetwork/paymaster-interfaces/types/Skl.sol";
 import {
     DateTimeUtils,
     Seconds,
     Timestamp,
     Months
-} from "./DateTimeUtils.sol";
+} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 import {SequenceLibrary} from "./Sequence.sol";
 import {TimelineLibrary} from "./Timeline.sol";
 

@@ -25,7 +25,7 @@ pragma solidity ^0.8.20;
 
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
-import {ValidatorId} from "../../interfaces/IPaymaster.sol";
+import {ValidatorId} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 
 
 library TypedMap {

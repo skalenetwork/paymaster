@@ -23,7 +23,7 @@ pragma solidity ^0.8.19;
 
 // cspell:words deque structs
 
-import {Timestamp} from "./DateTimeUtils.sol";
+import {Timestamp} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
 
 

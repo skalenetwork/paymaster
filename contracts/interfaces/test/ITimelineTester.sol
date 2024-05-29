@@ -21,7 +21,7 @@
 
 pragma solidity ^0.8.19;
 
-import {Timestamp} from "../../DateTimeUtils.sol";
+import {Timestamp} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 
 
 interface ITimelineTester {

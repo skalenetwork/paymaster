@@ -25,7 +25,11 @@ pragma solidity ^0.8.19;
 
 import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
 import {TypedPriorityQueue} from "./structs/typed/TypedPriorityQueue.sol";
-import {DateTimeUtils, Seconds, Timestamp} from "./DateTimeUtils.sol";
+import {
+    DateTimeUtils,
+    Seconds,
+    Timestamp
+} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 
 
 library TimelineLibrary {

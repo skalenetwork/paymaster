@@ -261,6 +261,18 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         emit ValidatorMarkedAsRemoved(id, currentTimestamp);
     }
 
+    function setValidatorAddress(
+        ValidatorId id,
+        address validatorAddress
+    )
+        external
+        override
+        restricted
+    {
+        Validator storage validator = _getValidator(id);
+        validator.validatorAddress = validatorAddress;
+    }
+
     function setActiveNodes(ValidatorId validatorId, uint256 amount) external override restricted {
         Validator storage validator = _getValidator(validatorId);
         if (amount > validator.nodesAmount) {

@@ -9,6 +9,7 @@ root: true
 ignorePatterns:
   - coverage/**
   - typechain-types/**
+  - venv/**
 rules:
   "@typescript-eslint/no-shadow": error
   capitalized-comments: ["error", "always", { "ignoreConsecutiveComments": true }]

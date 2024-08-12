@@ -25,7 +25,6 @@ pragma solidity ^0.8.19;
 
 import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {AccessManagedUpgradeable}
 from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol";
 
@@ -129,6 +128,10 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     string public version;
 
     error ImportantDataRemoving();
+    error IncorrectActiveNodesAmount(
+        uint256 amount,
+        uint256 totalAmount
+    );
 
     event SchainAdded(
         string name,
@@ -260,10 +263,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
 
     function setActiveNodes(ValidatorId validatorId, uint256 amount) external override restricted {
         Validator storage validator = _getValidator(validatorId);
+        if (amount > validator.nodesAmount) {
+            revert IncorrectActiveNodesAmount(amount, validator.nodesAmount);
+        }
         uint256 oldActiveNodesAmount = validator.activeNodesAmount;
-        uint256 activeNodesAmount = Math.min(amount, validator.nodesAmount);
-        validator.activeNodesAmount = activeNodesAmount;
-        _activeNodesAmountChanged(validator, oldActiveNodesAmount, activeNodesAmount);
+        validator.activeNodesAmount = amount;
+        _activeNodesAmountChanged(validator, oldActiveNodesAmount, amount);
     }
 
     function setMaxReplenishmentPeriod(Months months) external override restricted {

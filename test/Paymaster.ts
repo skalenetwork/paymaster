@@ -230,6 +230,13 @@ describe("Paymaster", () => {
             );
         });
 
+        it("should not allow to set too big amount of active nodes", async () => {
+            const { paymaster } = await loadFixture(addSchainAndValidatorFixture);
+            await expect(paymaster.setActiveNodes(validatorId, 2))
+                .to.be.revertedWithCustomError(paymaster, "IncorrectActiveNodesAmount")
+                .withArgs(2, 1);
+        });
+
         describe("when schain was paid for 1 month", () => {
             const payOneMonthFixture = async () => {
                 const { baseRewards, paymaster } = await loadFixture(addSchainAndValidatorFixture);

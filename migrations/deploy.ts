@@ -8,6 +8,11 @@ import { getVersion } from "./tools/version";
 // after estimateGas fix in skaled
 const DEPLOY_GAS_LIMIT = 20e6;
 
+export const contracts = [
+    "Paymaster",
+    "PaymasterAccessManager"
+];
+
 export const deployAccessManager = async (owner: Addressable) => {
     console.log("Deploy AccessManager");
     const factory = await ethers.getContractFactory("PaymasterAccessManager");

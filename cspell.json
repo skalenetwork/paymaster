@@ -5,6 +5,7 @@
         ".gitignore",
         "artifacts/**",
         "cache/**",
+        "data/**",
         "typechain-types/**",
         "**/venv/**"
     ],

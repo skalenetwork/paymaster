@@ -142,3 +142,6 @@ artifacts
 
 # python
 venv
+
+# project
+data

@@ -4214,22 +4214,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^6.12.1":
-  version: 6.12.1
-  resolution: "ethers@npm:6.12.1"
-  dependencies:
-    "@adraffy/ens-normalize": 1.10.1
-    "@noble/curves": 1.2.0
-    "@noble/hashes": 1.3.2
-    "@types/node": 18.15.13
-    aes-js: 4.0.0-beta.5
-    tslib: 2.4.0
-    ws: 8.5.0
-  checksum: ddf398c91f584b9e643740ec17a9c82b4a1c4ea3fb6efd00f1a043b89d1ec6f9427aa80894f75850ee805722e91b8d054bce18579a2c621226302c096774df90
-  languageName: node
-  linkType: hard
-
-"ethers@npm:^6.13.1, ethers@npm:^6.7.1":
+"ethers@npm:^6.13.1, ethers@npm:^6.13.2, ethers@npm:^6.7.1":
   version: 6.13.2
   resolution: "ethers@npm:6.13.2"
   dependencies:
@@ -6801,7 +6786,7 @@ __metadata:
     cspell: ^8.8.3
     dotenv: ^16.4.5
     eslint: ^8.56.0
-    ethers: ^6.12.1
+    ethers: ^6.13.2
     hardhat: ^2.22.8
     hardhat-gas-reporter: ^2.2.1
     lodash: ^4.17.21
@@ -8529,21 +8514,6 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 442badcce1f1178ec87a0b5372ae2e9771e07c4929a3180321901f226127f252441e8689d765aa5cfba5f50ac60dd830954afc5aeae81609aefa11d3ddf5cecf
-  languageName: node
-  linkType: hard
-
-"ws@npm:8.5.0":
-  version: 8.5.0
-  resolution: "ws@npm:8.5.0"
-  peerDependencies:
-    bufferutil: ^4.0.1
-    utf-8-validate: ^5.0.2
-  peerDependenciesMeta:
-    bufferutil:
-      optional: true
-    utf-8-validate:
-      optional: true
-  checksum: 76f2f90e40344bf18fd544194e7067812fb1372b2a37865678d8f12afe4b478ff2ebc0c7c0aff82cd5e6b66fc43d889eec0f1865c2365d8f7a66d92da7744a77
   languageName: node
   linkType: hard
 

@@ -63,6 +63,8 @@ jobs:
       run: yarn exec hardhat run scripts/generateAbi.ts
 
     - name: Run tests
+      env:
+        NODE_OPTIONS: --max-old-space-size=12288
       run: yarn exec hardhat coverage
 
     - name: Upload coverage reports to Codecov

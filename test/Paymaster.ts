@@ -25,6 +25,7 @@ describe("Paymaster", () => {
     const MAX_REPLENISHMENT_PERIOD = 24;
     const precision = 5n;
     const decimalPlacePrecision = 12n;
+    const SKL_PRICE = ethers.parseEther("0.5");
 
     let owner: SignerWithAddress;
     let validator: SignerWithAddress;
@@ -34,7 +35,6 @@ describe("Paymaster", () => {
     const setup = async (paymaster: Paymaster, skaleToken: Token) => {
         const minute = 60;
         const SCHAIN_PRICE = ethers.parseEther("5000");
-        const SKL_PRICE = ethers.parseEther("0.5");
 
         await skaleToken.mint(await user.getAddress(), BIG_AMOUNT);
         await skaleToken.connect(user).approve(await paymaster.getAddress(), BIG_AMOUNT);
@@ -440,6 +440,8 @@ describe("Paymaster", () => {
                 rewards.addSchain(sHash, await getResponseTimestamp(response));
             }
 
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
+
             return { baseRewards: rewards, paymaster, schains, token, validators };
         }
 
@@ -544,6 +546,8 @@ describe("Paymaster", () => {
 
             // Month A
 
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
+
             await paymaster.connect(user).pay(schains[0], twoYears);
             rewards.addPayment(schains[0], tokensPerMonth * BigInt(twoYears), twoYears);
 
@@ -554,6 +558,8 @@ describe("Paymaster", () => {
             await skipMonth();
 
             // Month C
+
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
 
             // Reward for month B is available
             const amountOfPaidChains = 2;
@@ -588,6 +594,8 @@ describe("Paymaster", () => {
             await skipMonth();
 
             // Month D
+
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
 
             // Reward for month C is available
             const amountOfChainsPaidForMonthC = 1;
@@ -626,6 +634,8 @@ describe("Paymaster", () => {
 
             // Month A
 
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
+
             // Pay for month B and C
             await paymaster.connect(user).pay(schains[0], twoMonths);
             rewards.addPayment(schains[0], tokensPerMonth * BigInt(twoMonths), twoMonths);
@@ -634,6 +644,8 @@ describe("Paymaster", () => {
             await skipMonth();
 
             // Month C
+
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
 
             // Reward for month B is available
             const amountOfPaidChains = 1;
@@ -670,6 +682,8 @@ describe("Paymaster", () => {
 
             // Month D
 
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
+
             const validatorId = validators.length - 1;
             const estimated = await paymaster.getRewardAmount(validatorId);
             const claim = await paymaster.connect(validators[validatorId]).claim(await validators[validatorId].getAddress());
@@ -698,11 +712,15 @@ describe("Paymaster", () => {
 
             // Month A
 
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
+
             await paymaster.connect(user).pay(schains[0], twoYears);
 
             await skipMonth();
 
             // Month B
+
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
 
             expect(await paymaster.getRewardAmount(validatorId)).to.be.equal(0);
 
@@ -718,6 +736,8 @@ describe("Paymaster", () => {
             await skipMonth();
 
             // Month C
+
+            await paymaster.connect(priceAgent).setSklPrice(SKL_PRICE);
 
             const monthBReward = tokensPerMonth;
             const rewardRate = monthBReward / secondsInMonthB;

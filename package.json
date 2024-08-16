@@ -21,7 +21,6 @@
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@nomicfoundation/hardhat-verify": "^2.0.3",
     "@openzeppelin/hardhat-upgrades": "^3.2.1",
     "@typechain/ethers-v6": "^0.5.1",
@@ -36,8 +35,8 @@
     "cspell": "^8.8.3",
     "eslint": "^8.56.0",
     "ethers": "^6.12.1",
-    "hardhat": "^2.19.4",
-    "hardhat-gas-reporter": "^1.0.8",
+    "hardhat": "^2.22.8",
+    "hardhat-gas-reporter": "^2.2.1",
     "lodash": "^4.17.21",
     "prando": "^6.0.1",
     "solhint": "^5.0.3",
@@ -51,7 +50,8 @@
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
     "@openzeppelin/upgrades-core": "^1.35.1",
     "@quant-finance/solidity-datetime": "^2.2.0",
-    "@skalenetwork/upgrade-tools": "linter",
+    "@skalenetwork/skale-contracts-ethers-v6": "^1.0.2-develop.0",
+    "@skalenetwork/upgrade-tools": "3.0.0-develop.11",
     "chalk": "^4",
     "dotenv": "^16.4.5"
   }

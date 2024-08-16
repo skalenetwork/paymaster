@@ -14,7 +14,7 @@ import { d2ChaiMatchers } from "./tools/matchers";
 import { ethers } from "hardhat";
 import {
     loadFixture
-} from "@nomicfoundation/hardhat-toolbox/network-helpers";
+} from "@nomicfoundation/hardhat-network-helpers";
 
 use(d2ChaiMatchers);
 

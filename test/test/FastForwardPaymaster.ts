@@ -4,7 +4,7 @@ import { PaymasterAccessManager } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { deployAccessManager } from "../../migrations/deploy";
 import { expect } from "chai";
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 
 describe("FastForwardPaymaster", () => {

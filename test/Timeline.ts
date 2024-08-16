@@ -1,7 +1,7 @@
 import Prando from 'prando';
 import { ethers } from "hardhat";
 import { expect } from 'chai';
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 
 describe("Timeline", () => {

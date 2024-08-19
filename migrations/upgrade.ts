@@ -81,7 +81,7 @@ const main = async () => {
     const upgrader = new PaymasterUpgrader({
         contractNamesToUpgrade: contracts,
         instance: paymaster,
-        targetVersion: "1.0.0"
+        targetVersion: "1.0.0-develop.7"
     });
     await upgrader.upgrade();
 }

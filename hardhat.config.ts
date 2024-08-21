@@ -1,5 +1,8 @@
-import "@nomicfoundation/hardhat-toolbox";
-import '@openzeppelin/hardhat-upgrades';
+import "@typechain/hardhat"
+import "@nomicfoundation/hardhat-chai-matchers"
+import "@nomicfoundation/hardhat-ethers"
+import "@openzeppelin/hardhat-upgrades";
+import "solidity-coverage";
 import * as dotenv from "dotenv";
 import {HardhatUserConfig, task} from "hardhat/config";
 

@@ -68,12 +68,6 @@ class PaymasterUpgrader extends Upgrader {
             to: await ethers.resolveAddress(paymaster)
         }));
     }
-
-    // Uncomment when new contracts are deployed
-    // deployNewContracts = async () => { };
-
-    // Uncomment when initialization is required
-    // initialize = async () => { };
 }
 
 const main = async () => {

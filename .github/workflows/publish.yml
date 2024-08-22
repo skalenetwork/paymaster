@@ -5,10 +5,11 @@ on:
   pull_request:
     types: [closed]
     branches:
+      - 'v*.*.*'
       - develop
       - beta
+      - release-candidate
       - stable
-      - 'v*.*.*'
   push:
     tags:
       - 'custom-release-*'

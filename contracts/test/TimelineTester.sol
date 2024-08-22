@@ -25,7 +25,7 @@ pragma solidity ^0.8.19;
 
 import {ITimelineTester} from "../interfaces/test/ITimelineTester.sol";
 import {TimelineLibrary} from "../Timeline.sol";
-import {Timestamp} from "../DateTimeUtils.sol";
+import {Timestamp} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 
 
 contract TimelineTester is ITimelineTester {

@@ -54,15 +54,15 @@ import {
     SchainHash,
     USD,
     ValidatorId
-} from "./interfaces/IPaymaster.sol";
+} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 import {TypedMap} from "./structs/typed/TypedMap.sol";
-import {SKL} from "./types/Skl.sol";
+import {SKL} from "@skalenetwork/paymaster-interfaces/types/Skl.sol";
 import {
     DateTimeUtils,
     Seconds,
     Timestamp,
     Months
-} from "./DateTimeUtils.sol";
+} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 import {SequenceLibrary} from "./Sequence.sol";
 import {TimelineLibrary} from "./Timeline.sol";
 
@@ -259,6 +259,18 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         validator.deleted = currentTimestamp;
 
         emit ValidatorMarkedAsRemoved(id, currentTimestamp);
+    }
+
+    function setValidatorAddress(
+        ValidatorId id,
+        address validatorAddress
+    )
+        external
+        override
+        restricted
+    {
+        Validator storage validator = _getValidator(id);
+        validator.validatorAddress = validatorAddress;
     }
 
     function setActiveNodes(ValidatorId validatorId, uint256 amount) external override restricted {

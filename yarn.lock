@@ -1279,9 +1279,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-verify@npm:^2.0.3":
-  version: 2.0.3
-  resolution: "@nomicfoundation/hardhat-verify@npm:2.0.3"
+"@nomicfoundation/hardhat-verify@npm:^2.0.9":
+  version: 2.0.9
+  resolution: "@nomicfoundation/hardhat-verify@npm:2.0.9"
   dependencies:
     "@ethersproject/abi": ^5.1.2
     "@ethersproject/address": ^5.0.2
@@ -1293,8 +1293,8 @@ __metadata:
     table: ^6.8.0
     undici: ^5.14.0
   peerDependencies:
-    hardhat: ^2.0.4
-  checksum: 5cc3513d3385eb45c19081e79b1b2a67b13376f0d2c5dc2da07ee41886f82110b0af5b46e7fae6204db8a9d4dcda7e568a630a254bd5567779068bc29c22c86f
+    hardhat: "*"
+  checksum: c010d5c147fefb23d971969dc7479aac45a0bb8977e86e04c579228ab9683189e7bdebbd7b5f70fe96a10c9d0a2849aab1f10bacad56c925f6255becfd2d585c
   languageName: node
   linkType: hard
 
@@ -7029,7 +7029,7 @@ __metadata:
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.0
     "@nomicfoundation/hardhat-ethers": ^3.0.5
     "@nomicfoundation/hardhat-network-helpers": ^1.0.10
-    "@nomicfoundation/hardhat-verify": ^2.0.3
+    "@nomicfoundation/hardhat-verify": ^2.0.9
     "@openzeppelin/contracts": ^5.0.1
     "@openzeppelin/contracts-upgradeable": ^5.0.2
     "@openzeppelin/hardhat-upgrades": ^3.2.1

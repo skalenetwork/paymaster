@@ -94,7 +94,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         TypedMap.AddressToValidatorIdMap addressToValidatorId;
     }
 
-    mapping(SchainHash => Schain) public schains;
+    mapping(SchainHash schainHash => Schain schain) public schains;
     EnumerableSet.Bytes32Set private _schainHashes;
 
     ValidatorData private _validatorData;
@@ -109,7 +109,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     TimelineLibrary.Timeline private _totalRewards;
     SequenceLibrary.Sequence private _totalNodesHistory;
 
-    mapping (DebtId => Payment) public debts;
+    mapping (DebtId debtId => Payment payment) public debts;
     DebtId public debtsBegin;
     DebtId public debtsEnd;
 

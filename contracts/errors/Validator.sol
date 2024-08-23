@@ -21,8 +21,8 @@
 
 pragma solidity ^0.8.18;
 
-import {ValidatorId} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 import {Timestamp} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import {ValidatorId} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 
 
 error ValidatorNotFound(

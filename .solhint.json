@@ -14,6 +14,7 @@
       }
     ],
     "function-max-lines": "error",
+    "imports-order": "error",
     "max-line-length": ["error", 100],
     "max-states-count": "error",
     "no-empty-blocks": "error",

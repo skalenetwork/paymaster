@@ -23,13 +23,13 @@ pragma solidity ^0.8.19;
 
 // cspell:words deque structs
 
-import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
-import {TypedPriorityQueue} from "./structs/typed/TypedPriorityQueue.sol";
 import {
     DateTimeUtils,
     Seconds,
     Timestamp
 } from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
+import {TypedPriorityQueue} from "./structs/typed/TypedPriorityQueue.sol";
 
 
 library TimelineLibrary {

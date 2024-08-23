@@ -21,8 +21,8 @@
 
 pragma solidity ^0.8.19;
 
-import {DateTimeUtils, Paymaster, Seconds, Timestamp} from "../Paymaster.sol";
-import {IFastForwardPaymaster, IPaymaster} from "../interfaces/test/IFastForwardPaymaster.sol";
+import { IFastForwardPaymaster, IPaymaster } from "./../interfaces/test/IFastForwardPaymaster.sol";
+import { DateTimeUtils, Paymaster, Seconds, Timestamp } from "./../Paymaster.sol";
 
 
 contract FastForwardPaymaster is Paymaster, IFastForwardPaymaster {

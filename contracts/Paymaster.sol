@@ -23,24 +23,25 @@ pragma solidity ^0.8.19;
 
 // cspell:words structs IERC20
 
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {AccessManagedUpgradeable}
+import { AccessManagedUpgradeable }
 from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol";
-
-import {
-    SchainPriceIsNotSet,
-    SkaleTokenIsNotSet,
-    SklPriceIsNotSet,
-    SklPriceIsOutdated
-} from "./errors/Parameters.sol";
+import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import { EnumerableSet }
+from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { DateTimeUtils, Seconds, Timestamp, Months }
+from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import { IPaymaster, SchainHash, USD, ValidatorId }
+from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
+import { SKL } from "@skalenetwork/paymaster-interfaces/types/Skl.sol";
+import { SchainPriceIsNotSet, SkaleTokenIsNotSet, SklPriceIsNotSet, SklPriceIsOutdated }
+from "./errors/Parameters.sol";
 import {
     ReplenishmentPeriodIsTooBig,
     ReplenishmentPeriodIsTooSmall,
     TooSmallAllowance,
     TransferFailure
 } from "./errors/Replenishment.sol";
-import {SchainNotFound, SchainAddingError, SchainDeletionError} from "./errors/Schain.sol";
+import { SchainNotFound, SchainAddingError, SchainDeletionError } from "./errors/Schain.sol";
 import {
     ValidatorNotFound,
     ValidatorAddingError,
@@ -49,22 +50,9 @@ import {
     ValidatorDeletionError,
     ValidatorHasBeenRemoved
 } from "./errors/Validator.sol";
-import {
-    IPaymaster,
-    SchainHash,
-    USD,
-    ValidatorId
-} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
-import {TypedMap} from "./structs/typed/TypedMap.sol";
-import {SKL} from "@skalenetwork/paymaster-interfaces/types/Skl.sol";
-import {
-    DateTimeUtils,
-    Seconds,
-    Timestamp,
-    Months
-} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
-import {SequenceLibrary} from "./Sequence.sol";
-import {TimelineLibrary} from "./Timeline.sol";
+import { SequenceLibrary } from "./Sequence.sol";
+import { TypedMap } from "./structs/typed/TypedMap.sol";
+import { TimelineLibrary } from "./Timeline.sol";
 
 
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {

@@ -23,9 +23,9 @@ pragma solidity ^0.8.19;
 
 // cspell:words structs
 
-import {ITimelineTester} from "../interfaces/test/ITimelineTester.sol";
-import {TimelineLibrary} from "../Timeline.sol";
-import {Timestamp} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import { Timestamp } from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import { ITimelineTester } from "./../interfaces/test/ITimelineTester.sol";
+import { TimelineLibrary } from "./../Timeline.sol";
 
 
 contract TimelineTester is ITimelineTester {

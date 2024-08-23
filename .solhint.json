@@ -15,6 +15,7 @@
       }
     ],
     "function-max-lines": "error",
+    "gas-length-in-loops": "error",
     "imports-order": "error",
     "max-line-length": ["error", 100],
     "max-states-count": "error",

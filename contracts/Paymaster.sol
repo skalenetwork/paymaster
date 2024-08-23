@@ -439,8 +439,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function getSchainsNames() external view override returns (string[] memory names) {
-        names = new string[](getSchainsNumber());
-        for (uint256 i = 0; i < names.length; ++i) {
+        uint256 length = getSchainsNumber();
+        names = new string[](length);
+        for (uint256 i = 0; i < length; ++i) {
             names[i] = _getSchain(SchainHash.wrap(_schainHashes.at(i))).name;
         }
     }

@@ -16,7 +16,7 @@
     "tsc": "tsc --noEmit"
   },
   "devDependencies": {
-    "@nomicfoundation/ethereumjs-trie": "^6.0.3",
+    "@nomicfoundation/ethereumjs-trie": "^6.0.4",
     "@nomicfoundation/ethereumjs-util": "^9.0.3",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",

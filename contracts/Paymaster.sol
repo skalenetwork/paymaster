@@ -23,24 +23,25 @@ pragma solidity ^0.8.19;
 
 // cspell:words structs IERC20
 
-import {IERC20} from "@openzeppelin/contracts/interfaces/IERC20.sol";
-import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {AccessManagedUpgradeable}
+import { AccessManagedUpgradeable }
 from "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol";
-
-import {
-    SchainPriceIsNotSet,
-    SkaleTokenIsNotSet,
-    SklPriceIsNotSet,
-    SklPriceIsOutdated
-} from "./errors/Parameters.sol";
+import { IERC20 } from "@openzeppelin/contracts/interfaces/IERC20.sol";
+import { EnumerableSet }
+from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { DateTimeUtils, Seconds, Timestamp, Months }
+from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import { IPaymaster, SchainHash, USD, ValidatorId }
+from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
+import { SKL } from "@skalenetwork/paymaster-interfaces/types/Skl.sol";
+import { SchainPriceIsNotSet, SkaleTokenIsNotSet, SklPriceIsNotSet, SklPriceIsOutdated }
+from "./errors/Parameters.sol";
 import {
     ReplenishmentPeriodIsTooBig,
     ReplenishmentPeriodIsTooSmall,
     TooSmallAllowance,
     TransferFailure
 } from "./errors/Replenishment.sol";
-import {SchainNotFound, SchainAddingError, SchainDeletionError} from "./errors/Schain.sol";
+import { SchainNotFound, SchainAddingError, SchainDeletionError } from "./errors/Schain.sol";
 import {
     ValidatorNotFound,
     ValidatorAddingError,
@@ -49,22 +50,9 @@ import {
     ValidatorDeletionError,
     ValidatorHasBeenRemoved
 } from "./errors/Validator.sol";
-import {
-    IPaymaster,
-    SchainHash,
-    USD,
-    ValidatorId
-} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
-import {TypedMap} from "./structs/typed/TypedMap.sol";
-import {SKL} from "@skalenetwork/paymaster-interfaces/types/Skl.sol";
-import {
-    DateTimeUtils,
-    Seconds,
-    Timestamp,
-    Months
-} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
-import {SequenceLibrary} from "./Sequence.sol";
-import {TimelineLibrary} from "./Timeline.sol";
+import { SequenceLibrary } from "./Sequence.sol";
+import { TypedMap } from "./structs/typed/TypedMap.sol";
+import { TimelineLibrary } from "./Timeline.sol";
 
 
 contract Paymaster is AccessManagedUpgradeable, IPaymaster {
@@ -106,7 +94,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         TypedMap.AddressToValidatorIdMap addressToValidatorId;
     }
 
-    mapping(SchainHash => Schain) public schains;
+    mapping(SchainHash schainHash => Schain schain) public schains;
     EnumerableSet.Bytes32Set private _schainHashes;
 
     ValidatorData private _validatorData;
@@ -121,7 +109,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     TimelineLibrary.Timeline private _totalRewards;
     SequenceLibrary.Sequence private _totalNodesHistory;
 
-    mapping (DebtId => Payment) public debts;
+    mapping (DebtId debtId => Payment payment) public debts;
     DebtId public debtsBegin;
     DebtId public debtsEnd;
 
@@ -451,8 +439,9 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
     }
 
     function getSchainsNames() external view override returns (string[] memory names) {
-        names = new string[](getSchainsNumber());
-        for (uint256 i = 0; i < names.length; ++i) {
+        uint256 length = getSchainsNumber();
+        names = new string[](length);
+        for (uint256 i = 0; i < length; ++i) {
             names[i] = _getSchain(SchainHash.wrap(_schainHashes.at(i))).name;
         }
     }
@@ -523,7 +512,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                 firstUnpaidDebt = validator.firstUnpaidDebt;
             }
             validator.nodesHistory.clear(before);
-            if (Timestamp.wrap(0) != validator.deleted && validator.deleted <= before) {
+            if (Timestamp.wrap(0) != validator.deleted && !(validator.deleted > before)) {
                 _removeValidator(validator);
             }
         }
@@ -631,12 +620,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         returns (bool debtWasCreated)
     {
         debtWasCreated = false;
-        if (current <= payment.from) {
+        if (!(current > payment.from)) {
             // payment for the future
             _totalRewards.add(payment.from, payment.to, SKL.unwrap(payment.amount));
         } else {
             debtWasCreated = true;
-            if (payment.to <= current) {
+            if (!(payment.to > current)) {
                 // payment for the past
                 _addDebt(
                     payment,
@@ -875,7 +864,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         returns (uint256 newNodesNumber)
     {
         newNodesNumber = currentNodesNumber;
-        while (nodesIterator.hasNext() && nodesIterator.nextTimestamp <= cursor) {
+        while (nodesIterator.hasNext() && !(nodesIterator.nextTimestamp > cursor)) {
             if (nodesIterator.step(nodesHistory)) {
                 newNodesNumber = nodesHistory.getValue(nodesIterator);
             }

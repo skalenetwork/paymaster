@@ -1861,11 +1861,11 @@ __metadata:
   linkType: hard
 
 "@skalenetwork/paymaster-interfaces@npm:main":
-  version: 1.0.0-main.10
-  resolution: "@skalenetwork/paymaster-interfaces@npm:1.0.0-main.10"
+  version: 1.0.0-main.13
+  resolution: "@skalenetwork/paymaster-interfaces@npm:1.0.0-main.13"
   dependencies:
     "@quant-finance/solidity-datetime": ^2.2.0
-  checksum: ed9938ba9767791fd2d4e36e954607973b499cd6ab79337d60632b3ab6ce499be5542f40776135b1b4d29b5c9079c6aef71cf820a047ae2dc046e1ba0e6dd6c0
+  checksum: bb62d0c0ac191073ab78f8a74e97cbe890bccc8864fb060d1ece37f6d62500fb9349f777b50b253b02785bfbcf84ce6830b601bf1bf28885f82600358bed46fe
   languageName: node
   linkType: hard
 

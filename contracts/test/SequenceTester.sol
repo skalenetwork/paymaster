@@ -21,9 +21,9 @@
 
 pragma solidity ^0.8.19;
 
-import {ISequenceTester} from "../interfaces/test/ISequenceTester.sol";
-import {SequenceLibrary} from "../Sequence.sol";
-import {Timestamp} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import { Timestamp } from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
+import { ISequenceTester } from "./../interfaces/test/ISequenceTester.sol";
+import { SequenceLibrary } from "./../Sequence.sol";
 
 
 contract SequenceTester is ISequenceTester {

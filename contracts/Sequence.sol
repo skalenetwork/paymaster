@@ -187,7 +187,7 @@ library SequenceLibrary {
         if (iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             iterator.idIndex = 0;
         } else {
-            iterator.idIndex += 1;
+            ++iterator.idIndex;
         }
         if (iterator.idIndex + 1 < iterator.sequenceSize) {
             iterator.nextTimestamp = _getNodeByIndex(sequence, iterator.idIndex + 1).timestamp;

@@ -16,6 +16,7 @@
     ],
     "function-max-lines": "error",
     "gas-increment-by-one": "error",
+    "gas-indexed-events": "error",
     "gas-length-in-loops": "error",
     "gas-strict-inequalities": "error",
     "imports-order": "error",

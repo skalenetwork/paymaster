@@ -40,11 +40,11 @@ library HeapLibrary {
     }
 
     event HeapValueAdded(
-        uint256 value
+        uint256 indexed value
     );
 
     event HeapValueRemoved(
-        uint256 value
+        uint256 indexed value
     );
 
     // Library internal functions should not have leading underscore

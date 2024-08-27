@@ -85,7 +85,7 @@ library TimelineLibrary {
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function process(Timeline storage timeline, Timestamp until) internal {
-        if (until <= timeline.processedUntil) {
+        if (!(timeline.processedUntil < until)) {
             return;
         }
 
@@ -176,7 +176,7 @@ library TimelineLibrary {
             valuesAmount > 0;
             --valuesAmount
         ) {
-            if (before <= _getValueByIndex(timeline, 0).timestamp) {
+            if (!(before > _getValueByIndex(timeline, 0).timestamp)) {
                 break;
             }
             ValueId valueId = timeline.valuesQueue.popFront();
@@ -246,7 +246,7 @@ library TimelineLibrary {
             return 0;
         }
         Timestamp firstValueTimestamp = _getValueByIndex(timeline, 0).timestamp;
-        if (to <= firstValueTimestamp) {
+        if (!(to > firstValueTimestamp)) {
             return 0;
         }
         if (from < firstValueTimestamp) {
@@ -406,14 +406,14 @@ library TimelineLibrary {
         if (timestamp < _getValueByIndex(timeline, 0).timestamp) {
             revert TimestampIsOutOfValues();
         }
-        if (_getCurrentValue(timeline).timestamp <= timestamp) {
+        if (!(_getCurrentValue(timeline).timestamp > timestamp)) {
             return timeline.valuesQueue.length() - 1;
         }
         uint256 left = 0;
         uint256 right = timeline.valuesQueue.length() - 1;
         while (left + 1 < right) {
             uint256 middle = (left + right) / 2;
-            if (_getValueByIndex(timeline, middle).timestamp <= timestamp) {
+            if (!(_getValueByIndex(timeline, middle).timestamp > timestamp)) {
                 left = middle;
             } else {
                 right = middle;
@@ -424,7 +424,7 @@ library TimelineLibrary {
 
     function _createValue(Timeline storage timeline, Value memory value) private {
         if(!timeline.valuesQueue.empty() &&
-            value.timestamp <= _getCurrentValue(timeline).timestamp) {
+            !(value.timestamp > _getCurrentValue(timeline).timestamp)) {
             revert CannotSetValueInThePast();
         }
         ValueId valuesEnd = timeline.valuesEnd;

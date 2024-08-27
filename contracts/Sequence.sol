@@ -67,7 +67,7 @@ library SequenceLibrary {
     function add(Sequence storage sequence, Timestamp timestamp, uint256 value) internal {
         uint256 length = sequence.ids.length();
         if (length > 0) {
-            if (timestamp <= _getNodeByIndex(sequence, length - 1).timestamp) {
+            if (!(timestamp > _getNodeByIndex(sequence, length - 1).timestamp)) {
                 revert CannotAddToThePast();
             }
         }
@@ -143,7 +143,7 @@ library SequenceLibrary {
         if(iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             return 0;
         }
-        if(iterator.idIndex >= iterator.sequenceSize) {
+        if(!(iterator.idIndex < iterator.sequenceSize)) {
             return _getNodeByIndex(sequence, iterator.sequenceSize - 1).value;
         }
         return _getNodeByIndex(sequence, iterator.idIndex).value;

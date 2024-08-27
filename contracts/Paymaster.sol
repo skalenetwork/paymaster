@@ -512,7 +512,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
                 firstUnpaidDebt = validator.firstUnpaidDebt;
             }
             validator.nodesHistory.clear(before);
-            if (Timestamp.wrap(0) != validator.deleted && validator.deleted <= before) {
+            if (Timestamp.wrap(0) != validator.deleted && !(validator.deleted > before)) {
                 _removeValidator(validator);
             }
         }
@@ -620,12 +620,12 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         returns (bool debtWasCreated)
     {
         debtWasCreated = false;
-        if (current <= payment.from) {
+        if (!(current > payment.from)) {
             // payment for the future
             _totalRewards.add(payment.from, payment.to, SKL.unwrap(payment.amount));
         } else {
             debtWasCreated = true;
-            if (payment.to <= current) {
+            if (!(payment.to > current)) {
                 // payment for the past
                 _addDebt(
                     payment,
@@ -864,7 +864,7 @@ contract Paymaster is AccessManagedUpgradeable, IPaymaster {
         returns (uint256 newNodesNumber)
     {
         newNodesNumber = currentNodesNumber;
-        while (nodesIterator.hasNext() && nodesIterator.nextTimestamp <= cursor) {
+        while (nodesIterator.hasNext() && !(nodesIterator.nextTimestamp > cursor)) {
             if (nodesIterator.step(nodesHistory)) {
                 newNodesNumber = nodesHistory.getValue(nodesIterator);
             }

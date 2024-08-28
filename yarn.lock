@@ -1269,16 +1269,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/hardhat-ethers@npm:^3.0.5":
-  version: 3.0.5
-  resolution: "@nomicfoundation/hardhat-ethers@npm:3.0.5"
+"@nomicfoundation/hardhat-ethers@npm:^3.0.7":
+  version: 3.0.7
+  resolution: "@nomicfoundation/hardhat-ethers@npm:3.0.7"
   dependencies:
     debug: ^4.1.1
     lodash.isequal: ^4.5.0
   peerDependencies:
     ethers: ^6.1.0
-    hardhat: ^2.0.0
-  checksum: 34b092dfec68f8d8673c96af717660327edc814bc5c9cdb5bc1f82d5bde2b18bc9b9d3499a632784a3d4f2505ac174217e55d31b546b7eaa77a5bb30b3c80bb4
+    hardhat: "*"
+  checksum: b8287bbabe5f6e7d67409f3b00845424b69871c94672908425211e74077d12444b7fd8cf3898a2861ce663d268766a8fbdd26382486e1a6ce26d7db21c9a07fe
   languageName: node
   linkType: hard
 
@@ -7054,7 +7054,7 @@ __metadata:
     "@nomicfoundation/ethereumjs-trie": ^6.0.4
     "@nomicfoundation/ethereumjs-util": ^9.0.3
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.0
-    "@nomicfoundation/hardhat-ethers": ^3.0.5
+    "@nomicfoundation/hardhat-ethers": ^3.0.7
     "@nomicfoundation/hardhat-network-helpers": ^1.0.10
     "@nomicfoundation/hardhat-verify": ^2.0.9
     "@openzeppelin/contracts": ^5.0.1

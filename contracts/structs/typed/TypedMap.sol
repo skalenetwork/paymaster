@@ -25,7 +25,7 @@ pragma solidity ^0.8.20;
 
 import {EnumerableMap} from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
-import {ValidatorId} from "../../interfaces/IPaymaster.sol";
+import {ValidatorId} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 
 
 library TypedMap {
@@ -42,7 +42,14 @@ library TypedMap {
      */
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function set(AddressToValidatorIdMap storage map, address key, ValidatorId value) internal returns (bool added) {
+    function set(
+        AddressToValidatorIdMap storage map,
+        address key,
+        ValidatorId value
+    )
+        internal
+        returns (bool added)
+    {
         return EnumerableMap.set(map.inner, key, ValidatorId.unwrap(value));
     }
 
@@ -53,7 +60,13 @@ library TypedMap {
      */
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function remove(AddressToValidatorIdMap storage map, address key) internal returns (bool removed) {
+    function remove(
+        AddressToValidatorIdMap storage map,
+        address key
+    )
+        internal
+        returns (bool removed)
+    {
         return EnumerableMap.remove(map.inner, key);
     }
 

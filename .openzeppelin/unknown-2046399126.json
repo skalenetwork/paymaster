@@ -1,0 +1,1060 @@
+{
+  "manifestVersion": "3.2",
+  "admin": {
+    "address": "0x0483C5fD61E2590e18ef77a01A7703CB48A286B9",
+    "txHash": "0x3b814b3bb9eec9621c08244abeae509c262b8b3a6f8738bd03194af89a8981e3"
+  },
+  "proxies": [
+    {
+      "address": "0xcB52fF060AD54a4EF99FA883Ebdd3532F6C3694e",
+      "txHash": "0xe40da434295f5ae2345ec63dabee4441d3e7612d6d4d3f3e80424a80cfa3f75f",
+      "kind": "transparent"
+    },
+    {
+      "address": "0x0d66cA00CbAD4219734D7FDF921dD7Caadc1F78D",
+      "txHash": "0xee1d7ab09d6e507409757ac79053752a672e7e11d8ac760fa75c92ba2d103213",
+      "kind": "transparent"
+    }
+  ],
+  "impls": {
+    "2e87c00dd17b4c37ddd78460c7c6a6ccd463fce73622dce43063dc641b831166": {
+      "address": "0x7407D03de67b207ecBFc96324649b928854E216F",
+      "txHash": "0xc764b28a3f64295b6e882183d63db10143447f8121e631a4069ccfd254cba1a8",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_bytes4": {
+            "label": "bytes4",
+            "numberOfBytes": "4"
+          },
+          "t_mapping(t_address,t_struct(Access)73_storage)": {
+            "label": "mapping(address => struct AccessManagerUpgradeable.Access)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(TargetConfig)67_storage)": {
+            "label": "mapping(address => struct AccessManagerUpgradeable.TargetConfig)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_struct(Schedule)91_storage)": {
+            "label": "mapping(bytes32 => struct AccessManagerUpgradeable.Schedule)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes4,t_uint64)": {
+            "label": "mapping(bytes4 => uint64)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint64,t_struct(Role)86_storage)": {
+            "label": "mapping(uint64 => struct AccessManagerUpgradeable.Role)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Access)73_storage": {
+            "label": "struct AccessManagerUpgradeable.Access",
+            "members": [
+              {
+                "label": "since",
+                "type": "t_uint48",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "delay",
+                "type": "t_userDefinedValueType(Delay)701",
+                "offset": 6,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(AccessManagerStorage)110_storage": {
+            "label": "struct AccessManagerUpgradeable.AccessManagerStorage",
+            "members": [
+              {
+                "label": "_targets",
+                "type": "t_mapping(t_address,t_struct(TargetConfig)67_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_roles",
+                "type": "t_mapping(t_uint64,t_struct(Role)86_storage)",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "_schedules",
+                "type": "t_mapping(t_bytes32,t_struct(Schedule)91_storage)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "_executionId",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(InitializableStorage)125_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Role)86_storage": {
+            "label": "struct AccessManagerUpgradeable.Role",
+            "members": [
+              {
+                "label": "members",
+                "type": "t_mapping(t_address,t_struct(Access)73_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "admin",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "guardian",
+                "type": "t_uint64",
+                "offset": 8,
+                "slot": "1"
+              },
+              {
+                "label": "grantDelay",
+                "type": "t_userDefinedValueType(Delay)701",
+                "offset": 16,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Schedule)91_storage": {
+            "label": "struct AccessManagerUpgradeable.Schedule",
+            "members": [
+              {
+                "label": "timepoint",
+                "type": "t_uint48",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "nonce",
+                "type": "t_uint32",
+                "offset": 6,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(TargetConfig)67_storage": {
+            "label": "struct AccessManagerUpgradeable.TargetConfig",
+            "members": [
+              {
+                "label": "allowedRoles",
+                "type": "t_mapping(t_bytes4,t_uint64)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "adminDelay",
+                "type": "t_userDefinedValueType(Delay)701",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "closed",
+                "type": "t_bool",
+                "offset": 14,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint32": {
+            "label": "uint32",
+            "numberOfBytes": "4"
+          },
+          "t_uint48": {
+            "label": "uint48",
+            "numberOfBytes": "6"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_userDefinedValueType(Delay)701": {
+            "label": "Time.Delay",
+            "numberOfBytes": "14",
+            "underlying": "t_uint112"
+          },
+          "t_uint112": {
+            "label": "uint112"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.AccessManager": [
+            {
+              "contract": "AccessManagerUpgradeable",
+              "label": "_targets",
+              "type": "t_mapping(t_address,t_struct(TargetConfig)67_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/manager/AccessManagerUpgradeable.sol:106",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "AccessManagerUpgradeable",
+              "label": "_roles",
+              "type": "t_mapping(t_uint64,t_struct(Role)86_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/manager/AccessManagerUpgradeable.sol:107",
+              "offset": 0,
+              "slot": "1"
+            },
+            {
+              "contract": "AccessManagerUpgradeable",
+              "label": "_schedules",
+              "type": "t_mapping(t_bytes32,t_struct(Schedule)91_storage)",
+              "src": "@openzeppelin/contracts-upgradeable/access/manager/AccessManagerUpgradeable.sol:108",
+              "offset": 0,
+              "slot": "2"
+            },
+            {
+              "contract": "AccessManagerUpgradeable",
+              "label": "_executionId",
+              "type": "t_bytes32",
+              "src": "@openzeppelin/contracts-upgradeable/access/manager/AccessManagerUpgradeable.sol:112",
+              "offset": 0,
+              "slot": "3"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    },
+    "42ccd98cd244acee0d89df5981ac693bc0996000bbfda3144c6e22c1e59bb49b": {
+      "address": "0xfd82bBB579c463ad76DD32f0595BD05A0A781cC4",
+      "txHash": "0xe6be97aeb5d668627bf82657b46b06f84f596fb8ab3aadf995217888d6564f03",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "schains",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_userDefinedValueType(SchainHash)16158,t_struct(Schain)11656_storage)",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:109"
+          },
+          {
+            "label": "_schainHashes",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_struct(Bytes32Set)8797_storage",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:110"
+          },
+          {
+            "label": "_validatorData",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_struct(ValidatorData)11691_storage",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:112"
+          },
+          {
+            "label": "maxReplenishmentPeriod",
+            "offset": 0,
+            "slot": "9",
+            "type": "t_userDefinedValueType(Months)10997",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:114"
+          },
+          {
+            "label": "schainPricePerMonth",
+            "offset": 0,
+            "slot": "10",
+            "type": "t_userDefinedValueType(USD)18473",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:115"
+          },
+          {
+            "label": "oneSklPrice",
+            "offset": 0,
+            "slot": "11",
+            "type": "t_userDefinedValueType(USD)18473",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:116"
+          },
+          {
+            "label": "sklPriceTimestamp",
+            "offset": 0,
+            "slot": "12",
+            "type": "t_userDefinedValueType(Timestamp)11001",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:117"
+          },
+          {
+            "label": "allowedSklPriceLag",
+            "offset": 0,
+            "slot": "13",
+            "type": "t_userDefinedValueType(Seconds)10991",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:118"
+          },
+          {
+            "label": "skaleToken",
+            "offset": 0,
+            "slot": "14",
+            "type": "t_contract(IERC20)4025",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:119"
+          },
+          {
+            "label": "_totalRewards",
+            "offset": 0,
+            "slot": "15",
+            "type": "t_struct(Timeline)14928_storage",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:121"
+          },
+          {
+            "label": "_totalNodesHistory",
+            "offset": 0,
+            "slot": "24",
+            "type": "t_struct(Sequence)14198_storage",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:122"
+          },
+          {
+            "label": "debts",
+            "offset": 0,
+            "slot": "28",
+            "type": "t_mapping(t_userDefinedValueType(DebtId)11637,t_struct(Payment)11647_storage)",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:124"
+          },
+          {
+            "label": "debtsBegin",
+            "offset": 0,
+            "slot": "29",
+            "type": "t_userDefinedValueType(DebtId)11637",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:125"
+          },
+          {
+            "label": "debtsEnd",
+            "offset": 0,
+            "slot": "30",
+            "type": "t_userDefinedValueType(DebtId)11637",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:126"
+          },
+          {
+            "label": "version",
+            "offset": 0,
+            "slot": "31",
+            "type": "t_string_storage",
+            "contract": "Paymaster",
+            "src": "contracts/Paymaster.sol:128"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(AccessManagedStorage)26_storage": {
+            "label": "struct AccessManagedUpgradeable.AccessManagedStorage",
+            "members": [
+              {
+                "label": "_authority",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_consumingSchedule",
+                "type": "t_bool",
+                "offset": 20,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(InitializableStorage)125_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_array(t_bytes32)dyn_storage": {
+            "label": "bytes32[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]",
+            "numberOfBytes": "32"
+          },
+          "t_array(t_userDefinedValueType(Value)17245)dyn_storage": {
+            "label": "PriorityQueueLibrary.Value[]",
+            "numberOfBytes": "32"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC20)4025": {
+            "label": "contract IERC20",
+            "numberOfBytes": "20"
+          },
+          "t_mapping(t_bytes32,t_bytes32)": {
+            "label": "mapping(bytes32 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_bytes32,t_uint256)": {
+            "label": "mapping(bytes32 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint128,t_bytes32)": {
+            "label": "mapping(uint128 => bytes32)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_array(t_userDefinedValueType(Value)17245)dyn_storage)": {
+            "label": "mapping(uint256 => PriorityQueueLibrary.Value[])",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_userDefinedValueType(ChangeId)14874,t_struct(Change)14936_storage)": {
+            "label": "mapping(TimelineLibrary.ChangeId => struct TimelineLibrary.Change)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_userDefinedValueType(DebtId)11637,t_struct(Payment)11647_storage)": {
+            "label": "mapping(Paymaster.DebtId => struct Paymaster.Payment)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_userDefinedValueType(NodeId)14166,t_struct(Node)14185_storage)": {
+            "label": "mapping(SequenceLibrary.NodeId => struct SequenceLibrary.Node)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_userDefinedValueType(SchainHash)16158,t_struct(Schain)11656_storage)": {
+            "label": "mapping(SchainHash => struct Paymaster.Schain)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_userDefinedValueType(ValidatorId)16160,t_struct(Validator)11678_storage)": {
+            "label": "mapping(ValidatorId => struct Paymaster.Validator)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_userDefinedValueType(ValueId)14876,t_struct(Value)14942_storage)": {
+            "label": "mapping(TimelineLibrary.ValueId => struct TimelineLibrary.Value)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(AddressToUintMap)8157_storage": {
+            "label": "struct EnumerableMap.AddressToUintMap",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Bytes32ToBytes32Map)7499_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(AddressToValidatorIdMap)17900_storage": {
+            "label": "struct TypedMap.AddressToValidatorIdMap",
+            "members": [
+              {
+                "label": "inner",
+                "type": "t_struct(AddressToUintMap)8157_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(Bytes32Deque)7165_storage": {
+            "label": "struct DoubleEndedQueue.Bytes32Deque",
+            "members": [
+              {
+                "label": "_begin",
+                "type": "t_uint128",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_end",
+                "type": "t_uint128",
+                "offset": 16,
+                "slot": "0"
+              },
+              {
+                "label": "_data",
+                "type": "t_mapping(t_uint128,t_bytes32)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Bytes32Set)8797_storage": {
+            "label": "struct EnumerableSet.Bytes32Set",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)8603_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Bytes32ToBytes32Map)7499_storage": {
+            "label": "struct EnumerableMap.Bytes32ToBytes32Map",
+            "members": [
+              {
+                "label": "_keys",
+                "type": "t_struct(Bytes32Set)8797_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_values",
+                "type": "t_mapping(t_bytes32,t_bytes32)",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(Change)14936_storage": {
+            "label": "struct TimelineLibrary.Change",
+            "members": [
+              {
+                "label": "timestamp",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "add",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "subtract",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(ChangeIdPriorityQueue)17997_storage": {
+            "label": "struct TypedPriorityQueue.ChangeIdPriorityQueue",
+            "members": [
+              {
+                "label": "inner",
+                "type": "t_struct(PriorityQueue)17255_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Heap)16456_storage": {
+            "label": "struct HeapLibrary.Heap",
+            "members": [
+              {
+                "label": "values",
+                "type": "t_array(t_uint256)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(Node)14185_storage": {
+            "label": "struct SequenceLibrary.Node",
+            "members": [
+              {
+                "label": "timestamp",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(NodeIdDeque)17647_storage": {
+            "label": "struct TypedDoubleEndedQueue.NodeIdDeque",
+            "members": [
+              {
+                "label": "inner",
+                "type": "t_struct(Bytes32Deque)7165_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Payment)11647_storage": {
+            "label": "struct Paymaster.Payment",
+            "members": [
+              {
+                "label": "from",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "to",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "amount",
+                "type": "t_userDefinedValueType(SKL)18414",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(PriorityQueue)17255_storage": {
+            "label": "struct PriorityQueueLibrary.PriorityQueue",
+            "members": [
+              {
+                "label": "priorities",
+                "type": "t_struct(Heap)16456_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "values",
+                "type": "t_mapping(t_uint256,t_array(t_userDefinedValueType(Value)17245)dyn_storage)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Schain)11656_storage": {
+            "label": "struct Paymaster.Schain",
+            "members": [
+              {
+                "label": "hash",
+                "type": "t_userDefinedValueType(SchainHash)16158",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "name",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "paidUntil",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "2"
+              }
+            ],
+            "numberOfBytes": "96"
+          },
+          "t_struct(Sequence)14198_storage": {
+            "label": "struct SequenceLibrary.Sequence",
+            "members": [
+              {
+                "label": "nodes",
+                "type": "t_mapping(t_userDefinedValueType(NodeId)14166,t_struct(Node)14185_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "ids",
+                "type": "t_struct(NodeIdDeque)17647_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "freeNodeId",
+                "type": "t_userDefinedValueType(NodeId)14166",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "128"
+          },
+          "t_struct(Set)8603_storage": {
+            "label": "struct EnumerableSet.Set",
+            "members": [
+              {
+                "label": "_values",
+                "type": "t_array(t_bytes32)dyn_storage",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_positions",
+                "type": "t_mapping(t_bytes32,t_uint256)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Timeline)14928_storage": {
+            "label": "struct TimelineLibrary.Timeline",
+            "members": [
+              {
+                "label": "processedUntil",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "changesEnd",
+                "type": "t_userDefinedValueType(ChangeId)14874",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "futureChanges",
+                "type": "t_mapping(t_userDefinedValueType(ChangeId)14874,t_struct(Change)14936_storage)",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "changesQueue",
+                "type": "t_struct(ChangeIdPriorityQueue)17997_storage",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "valuesEnd",
+                "type": "t_userDefinedValueType(ValueId)14876",
+                "offset": 0,
+                "slot": "5"
+              },
+              {
+                "label": "values",
+                "type": "t_mapping(t_userDefinedValueType(ValueId)14876,t_struct(Value)14942_storage)",
+                "offset": 0,
+                "slot": "6"
+              },
+              {
+                "label": "valuesQueue",
+                "type": "t_struct(ValueIdDeque)17651_storage",
+                "offset": 0,
+                "slot": "7"
+              }
+            ],
+            "numberOfBytes": "288"
+          },
+          "t_struct(UintSet)9075_storage": {
+            "label": "struct EnumerableSet.UintSet",
+            "members": [
+              {
+                "label": "_inner",
+                "type": "t_struct(Set)8603_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Validator)11678_storage": {
+            "label": "struct Paymaster.Validator",
+            "members": [
+              {
+                "label": "id",
+                "type": "t_userDefinedValueType(ValidatorId)16160",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "validatorAddress",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "nodesAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "activeNodesAmount",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "nodesHistory",
+                "type": "t_struct(Sequence)14198_storage",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "claimedUntil",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "8"
+              },
+              {
+                "label": "firstUnpaidDebt",
+                "type": "t_userDefinedValueType(DebtId)11637",
+                "offset": 0,
+                "slot": "9"
+              },
+              {
+                "label": "deleted",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "10"
+              }
+            ],
+            "numberOfBytes": "352"
+          },
+          "t_struct(ValidatorData)11691_storage": {
+            "label": "struct Paymaster.ValidatorData",
+            "members": [
+              {
+                "label": "validators",
+                "type": "t_mapping(t_userDefinedValueType(ValidatorId)16160,t_struct(Validator)11678_storage)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "validatorIds",
+                "type": "t_struct(UintSet)9075_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "addressToValidatorId",
+                "type": "t_struct(AddressToValidatorIdMap)17900_storage",
+                "offset": 0,
+                "slot": "3"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_struct(Value)14942_storage": {
+            "label": "struct TimelineLibrary.Value",
+            "members": [
+              {
+                "label": "timestamp",
+                "type": "t_userDefinedValueType(Timestamp)11001",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "value",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(ValueIdDeque)17651_storage": {
+            "label": "struct TypedDoubleEndedQueue.ValueIdDeque",
+            "members": [
+              {
+                "label": "inner",
+                "type": "t_struct(Bytes32Deque)7165_storage",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint128": {
+            "label": "uint128",
+            "numberOfBytes": "16"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_userDefinedValueType(ChangeId)14874": {
+            "label": "TimelineLibrary.ChangeId",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(DebtId)11637": {
+            "label": "Paymaster.DebtId",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(Months)10997": {
+            "label": "Months",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(NodeId)14166": {
+            "label": "SequenceLibrary.NodeId",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(SKL)18414": {
+            "label": "SKL",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(SchainHash)16158": {
+            "label": "SchainHash",
+            "numberOfBytes": "32",
+            "underlying": "t_bytes32"
+          },
+          "t_userDefinedValueType(Seconds)10991": {
+            "label": "Seconds",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(Timestamp)11001": {
+            "label": "Timestamp",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(USD)18473": {
+            "label": "USD",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(ValidatorId)16160": {
+            "label": "ValidatorId",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(Value)17245": {
+            "label": "PriorityQueueLibrary.Value",
+            "numberOfBytes": "32",
+            "underlying": "t_uint256"
+          },
+          "t_userDefinedValueType(ValueId)14876": {
+            "label": "TimelineLibrary.ValueId",
+            "numberOfBytes": "32",
+            "underlying": "t_bytes32"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.AccessManaged": [
+            {
+              "contract": "AccessManagedUpgradeable",
+              "label": "_authority",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "AccessManagedUpgradeable",
+              "label": "_consumingSchedule",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/access/manager/AccessManagedUpgradeable.sol:26",
+              "offset": 20,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@
 
 pragma solidity ^0.8.18;
 
-import {SchainHash} from "../interfaces/IPaymaster.sol";
+import {SchainHash} from "@skalenetwork/paymaster-interfaces/IPaymaster.sol";
 
 
 error SchainNotFound(

@@ -97,7 +97,13 @@ library PriorityQueueLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function getIterator(PriorityQueue storage queue) internal view returns (Iterator memory iterator) {
+    function getIterator(
+        PriorityQueue storage queue
+    )
+        internal
+        view
+        returns (Iterator memory iterator)
+    {
         if (empty(queue)) {
             revert AccessToEmptyPriorityQueue();
         }
@@ -125,12 +131,14 @@ library PriorityQueueLibrary {
     function step(Iterator memory iterator, PriorityQueue storage queue) internal view {
         if (iterator.valueIndex + 1 < iterator.valuesLength) {
             ++iterator.valueIndex;
-            iterator.value = queue.values[iterator.priorityIterator.getValue()][iterator.valueIndex];
+            iterator.value =
+                queue.values[iterator.priorityIterator.getValue()][iterator.valueIndex];
         } else {
             iterator.priorityIterator.step();
             iterator.valueIndex = 0;
             iterator.valuesLength = queue.values[iterator.priorityIterator.getValue()].length;
-            iterator.value = queue.values[iterator.priorityIterator.getValue()][iterator.valueIndex];
+            iterator.value =
+                queue.values[iterator.priorityIterator.getValue()][iterator.valueIndex];
         }
     }
 

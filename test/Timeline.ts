@@ -1,7 +1,7 @@
 import Prando from 'prando';
 import { ethers } from "hardhat";
 import { expect } from 'chai';
-import { loadFixture } from "@nomicfoundation/hardhat-toolbox/network-helpers";
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 
 describe("Timeline", () => {
@@ -13,6 +13,12 @@ describe("Timeline", () => {
         return value;
     };
     const deployTimelineFixture = async () => await ethers.deployContract("TimelineTester");
+
+    it("should revert on incorrect time interval", async () => {
+        const timeline = await loadFixture(deployTimelineFixture);
+        await expect(timeline.getSum(1, 0))
+            .to.revertedWithCustomError(timeline, "IncorrectTimeInterval");
+    });
 
     describe("basic tests", () => {
         it("should calculate an entire segment", async () => {
@@ -51,6 +57,46 @@ describe("Timeline", () => {
             const result = await timeline.getSum(previousMonth, middleOfTheMonth);
             const correct = segment.value / 2n;
             expect(abs(result - correct)).to.be.lessThan(precision);
+        });
+
+        describe("sample data", () => {
+            const offset = 10;
+
+            const timelineWithSampleDataFixture = async () => {
+                const segmentLength = 7;
+                const segmentsNumber = 5;
+                const timeline = await loadFixture(deployTimelineFixture);
+
+                for (let index = 0; index < segmentsNumber; index += 1) {
+                    const value = (index + 1) * segmentLength;
+                    const from = offset + index;
+                    const to = from + segmentLength;
+
+                    await timeline.add(from, to, value);
+                }
+
+                return timeline;
+            };
+
+            it("should not allow to clean unprocessed data", async () => {
+                const timeline = await loadFixture(timelineWithSampleDataFixture);
+                const processUntil = offset + 2;
+
+                await timeline.process(processUntil);
+
+                await expect(timeline.clear(processUntil + 1))
+                    .to.revertedWithCustomError(timeline, "ClearUnprocessed");
+
+                const beforeEverything = Math.round(offset / 2);
+
+                await expect(timeline.clear(beforeEverything))
+                    .to.emit(timeline, "Cleared")
+                    .withArgs(beforeEverything);
+
+                await expect(timeline.clear(processUntil))
+                    .to.emit(timeline, "Cleared")
+                    .withArgs(processUntil);
+            })
         });
     });
 

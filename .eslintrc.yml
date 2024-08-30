@@ -9,21 +9,25 @@ root: true
 ignorePatterns:
   - coverage/**
   - typechain-types/**
+  - venv/**
 rules:
+  "@typescript-eslint/no-shadow": error
   capitalized-comments: ["error", "always", { "ignoreConsecutiveComments": true }]
   multiline-comment-style: ["error", "separate-lines"]
   no-console: off
+  no-shadow: off
   no-warning-comments: warn
   one-var: ["error", "never"]
 overrides:
   - files: [test/**/*.ts]
     rules:
+      "@typescript-eslint/no-namespace": ["error", {"allowDeclarations": true}]
       init-declarations: ["off"]
       max-depth: ["off"]
       max-lines: ["off"]
       max-lines-per-function: ["off"]
       max-statements: ["off"]
       no-await-in-loop: ["off"]
-      no-magic-numbers: ["error", { "ignore": [0, 0n, 1, 1n, 2, 2n] }]
+      no-magic-numbers: ["error", { "ignore": [0, 0n, 1, 1n, 2, 2n, 10n] }]
 
 

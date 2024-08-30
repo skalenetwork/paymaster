@@ -1,5 +1,8 @@
-import "@nomicfoundation/hardhat-toolbox";
-import '@openzeppelin/hardhat-upgrades';
+import "@typechain/hardhat"
+import "@nomicfoundation/hardhat-chai-matchers"
+import "@nomicfoundation/hardhat-ethers"
+import "@openzeppelin/hardhat-upgrades";
+import "solidity-coverage";
 import * as dotenv from "dotenv";
 import {HardhatUserConfig, task} from "hardhat/config";
 
@@ -21,6 +24,9 @@ const getCustomPrivateKey = (privateKey: string | undefined) => {
 };
 
 const config: HardhatUserConfig = {
+    "mocha": {
+        "timeout": 120000
+    },
     "networks": {
         "custom": {
             "accounts": getCustomPrivateKey(process.env.PRIVATE_KEY),

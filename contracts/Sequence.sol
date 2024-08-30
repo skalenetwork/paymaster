@@ -23,7 +23,7 @@ pragma solidity ^0.8.19;
 
 // cspell:words deque structs
 
-import {Timestamp} from "./DateTimeUtils.sol";
+import {Timestamp} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
 
 
@@ -67,7 +67,7 @@ library SequenceLibrary {
     function add(Sequence storage sequence, Timestamp timestamp, uint256 value) internal {
         uint256 length = sequence.ids.length();
         if (length > 0) {
-            if (timestamp <= _getNodeByIndex(sequence, length - 1).timestamp) {
+            if (!(timestamp > _getNodeByIndex(sequence, length - 1).timestamp)) {
                 revert CannotAddToThePast();
             }
         }
@@ -132,11 +132,18 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function getValue(Sequence storage sequence, Iterator memory iterator) internal view returns (uint256 value) {
+    function getValue(
+        Sequence storage sequence,
+        Iterator memory iterator
+    )
+        internal
+        view
+        returns (uint256 value)
+    {
         if(iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             return 0;
         }
-        if(iterator.idIndex >= iterator.sequenceSize) {
+        if(!(iterator.idIndex < iterator.sequenceSize)) {
             return _getNodeByIndex(sequence, iterator.sequenceSize - 1).value;
         }
         return _getNodeByIndex(sequence, iterator.idIndex).value;
@@ -144,7 +151,14 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function getValueByTimestamp(Sequence storage sequence, Timestamp timestamp) internal view returns (uint256 value) {
+    function getValueByTimestamp(
+        Sequence storage sequence,
+        Timestamp timestamp
+    )
+        internal
+        view
+        returns (uint256 value)
+    {
         return getValue(sequence, getIterator(sequence, timestamp));
     }
 
@@ -161,12 +175,19 @@ library SequenceLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function step(Iterator memory iterator, Sequence storage sequence) internal view returns (bool success) {
+    function step(
+        Iterator memory iterator,
+        Sequence storage sequence
+    )
+        internal
+        view
+        returns (bool success)
+    {
         success = hasNext(iterator);
         if (iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
             iterator.idIndex = 0;
         } else {
-            iterator.idIndex += 1;
+            ++iterator.idIndex;
         }
         if (iterator.idIndex + 1 < iterator.sequenceSize) {
             iterator.nextTimestamp = _getNodeByIndex(sequence, iterator.idIndex + 1).timestamp;
@@ -202,13 +223,17 @@ library SequenceLibrary {
     // solhint-disable-next-line private-vars-leading-underscore
     function clear(Sequence storage sequence, Timestamp before) internal {
         // It's important to store the most right value
-        for (uint256 nodesAmount = sequence.ids.length(); nodesAmount > 1; --nodesAmount) {
-            if (before <= _getNodeByIndex(sequence, 0).timestamp) {
-                break;
-            }
+
+        Iterator memory iterator = getIterator(sequence, before);
+        if(iterator.idIndex == _BEFORE_FIRST_ELEMENT) {
+            return;
+        }
+
+        for (uint256 i = 0; i < iterator.idIndex; ++i) {
             NodeId nodeId = sequence.ids.popFront();
             _deleteNode(sequence.nodes[nodeId]);
         }
+
         if (_getNodeByIndex(sequence, 0).timestamp < before) {
             _getNodeByIndex(sequence, 0).timestamp = before;
         }
@@ -249,11 +274,25 @@ library SequenceLibrary {
         delete node.value;
     }
 
-    function _getNode(Sequence storage sequence, NodeId nodeId) private view returns (Node storage node) {
+    function _getNode(
+        Sequence storage sequence,
+        NodeId nodeId
+    )
+        private
+        view
+        returns (Node storage node)
+    {
         return sequence.nodes[nodeId];
     }
 
-    function _getNodeByIndex(Sequence storage sequence, uint256 index) private view returns (Node storage node) {
+    function _getNodeByIndex(
+        Sequence storage sequence,
+        uint256 index
+    )
+        private
+        view
+        returns (Node storage node)
+    {
         return _getNode(sequence, sequence.ids.at(index));
     }
 }

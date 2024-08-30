@@ -1,24 +1,20 @@
 import { Paymaster, PaymasterAccessManager } from "../typechain-types";
 import { ethers, upgrades } from "hardhat";
 import { Addressable } from "ethers";
-import { getVersion } from "./tools/version";
+import { getVersion } from "@skalenetwork/upgrade-tools";
 
 
-// TODO: remove fixed gas limit
-// after estimateGas fix in skaled
-const DEPLOY_GAS_LIMIT = 20e6;
+export const contracts = [
+    "Paymaster",
+    "PaymasterAccessManager"
+];
 
 export const deployAccessManager = async (owner: Addressable) => {
     console.log("Deploy AccessManager");
     const factory = await ethers.getContractFactory("PaymasterAccessManager");
     const accessManager = await upgrades.deployProxy(
         factory,
-        [await owner.getAddress()],
-        {
-            txOverrides: {
-                "gasLimit": DEPLOY_GAS_LIMIT
-            }
-        }
+        [await owner.getAddress()]
     ) as unknown as PaymasterAccessManager;
     await accessManager.waitForDeployment();
     return accessManager;
@@ -33,12 +29,7 @@ export const deployPaymaster = async (accessManager: PaymasterAccessManager) => 
     const factory = await ethers.getContractFactory(contract);
     const paymaster = await upgrades.deployProxy(
         factory,
-        [await accessManager.getAddress()],
-        {
-            txOverrides: {
-                "gasLimit": DEPLOY_GAS_LIMIT
-            }
-        }
+        [await accessManager.getAddress()]
     ) as unknown as Paymaster;
     await paymaster.waitForDeployment();
     return paymaster;
@@ -50,22 +41,14 @@ export const setupRoles = async (accessManager: PaymasterAccessManager, paymaste
         [paymaster.interface.getFunction("setSklPrice").selector],
         // It's uppercase because it's a constant inside a contract
         // eslint-disable-next-line new-cap
-        await accessManager.PRICE_SETTER_ROLE(),
-        {
-            "gasLimit": DEPLOY_GAS_LIMIT
-        }
+        await accessManager.PRICE_SETTER_ROLE()
     );
     await response.wait();
 }
 
 export const setup = async (paymaster: Paymaster) => {
     const version = await getVersion();
-    const response = await paymaster.setVersion(
-        version,
-        {
-            "gasLimit": DEPLOY_GAS_LIMIT
-        }
-    );
+    const response = await paymaster.setVersion(version);
     await response.wait();
 }
 

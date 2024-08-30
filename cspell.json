@@ -5,6 +5,9 @@
         ".gitignore",
         "artifacts/**",
         "cache/**",
+        "coverage/**",
+        "coverage.json",
+        "data/**",
         "typechain-types/**",
         "**/venv/**"
     ],

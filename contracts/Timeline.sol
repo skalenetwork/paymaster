@@ -23,9 +23,13 @@ pragma solidity ^0.8.19;
 
 // cspell:words deque structs
 
+import {
+    DateTimeUtils,
+    Seconds,
+    Timestamp
+} from "@skalenetwork/paymaster-interfaces/DateTimeUtils.sol";
 import {TypedDoubleEndedQueue} from "./structs/typed/TypedDoubleEndedQueue.sol";
 import {TypedPriorityQueue} from "./structs/typed/TypedPriorityQueue.sol";
-import {DateTimeUtils, Seconds, Timestamp} from "./DateTimeUtils.sol";
 
 
 library TimelineLibrary {
@@ -81,7 +85,7 @@ library TimelineLibrary {
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
     function process(Timeline storage timeline, Timestamp until) internal {
-        if (until <= timeline.processedUntil) {
+        if (!(timeline.processedUntil < until)) {
             return;
         }
 
@@ -96,7 +100,8 @@ library TimelineLibrary {
                 } else {
                     Value storage currentValue = _getCurrentValue(timeline);
                     if (currentValue.timestamp == nextChange.timestamp) {
-                        currentValue.value = currentValue.value + nextChange.add - nextChange.subtract;
+                        currentValue.value = currentValue.value +
+                            nextChange.add - nextChange.subtract;
                     } else {
                         _createValue(timeline, Value({
                             timestamp: nextChange.timestamp,
@@ -117,14 +122,23 @@ library TimelineLibrary {
 
     // Library internal functions should not have leading underscore
     // solhint-disable-next-line private-vars-leading-underscore
-    function getSum(Timeline storage timeline, Timestamp from, Timestamp to) internal view returns (uint256 sum) {
+    function getSum(
+        Timeline storage timeline,
+        Timestamp from,
+        Timestamp to
+    )
+        internal
+        view
+        returns (uint256 sum)
+    {
         if (to < from) {
             revert IncorrectTimeInterval();
         }
         Timestamp processedUntil = timeline.processedUntil;
         if (processedUntil < to) {
             if (processedUntil < from) {
-                return _getSumInUnprocessedSegment(timeline, to) - _getSumInUnprocessedSegment(timeline, from);
+                return _getSumInUnprocessedSegment(timeline, to) -
+                    _getSumInUnprocessedSegment(timeline, from);
             } else {
                 return _getSumInProcessedSegment(timeline, from, timeline.processedUntil) +
                     _getSumInUnprocessedSegment(timeline, to);
@@ -157,8 +171,12 @@ library TimelineLibrary {
             revert ClearUnprocessed();
         }
 
-        for (uint256 valuesAmount = timeline.valuesQueue.length(); valuesAmount > 0; --valuesAmount) {
-            if (before <= _getValueByIndex(timeline, 0).timestamp) {
+        for (
+            uint256 valuesAmount = timeline.valuesQueue.length();
+            valuesAmount > 0;
+            --valuesAmount
+        ) {
+            if (!(before > _getValueByIndex(timeline, 0).timestamp)) {
                 break;
             }
             ValueId valueId = timeline.valuesQueue.popFront();
@@ -228,7 +246,7 @@ library TimelineLibrary {
             return 0;
         }
         Timestamp firstValueTimestamp = _getValueByIndex(timeline, 0).timestamp;
-        if (to <= firstValueTimestamp) {
+        if (!(to > firstValueTimestamp)) {
             return 0;
         }
         if (from < firstValueTimestamp) {
@@ -238,7 +256,11 @@ library TimelineLibrary {
         sum = 0;
         uint256 queueLength = timeline.valuesQueue.length();
         Timestamp current = from;
-        for (uint256 i = _getLowerBoundIndex(timeline, from); i < queueLength && current < to; ++i) {
+        for (
+            uint256 i = _getLowerBoundIndex(timeline, from);
+            i < queueLength && current < to;
+            ++i
+        ) {
             Timestamp next = to;
             if (i + 1 < queueLength) {
                 Timestamp nextInterval = _getValueByIndex(timeline, i+1).timestamp;
@@ -247,13 +269,22 @@ library TimelineLibrary {
                 }
             }
 
-            sum += _getValueByIndex(timeline, i).value * Seconds.unwrap(DateTimeUtils.duration(current, next));
+            sum += _getValueByIndex(timeline, i).value * Seconds.unwrap(
+                DateTimeUtils.duration(current, next)
+            );
 
             current = next;
         }
     }
 
-    function _getSumInUnprocessedSegment(Timeline storage timeline, Timestamp to) private view returns (uint256 sum) {
+    function _getSumInUnprocessedSegment(
+        Timeline storage timeline,
+        Timestamp to
+    )
+        private
+        view
+        returns (uint256 sum)
+    {
         Value memory current;
         if (timeline.valuesQueue.empty()) {
             current = Value({
@@ -278,7 +309,9 @@ library TimelineLibrary {
                     break;
                 }
 
-                sum += current.value * Seconds.unwrap(DateTimeUtils.duration(current.timestamp, nextValue.timestamp));
+                sum += current.value * Seconds.unwrap(
+                    DateTimeUtils.duration(current.timestamp, nextValue.timestamp)
+                );
                 current = nextValue;
 
                 if (changeIdsIterator.hasNext()) {
@@ -296,7 +329,13 @@ library TimelineLibrary {
         return !timeline.changesQueue.empty();
     }
 
-    function _getNextChange(Timeline storage timeline) private view returns (Change storage change) {
+    function _getNextChange(
+        Timeline storage timeline
+    )
+        private
+        view
+        returns (Change storage change)
+    {
         ChangeId changeId = timeline.changesQueue.front();
         return timeline.futureChanges[changeId];
     }
@@ -333,28 +372,48 @@ library TimelineLibrary {
         delete value.value;
     }
 
-    function _getCurrentValue(Timeline storage timeline) private view returns (Value storage value) {
+    function _getCurrentValue(
+        Timeline storage timeline
+    )
+        private
+        view
+        returns (Value storage value)
+    {
         return timeline.values[timeline.valuesQueue.back()];
     }
 
-    function _getValueByIndex(Timeline storage timeline, uint256 index) private view returns (Value storage value) {
+    function _getValueByIndex(
+        Timeline storage timeline,
+        uint256 index
+    )
+        private
+        view
+        returns (Value storage value)
+    {
         return timeline.values[timeline.valuesQueue.at(index)];
     }
 
     // False positive detection of the dead code. The function is used in `getSum` function
     // slither-disable-next-line dead-code
-    function _getLowerBoundIndex(Timeline storage timeline, Timestamp timestamp) private view returns (uint256 index) {
+    function _getLowerBoundIndex(
+        Timeline storage timeline,
+        Timestamp timestamp
+    )
+        private
+        view
+        returns (uint256 index)
+    {
         if (timestamp < _getValueByIndex(timeline, 0).timestamp) {
             revert TimestampIsOutOfValues();
         }
-        if (_getCurrentValue(timeline).timestamp <= timestamp) {
+        if (!(_getCurrentValue(timeline).timestamp > timestamp)) {
             return timeline.valuesQueue.length() - 1;
         }
         uint256 left = 0;
         uint256 right = timeline.valuesQueue.length() - 1;
         while (left + 1 < right) {
             uint256 middle = (left + right) / 2;
-            if (_getValueByIndex(timeline, middle).timestamp <= timestamp) {
+            if (!(_getValueByIndex(timeline, middle).timestamp > timestamp)) {
                 left = middle;
             } else {
                 right = middle;
@@ -364,7 +423,8 @@ library TimelineLibrary {
     }
 
     function _createValue(Timeline storage timeline, Value memory value) private {
-        if(!timeline.valuesQueue.empty() && value.timestamp <= _getCurrentValue(timeline).timestamp) {
+        if(!timeline.valuesQueue.empty() &&
+            !(value.timestamp > _getCurrentValue(timeline).timestamp)) {
             revert CannotSetValueInThePast();
         }
         ValueId valuesEnd = timeline.valuesEnd;

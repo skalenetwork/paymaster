@@ -1905,8 +1905,8 @@ __metadata:
   linkType: hard
 
 "@skalenetwork/upgrade-tools@npm:debug":
-  version: 3.0.0-debug.0
-  resolution: "@skalenetwork/upgrade-tools@npm:3.0.0-debug.0"
+  version: 3.0.0-debug.1
+  resolution: "@skalenetwork/upgrade-tools@npm:3.0.0-debug.1"
   dependencies:
     "@safe-global/api-kit": ^2.4.1
     "@safe-global/protocol-kit": ^4.0.1
@@ -1923,7 +1923,7 @@ __metadata:
     "@types/mocha": ^9.1.0
     ethers: ^6.7.1
     hardhat: ^2.9.9
-  checksum: 27cec3a34f2874bb1124851b00b15ebc323cf2045e706c8e58c5761593f63884ec446cc935628d5ee2197b46a98dadbfebdf4e26b5e6283e99b775692f254a11
+  checksum: 949e78dffd81c880701d8102636901c6809a0ad781faa0a8e8299530cb4a274a1cf1dbcdb7d05a735a64c83368cef26651202a660f40d3bec998000cac0c74cb
   languageName: node
   linkType: hard
 

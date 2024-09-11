@@ -95,32 +95,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainsafe/as-sha256@npm:^0.3.1":
-  version: 0.3.1
-  resolution: "@chainsafe/as-sha256@npm:0.3.1"
-  checksum: 58ea733be1657b0e31dbf48b0dba862da0833df34a81c1460c7352f04ce90874f70003cbf34d0afb9e5e53a33ee2d63a261a8b12462be85b2ba0a6f7f13d6150
-  languageName: node
-  linkType: hard
-
-"@chainsafe/persistent-merkle-tree@npm:^0.5.0":
-  version: 0.5.0
-  resolution: "@chainsafe/persistent-merkle-tree@npm:0.5.0"
-  dependencies:
-    "@chainsafe/as-sha256": ^0.3.1
-  checksum: 2c67203da776c79cd3a6132e2d672fe132393b2e63dc71604e3134acc8c0ec25cc5e431051545939ea0f7c5ff2066fb806b9e5cab974ca085d046226a1671f7d
-  languageName: node
-  linkType: hard
-
-"@chainsafe/ssz@npm:^0.10.0":
-  version: 0.10.2
-  resolution: "@chainsafe/ssz@npm:0.10.2"
-  dependencies:
-    "@chainsafe/as-sha256": ^0.3.1
-    "@chainsafe/persistent-merkle-tree": ^0.5.0
-  checksum: 6bb70cf741d0a19dd0b28b3f6f067b96fa39f556e2eefa6ac745b21db9c3b3a8393dc3cca8ff4a6ce065ed71ddc3fb1b2b390a92004b9d01067c26e2558e5503
-  languageName: node
-  linkType: hard
-
 "@colors/colors@npm:1.5.0":
   version: 1.5.0
   resolution: "@colors/colors@npm:1.5.0"
@@ -1177,15 +1151,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/ethereumjs-rlp@npm:5.0.3":
-  version: 5.0.3
-  resolution: "@nomicfoundation/ethereumjs-rlp@npm:5.0.3"
-  bin:
-    rlp: bin/rlp
-  checksum: 1cf45b1eeec11d82950b9867efbf07c60a4aac533149b0567b8e1e20d88b8b62d0521eac8ee1a3982c8baca6e179d33e3c5bfb1b670e60b409135300dcfae2f8
-  languageName: node
-  linkType: hard
-
 "@nomicfoundation/ethereumjs-rlp@npm:5.0.4":
   version: 5.0.4
   resolution: "@nomicfoundation/ethereumjs-rlp@npm:5.0.4"
@@ -1226,7 +1191,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nomicfoundation/ethereumjs-util@npm:9.0.4":
+"@nomicfoundation/ethereumjs-util@npm:9.0.4, @nomicfoundation/ethereumjs-util@npm:^9.0.4":
   version: 9.0.4
   resolution: "@nomicfoundation/ethereumjs-util@npm:9.0.4"
   dependencies:
@@ -1238,17 +1203,6 @@ __metadata:
     c-kzg:
       optional: true
   checksum: 754439f72b11cad2d8986707ad020077dcc763c4055f73e2668a0b4cadb22aa4407faa9b3c587d9eb5b97ac337afbe037eb642bc1d5a16197284f83db3462cbe
-  languageName: node
-  linkType: hard
-
-"@nomicfoundation/ethereumjs-util@npm:^9.0.3":
-  version: 9.0.3
-  resolution: "@nomicfoundation/ethereumjs-util@npm:9.0.3"
-  dependencies:
-    "@chainsafe/ssz": ^0.10.0
-    "@nomicfoundation/ethereumjs-rlp": 5.0.3
-    ethereum-cryptography: 0.1.3
-  checksum: 26948a4c7747455b5f07891ab1b1d932d7d19215de47159fdba5bb3e2e17d4c43d39c78810fe634c74bfa681feeb88cfcd1ea621f6cdbc1b2333dc30a2342b8e
   languageName: node
   linkType: hard
 
@@ -7052,7 +7006,7 @@ __metadata:
   resolution: "paymaster@workspace:."
   dependencies:
     "@nomicfoundation/ethereumjs-trie": ^6.0.4
-    "@nomicfoundation/ethereumjs-util": ^9.0.3
+    "@nomicfoundation/ethereumjs-util": ^9.0.4
     "@nomicfoundation/hardhat-chai-matchers": ^2.0.0
     "@nomicfoundation/hardhat-ethers": ^3.0.5
     "@nomicfoundation/hardhat-network-helpers": ^1.0.10

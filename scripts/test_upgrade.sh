@@ -37,7 +37,7 @@ echo "Deploy previous version"
 DEPLOY_OUTPUT_FILE="$GITHUB_WORKSPACE/data/deploy.txt"
 VERSION=$DEPLOYED_VERSION yarn exec hardhat run migrations/deploy.ts --network localhost > $DEPLOY_OUTPUT_FILE
 rm $GITHUB_WORKSPACE/.openzeppelin/unknown-*.json || true
-cp .openzeppelin/unknown-*.json $GITHUB_WORKSPACE/.openzeppelin
+cp .openzeppelin/unknown-*.json "$GITHUB_WORKSPACE/.openzeppelin/"
 PAYMASTER_ADDRESS=$(cat $DEPLOY_OUTPUT_FILE | grep "Paymaster address" | awk '{print $NF}')
 
 cd $GITHUB_WORKSPACE

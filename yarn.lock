@@ -1904,9 +1904,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@skalenetwork/upgrade-tools@npm:3.0.0-develop.13":
-  version: 3.0.0-develop.13
-  resolution: "@skalenetwork/upgrade-tools@npm:3.0.0-develop.13"
+"@skalenetwork/upgrade-tools@npm:3.0.0-develop.21":
+  version: 3.0.0-develop.21
+  resolution: "@skalenetwork/upgrade-tools@npm:3.0.0-develop.21"
   dependencies:
     "@safe-global/api-kit": ^2.4.1
     "@safe-global/protocol-kit": ^4.0.1
@@ -1923,7 +1923,7 @@ __metadata:
     "@types/mocha": ^9.1.0
     ethers: ^6.7.1
     hardhat: ^2.9.9
-  checksum: a9fc5a674ad69975bbaedd6f4116b5e05e8ba9250f0b6d4283921461abc3949a82900371ac6ca495d06288cb6e734df4a8e938a07ab19da45d2342f0bba2b128
+  checksum: a50d0ff7acfb9c7e940ee59217733dfad3721a6aeabd2b6427a4cda8a46f3c79ef389227690e156b62d59ede84205cb7f040e04d1b1de85013f05da12037b616
   languageName: node
   linkType: hard
 
@@ -7064,7 +7064,7 @@ __metadata:
     "@quant-finance/solidity-datetime": ^2.2.0
     "@skalenetwork/paymaster-interfaces": main
     "@skalenetwork/skale-contracts-ethers-v6": ^1.0.2-develop.0
-    "@skalenetwork/upgrade-tools": 3.0.0-develop.13
+    "@skalenetwork/upgrade-tools": 3.0.0-develop.21
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.11

@@ -47,7 +47,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^5.0.1",
+    "@openzeppelin/contracts": "^5.0.2",
     "@openzeppelin/contracts-upgradeable": "^5.0.2",
     "@openzeppelin/upgrades-core": "^1.35.1",
     "@quant-finance/solidity-datetime": "^2.2.0",

@@ -30,7 +30,7 @@
     "@types/node": ">=20.10.6",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^8.5.0",
-    "axios": "^1.7.2",
+    "axios": "^1.7.7",
     "chai": "^4.2.0",
     "cspell": "^8.14.2",
     "eslint": "^8.56.0",

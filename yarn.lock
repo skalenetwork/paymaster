@@ -2106,12 +2106,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:>=20.10.6":
-  version: 20.10.6
-  resolution: "@types/node@npm:20.10.6"
+"@types/node@npm:>=22.7.2":
+  version: 22.7.2
+  resolution: "@types/node@npm:22.7.2"
   dependencies:
-    undici-types: ~5.26.4
-  checksum: ada40e4ccbda3697dca88f8d13f4c996c493be6fbc15f5f5d3b91096d56bd700786a2c148a92a2b4c5d1f133379e63f754a786b3aebfc6a7d09fc7ea16dc017b
+    undici-types: ~6.19.2
+  checksum: 5e753a4a7195a05133e1234e6e2eb68d9f002c5566499dc560e1d7efdcad102f10815ea11f8e206a04b7626876c666227535c755a7d77bc71d73278864b0a652
   languageName: node
   linkType: hard
 
@@ -7035,7 +7035,7 @@ __metadata:
     "@typechain/hardhat": ^9.1.0
     "@types/chai": ^4.3.11
     "@types/mocha": ">=10.0.6"
-    "@types/node": ">=20.10.6"
+    "@types/node": ">=22.7.2"
     "@typescript-eslint/eslint-plugin": ^6.17.0
     "@typescript-eslint/parser": ^8.5.0
     axios: ^1.7.7
@@ -8453,10 +8453,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"undici-types@npm:~5.26.4":
-  version: 5.26.5
-  resolution: "undici-types@npm:5.26.5"
-  checksum: 3192ef6f3fd5df652f2dc1cd782b49d6ff14dc98e5dced492aa8a8c65425227da5da6aafe22523c67f035a272c599bb89cfe803c1db6311e44bed3042fc25487
+"undici-types@npm:~6.19.2":
+  version: 6.19.8
+  resolution: "undici-types@npm:6.19.8"
+  checksum: de51f1b447d22571cf155dfe14ff6d12c5bdaec237c765085b439c38ca8518fc360e88c70f99469162bf2e14188a7b0bcb06e1ed2dc031042b984b0bb9544017
   languageName: node
   linkType: hard
 

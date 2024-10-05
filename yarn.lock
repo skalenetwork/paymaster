@@ -1855,6 +1855,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@skalenetwork/skale-contracts-ethers-v6@npm:^1.0.2-develop.12":
+  version: 1.0.2-develop.12
+  resolution: "@skalenetwork/skale-contracts-ethers-v6@npm:1.0.2-develop.12"
+  dependencies:
+    "@skalenetwork/skale-contracts": 1.0.2-develop.12
+    ethers: ^6.7.1
+  checksum: 3a6e8a774b1f9763c58e824c5edc09053d5793417db218ba1f16b9caff3d9052cc5ee74cf52875f1e0b9d93389a253e26cc1361aac83a33be25cf2b787ec0856
+  languageName: node
+  linkType: hard
+
 "@skalenetwork/skale-contracts@npm:1.0.2-develop.0":
   version: 1.0.2-develop.0
   resolution: "@skalenetwork/skale-contracts@npm:1.0.2-develop.0"
@@ -1863,6 +1873,17 @@ __metadata:
     axios: ^1.4.0
     semver: ^7.6.0
   checksum: 5b72c89e407bfd1bcecfee862011379075a44f1150a99ad3ad50115efee53e80215a1df0b013b00a6489e0debe1e61c7d32009e4b5293b3731cf07251e4f00dc
+  languageName: node
+  linkType: hard
+
+"@skalenetwork/skale-contracts@npm:1.0.2-develop.12":
+  version: 1.0.2-develop.12
+  resolution: "@skalenetwork/skale-contracts@npm:1.0.2-develop.12"
+  dependencies:
+    "@renovatebot/pep440": ^3.0.20
+    axios: ^1.4.0
+    semver: ^7.6.0
+  checksum: c562bb27e8c60766467b2ff3531262497fa1444b5a9a5f54e420390a6034de1a847f611c2ee330a3a23e4459cb1216f29278bc0f2c84062ca624df66345ae68b
   languageName: node
   linkType: hard
 
@@ -7037,7 +7058,7 @@ __metadata:
     "@openzeppelin/upgrades-core": ^1.35.1
     "@quant-finance/solidity-datetime": ^2.2.0
     "@skalenetwork/paymaster-interfaces": main
-    "@skalenetwork/skale-contracts-ethers-v6": ^1.0.2-develop.0
+    "@skalenetwork/skale-contracts-ethers-v6": ^1.0.2-develop.12
     "@skalenetwork/upgrade-tools": 3.0.0-develop.21
     "@typechain/ethers-v6": ^0.5.1
     "@typechain/hardhat": ^9.1.0

@@ -52,7 +52,7 @@
     "@openzeppelin/upgrades-core": "^1.35.1",
     "@quant-finance/solidity-datetime": "^2.2.0",
     "@skalenetwork/paymaster-interfaces": "main",
-    "@skalenetwork/skale-contracts-ethers-v6": "^1.0.2-develop.0",
+    "@skalenetwork/skale-contracts-ethers-v6": "^1.0.2-develop.18",
     "@skalenetwork/upgrade-tools": "3.0.0-develop.21",
     "chalk": "^4",
     "dotenv": "^16.4.5"

@@ -40,11 +40,11 @@ library HeapLibrary {
     }
 
     event HeapValueAdded(
-        uint256 value
+        uint256 indexed value
     );
 
     event HeapValueRemoved(
-        uint256 value
+        uint256 indexed value
     );
 
     // Library internal functions should not have leading underscore
@@ -154,7 +154,7 @@ library HeapLibrary {
         }
         NodeId parent = _getParentNode(node);
         uint256 parentValue = _getValue(heap, parent);
-        if (parentValue <= value) {
+        if (!(parentValue > value)) {
             _setValue(heap, node, value);
         } else {
             _setValue(heap, node, parentValue);
@@ -220,7 +220,7 @@ library HeapLibrary {
     }
 
     function _exists(NodeId node, NodeId lastNode) private pure returns (bool result) {
-        return NodeId.unwrap(node) <= NodeId.unwrap(lastNode);
+        return !(NodeId.unwrap(node) > NodeId.unwrap(lastNode));
     }
 
     function _getValue(Heap storage heap, NodeId node) private view returns (uint256 value) {

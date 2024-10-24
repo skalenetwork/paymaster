@@ -1,5 +1,5 @@
-import {AutoSubmitter, Upgrader} from "@skalenetwork/upgrade-tools";
 import {Instance, skaleContracts} from "@skalenetwork/skale-contracts-ethers-v6";
+import {Submitter, Upgrader} from "@skalenetwork/upgrade-tools";
 import {Paymaster} from "../typechain-types";
 import {Transaction} from "ethers";
 import chalk from "chalk";
@@ -35,7 +35,7 @@ interface UpgradeContext {
 class PaymasterUpgrader extends Upgrader {
     constructor(
         context: UpgradeContext,
-        submitter = new AutoSubmitter()
+        submitter?: Submitter
     ) {
         super(
             {

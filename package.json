@@ -16,12 +16,12 @@
     "tsc": "tsc --noEmit"
   },
   "devDependencies": {
-    "@nomicfoundation/ethereumjs-trie": "^6.0.3",
+    "@nomicfoundation/ethereumjs-trie": "^6.0.4",
     "@nomicfoundation/ethereumjs-util": "^9.0.3",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
-    "@nomicfoundation/hardhat-verify": "^2.0.3",
+    "@nomicfoundation/hardhat-verify": "^2.0.9",
     "@openzeppelin/hardhat-upgrades": "^3.2.1",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
@@ -32,7 +32,7 @@
     "@typescript-eslint/parser": "^6.13.2",
     "axios": "^1.7.2",
     "chai": "^4.2.0",
-    "cspell": "^8.8.3",
+    "cspell": "^8.14.2",
     "eslint": "^8.56.0",
     "ethers": "^6.13.2",
     "ganache": "^7.9.2",
@@ -53,7 +53,7 @@
     "@quant-finance/solidity-datetime": "^2.2.0",
     "@skalenetwork/paymaster-interfaces": "main",
     "@skalenetwork/skale-contracts-ethers-v6": "^1.0.2-develop.0",
-    "@skalenetwork/upgrade-tools": "3.0.0-develop.13",
+    "@skalenetwork/upgrade-tools": "3.0.0-develop.21",
     "chalk": "^4",
     "dotenv": "^16.4.5"
   }

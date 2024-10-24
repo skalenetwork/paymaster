@@ -23,8 +23,8 @@ pragma solidity ^0.8.20;
 
 // cspell:words structs
 
-import {PriorityQueueLibrary} from "../PriorityQueue.sol";
-import {TimelineLibrary} from "../../Timeline.sol";
+import { TimelineLibrary } from "./../../Timeline.sol";
+import { PriorityQueueLibrary } from "./../PriorityQueue.sol";
 
 
 library TypedPriorityQueue {

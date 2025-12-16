@@ -16,7 +16,7 @@
 
 Paymaster is a core economic component of the SKALE Network that manages the payment flow between SKALE chains and validators. It collects subscription fees from SKALE chains paid in SKL tokens and distributes these fees as rewards to validators proportional to their active node participation in the network.
 
-The system implements a time-based payment and reward distribution mechanism, tracking validator node participation over time, managing chain subscription lifecycles, and ensuring fair reward distribution based on validator contributions. It uses advanced data structures like timelines, sequences, heaps, and priority queues to efficiently manage historical data and calculate accurate reward amounts.
+The system implements a time-based payment and reward distribution mechanism, tracking validator node participation over time, managing chain subscription life cycles, and ensuring fair reward distribution based on validator contributions. It uses advanced data structures like timelines, sequences, heaps, and priority queues to efficiently manage historical data and calculate accurate reward amounts.
 
 The high-level architecture of the repository is described in
 [./docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
